@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useCart } from "@/context/CartContext";
 import {
   Search,
   ShoppingCart,
@@ -26,7 +27,7 @@ const NAV_LINKS = [
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [cartCount] = useState(2);
+  const { totalItems, openCart } = useCart();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -148,18 +149,19 @@ export default function Navbar() {
               </Link>
 
               {/* Brushed Metallic Champagne Gold Cart Button with Badge */}
-              <Link
-                href="/shop"
+              <button
+                type="button"
+                onClick={openCart}
                 aria-label="Shopping Cart"
-                className="relative p-2 sm:p-2.5 rounded-full text-[#09090B] bg-gradient-to-r from-[#E5C76B] via-[#C9A227] to-[#B08922] hover:brightness-105 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] transition-all active:scale-95 flex items-center justify-center"
+                className="relative p-2 sm:p-2.5 rounded-full text-[#09090B] bg-gradient-to-r from-[#E5C76B] via-[#C9A227] to-[#B08922] hover:brightness-105 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] transition-all active:scale-95 flex items-center justify-center cursor-pointer"
               >
                 <ShoppingCart className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-[#09090B] stroke-[2.3]" />
-                {cartCount > 0 && (
+                {totalItems > 0 && (
                   <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-black text-white bg-[#09090B] rounded-full border border-[#E2C275]">
-                    {cartCount}
+                    {totalItems}
                   </span>
                 )}
-              </Link>
+              </button>
 
               {/* Mobile Drawer Toggle */}
               <button

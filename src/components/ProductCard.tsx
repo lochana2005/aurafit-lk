@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, ShieldCheck, Heart, Eye, ShoppingCart } from "lucide-react";
 import { Product } from "@/data/mockProducts";
+import { useCart } from "@/context/CartContext";
 import StudioImage from "./StudioImage";
 
 interface ProductCardProps {
@@ -13,6 +14,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const router = useRouter();
+  const { addToCart } = useCart();
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
 
@@ -20,6 +22,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     e.preventDefault();
     e.stopPropagation();
     setIsAdded(true);
+    addToCart(product, 1);
     setTimeout(() => setIsAdded(false), 2000);
   };
 

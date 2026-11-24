@@ -23,7 +23,9 @@ export default function TopPicksSection() {
   const filteredProducts =
     selectedCategory === "ALL"
       ? MOCK_PRODUCTS
-      : MOCK_PRODUCTS.filter((p) => p.category === selectedCategory);
+      : MOCK_PRODUCTS.filter(
+          (p) => p.category.toUpperCase() === selectedCategory.toUpperCase()
+        );
 
   return (
     <motion.section
