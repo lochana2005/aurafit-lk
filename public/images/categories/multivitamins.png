@@ -1,27 +1,83 @@
-<svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="300" height="300" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bg-multivitamins" x1="0" y1="0" x2="300" y2="300" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#191920"/>
-      <stop offset="0.5" stop-color="#121216"/>
-      <stop offset="1" stop-color="#0A0A0C"/>
+    <radialGradient id="shadow-multivitamins.png" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tub-body-multivitamins.png" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#181820"/>
+      <stop offset="25%" stop-color="#282834"/>
+      <stop offset="50%" stop-color="#14141A"/>
+      <stop offset="75%" stop-color="#1C1C24"/>
+      <stop offset="100%" stop-color="#0C0C10"/>
     </linearGradient>
-    <linearGradient id="champagne-multivitamins" x1="0" y1="0" x2="1" y2="1">
-      <stop stop-color="#FBF4DE"/>
-      <stop offset="0.5" stop-color="#E2C275"/>
-      <stop offset="1" stop-color="#A8842E"/>
+    <linearGradient id="lid-grad-multivitamins.png" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3A3A48"/>
+      <stop offset="50%" stop-color="#181820"/>
+      <stop offset="100%" stop-color="#0F0F14"/>
     </linearGradient>
-    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
-      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
-    </pattern>
+    <linearGradient id="label-grad-multivitamins.png" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0D0D12"/>
+      <stop offset="20%" stop-color="#1C1C24"/>
+      <stop offset="60%" stop-color="#121218"/>
+      <stop offset="100%" stop-color="#08080C"/>
+    </linearGradient>
   </defs>
-  <rect width="300" height="300" fill="url(#bg-multivitamins)"/>
-  <rect width="300" height="300" fill="url(#grid)"/>
-  <rect x="1" y="1" width="298" height="298" rx="12" stroke="rgba(255,255,255,0.08)"/>
-  <circle cx="150" cy="134" r="48" stroke="rgba(226,194,117,0.25)" stroke-dasharray="4 4" fill="none"/>
-  <text x="150" y="146" text-anchor="middle" fill="url(#champagne-multivitamins)" font-family="sans-serif" font-weight="800" font-size="12" letter-spacing="2">
-    MULTIVITAMINS
-  </text>
-  <text x="150" y="170" text-anchor="middle" fill="#A1A1AA" font-family="sans-serif" font-size="11" letter-spacing="1">
-    CATEGORY STUDIO PNG
-  </text>
+
+  <!-- Ambient Under-Shadow -->
+  <ellipse cx="100" cy="178" rx="75" ry="14" fill="url(#shadow-multivitamins.png)"/>
+
+  <!-- Left Secondary Shaker Bottle -->
+  <g transform="translate(24, 76)">
+    <rect x="8" y="12" width="34" height="82" rx="6" fill="#1A1A22" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>
+    <path d="M10 28 Q25 32 40 28 L39 74 Q25 78 11 74 Z" fill="#10B981" fill-opacity="0.18"/>
+    <!-- Shaker Cap & Spout -->
+    <rect x="5" y="2" width="40" height="12" rx="3" fill="#2A2A36" stroke="#10B981" stroke-width="1" stroke-opacity="0.4"/>
+    <rect x="20" y="-5" width="10" height="8" rx="2" fill="#10B981"/>
+    <!-- Shaker Metallic Stripe -->
+    <line x1="8" y1="50" x2="42" y2="50" stroke="#10B981" stroke-width="2" stroke-opacity="0.8"/>
+  </g>
+
+  <!-- Central Main Supplement Tub -->
+  <g transform="translate(54, 30)">
+    <!-- Lid Ribbing & Dome -->
+    <rect x="12" y="10" width="68" height="16" rx="4" fill="url(#lid-grad-multivitamins.png)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+    <line x1="18" y1="10" x2="18" y2="26" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="28" y1="10" x2="28" y2="26" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="46" y1="10" x2="46" y2="26" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="64" y1="10" x2="64" y2="26" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="74" y1="10" x2="74" y2="26" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <rect x="22" y="6" width="48" height="5" rx="2" fill="#4A4A5A"/>
+
+    <!-- Main Tub Body -->
+    <path d="M8 32 C8 26, 16 26, 20 26 L72 26 C76 26, 84 26, 84 32 L88 136 C88 142, 80 144, 46 144 C12 144, 4 142, 4 136 Z" fill="url(#tub-body-multivitamins.png)" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+
+    <!-- High-Gloss Specular Highlight Strip -->
+    <path d="M16 28 L24 28 L20 142 L12 142 Z" fill="white" fill-opacity="0.08"/>
+
+    <!-- Metallic Brand Label -->
+    <path d="M5 52 L87 52 L86 118 L6 118 Z" fill="url(#label-grad-multivitamins.png)" stroke="#10B981" stroke-width="1.2" stroke-opacity="0.6"/>
+    <!-- Label Top & Bottom Accent Bars -->
+    <rect x="5" y="52" width="82" height="4" fill="#10B981"/>
+    <rect x="5" y="114" width="82" height="4" fill="#10B981"/>
+
+    <!-- Badge Typography on Tub -->
+    <text x="46" y="72" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="900" font-size="8.5" letter-spacing="1.5">AURAFIT</text>
+    <text x="46" y="88" text-anchor="middle" fill="#10B981" font-family="sans-serif" font-weight="900" font-size="10" letter-spacing="1">MULTI-VITA</text>
+    <text x="46" y="102" text-anchor="middle" fill="#A1A1AA" font-family="sans-serif" font-weight="700" font-size="6.5" letter-spacing="1.5">BIO-COMPLEX</text>
+  </g>
+
+  <!-- Right Pill Bottle / Small Canister (Overlapping) -->
+  <g transform="translate(126, 94)">
+    <!-- Cap -->
+    <rect x="6" y="0" width="30" height="10" rx="2.5" fill="#282834" stroke="#10B981" stroke-width="1.2" stroke-opacity="0.7"/>
+    <!-- Body -->
+    <rect x="2" y="10" width="38" height="62" rx="5" fill="#121218" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+    <!-- Foil Mini Label -->
+    <rect x="3" y="22" width="36" height="36" fill="#1A1A24" stroke="#10B981" stroke-width="0.8" stroke-opacity="0.4"/>
+    <rect x="3" y="22" width="36" height="2.5" fill="#10B981"/>
+    <rect x="3" y="55.5" width="36" height="2.5" fill="#10B981"/>
+    <!-- Specular -->
+    <line x1="8" y1="12" x2="8" y2="70" stroke="white" stroke-width="1.5" stroke-opacity="0.1"/>
+  </g>
 </svg>

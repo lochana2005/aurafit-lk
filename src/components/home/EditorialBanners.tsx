@@ -9,14 +9,14 @@ import { EDITORIAL_BANNERS } from "@/data/mockProducts";
 
 export default function EditorialBanners() {
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.15 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-white/[0.08]"
-    >
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+    <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-white/[0.08]">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: "some", margin: "0px 0px -40px 0px" }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6"
+      >
         {EDITORIAL_BANNERS.map((banner) => (
           <div
             key={banner.id}
@@ -55,8 +55,8 @@ export default function EditorialBanners() {
             </div>
           </div>
         ))}
-      </div>
-    </motion.section>
+      </motion.div>
+    </section>
   );
 }
 

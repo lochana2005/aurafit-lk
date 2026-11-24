@@ -210,6 +210,29 @@ body {
   animation: gold-badge-pulse 4.5s ease-in-out infinite;
 }
 
+/* =========================================================================
+   60FPS GPU-ACCELERATED INFINITE BRAND MARQUEE
+   ========================================================================= */
+@keyframes aurafit-marquee {
+  0% {
+    transform: translate3d(0%, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-aurafit-marquee {
+  display: flex;
+  width: max-content;
+  animation: aurafit-marquee 28s linear infinite !important;
+  will-change: transform;
+}
+
+.animate-aurafit-marquee:hover {
+  animation-play-state: paused !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .gold-shimmer-headline,
   .white-glow-headline,

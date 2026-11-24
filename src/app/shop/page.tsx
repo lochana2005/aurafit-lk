@@ -54,7 +54,25 @@ function ShopContent() {
 
     const newBrands: string[] = [];
     if (brandParam) {
-      newBrands.push(brandParam);
+      const matchBrand = [
+        "Optimum Nutrition",
+        "Dymatize",
+        "Applied Nutrition",
+        "MuscleTech",
+        "Ronnie Coleman",
+        "Cellucor",
+        "MyProtein",
+        "BSN",
+      ].find(
+        (b) =>
+          b.toLowerCase() === brandParam.toLowerCase() ||
+          b.toLowerCase().replace(/\s+/g, "-") === brandParam.toLowerCase()
+      );
+      if (matchBrand) {
+        newBrands.push(matchBrand);
+      } else {
+        newBrands.push(brandParam);
+      }
     }
 
     return {
@@ -131,7 +149,12 @@ function ShopContent() {
       }
 
       // 4. Brand Filter
-      if (filters.brands.length > 0 && !filters.brands.includes(product.brand)) {
+      if (
+        filters.brands.length > 0 &&
+        !filters.brands.some(
+          (b) => b.toLowerCase() === product.brand.toLowerCase()
+        )
+      ) {
         return false;
       }
 

@@ -28,15 +28,15 @@ export default function TopPicksSection() {
         );
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.15 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 border-t border-white/[0.08]"
-    >
+    <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-14 border-t border-white/[0.08]">
       {/* Header row: Two-Tone Title on left + Interactive Category Tabs on right */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: "some" }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8"
+      >
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold uppercase tracking-wider font-heading">
             <span className="text-white">TOP PICKS </span>
@@ -67,14 +67,20 @@ export default function TopPicksSection() {
             );
           })}
         </div>
-      </div>
+      </motion.div>
 
       {/* 4-Column Responsive Product Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: "some", margin: "0px 0px -40px 0px" }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+      >
         {filteredProducts.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
-      </div>
+      </motion.div>
 
       {/* Bottom Catalog Redirect Strip */}
       <div className="mt-12 text-center">
@@ -86,7 +92,7 @@ export default function TopPicksSection() {
           <ArrowRight className="w-4 h-4 text-[#E2C275]" />
         </Link>
       </div>
-    </motion.section>
+    </section>
   );
 }
 

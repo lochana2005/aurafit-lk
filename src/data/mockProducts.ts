@@ -80,7 +80,7 @@ export const HERO_SLIDES: HeroSlide[] = [
       "Fast-absorbing, ultra-pure whey protein isolate engineered for lean hypertrophy and accelerated recovery.",
     ctaText: "Explore Isolates",
     ctaLink: "/shop?cat=whey-protein",
-    image: "/images/banners/hero-isolate.jpg",
+    image: "/images/banners/hero-vault.jpg",
   },
   {
     id: "slide-3",
@@ -90,7 +90,7 @@ export const HERO_SLIDES: HeroSlide[] = [
       "Clinical doses of Citrulline Malate, Beta-Alanine, and caffeine matrix formulated for Sri Lankan athletes.",
     ctaText: "Shop Pre-Workouts",
     ctaLink: "/shop?cat=pre-workout",
-    image: "/images/banners/hero-preworkout.jpg",
+    image: "/images/banners/promo-scanner.jpg",
   },
 ];
 

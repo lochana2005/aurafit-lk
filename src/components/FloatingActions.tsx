@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowUp, MessageCircle, X } from "lucide-react";
+import { ArrowUp, MessageCircle, X, Headphones } from "lucide-react";
 
 interface SocialAction {
   name: string;
@@ -11,6 +12,7 @@ interface SocialAction {
   y: number;
   hoverClass: string;
   icon: React.ReactNode;
+  isInternal?: boolean;
 }
 
 const SOCIAL_ACTIONS: SocialAction[] = [
@@ -18,7 +20,7 @@ const SOCIAL_ACTIONS: SocialAction[] = [
     name: "WhatsApp",
     href: "https://wa.me/94771234567",
     x: 0,
-    y: -90,
+    y: -96,
     hoverClass:
       "hover:text-emerald-400 hover:border-emerald-500/50 hover:shadow-[0_0_16px_rgba(52,211,153,0.45)]",
     icon: (
@@ -30,8 +32,8 @@ const SOCIAL_ACTIONS: SocialAction[] = [
   {
     name: "Instagram",
     href: "https://instagram.com/aurafit.lk",
-    x: -45,
-    y: -78,
+    x: -37,
+    y: -89,
     hoverClass:
       "hover:text-pink-400 hover:border-pink-500/50 hover:shadow-[0_0_16px_rgba(244,114,182,0.45)]",
     icon: (
@@ -43,8 +45,8 @@ const SOCIAL_ACTIONS: SocialAction[] = [
   {
     name: "Facebook",
     href: "https://facebook.com/aurafit.lk",
-    x: -78,
-    y: -45,
+    x: -68,
+    y: -68,
     hoverClass:
       "hover:text-sky-400 hover:border-sky-500/50 hover:shadow-[0_0_16px_rgba(56,189,248,0.45)]",
     icon: (
@@ -56,8 +58,8 @@ const SOCIAL_ACTIONS: SocialAction[] = [
   {
     name: "TikTok",
     href: "https://tiktok.com/@aurafit.lk",
-    x: -90,
-    y: 0,
+    x: -89,
+    y: -37,
     hoverClass:
       "hover:text-cyan-300 hover:border-cyan-400/50 hover:shadow-[0_0_16px_rgba(103,232,249,0.45)]",
     icon: (
@@ -65,6 +67,16 @@ const SOCIAL_ACTIONS: SocialAction[] = [
         <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.24 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
       </svg>
     ),
+  },
+  {
+    name: "Contact Support",
+    href: "/contact",
+    x: -96,
+    y: 0,
+    hoverClass:
+      "hover:text-[#E2C275] hover:border-[#E2C275]/50 hover:shadow-[0_0_16px_rgba(226,194,117,0.45)]",
+    icon: <Headphones className="w-5 h-5 text-[#E2C275]" />,
+    isInternal: true,
   },
 ];
 
@@ -164,20 +176,36 @@ export default function FloatingActions() {
                   }}
                   className="absolute top-[6px] left-[6px] z-10"
                 >
-                  <a
-                    href={action.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`Contact AuraFit on ${action.name}`}
-                    className={`w-11 h-11 rounded-full bg-[#141418]/95 border border-white/15 ${action.hoverClass} text-white shadow-2xl flex items-center justify-center transition-all duration-200 active:scale-95 group relative`}
-                  >
-                    {action.icon}
+                  {action.isInternal ? (
+                    <Link
+                      href={action.href}
+                      onClick={() => setIsOpen(false)}
+                      aria-label={`Contact AuraFit on ${action.name}`}
+                      className={`w-11 h-11 rounded-full bg-[#141418]/95 border border-white/15 ${action.hoverClass} text-white shadow-2xl flex items-center justify-center transition-all duration-200 active:scale-95 group relative`}
+                    >
+                      {action.icon}
 
-                    {/* Dark Luxury Pill Tooltip */}
-                    <span className="absolute right-full mr-2.5 px-2.5 py-1 rounded-md bg-[#09090B]/95 border border-white/10 text-[10px] font-bold tracking-wider text-zinc-200 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 whitespace-nowrap shadow-2xl">
-                      {action.name}
-                    </span>
-                  </a>
+                      {/* Dark Luxury Pill Tooltip */}
+                      <span className="absolute right-full mr-2.5 px-2.5 py-1 rounded-md bg-[#09090B]/95 border border-white/10 text-[10px] font-bold tracking-wider text-zinc-200 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 whitespace-nowrap shadow-2xl">
+                        {action.name}
+                      </span>
+                    </Link>
+                  ) : (
+                    <a
+                      href={action.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Contact AuraFit on ${action.name}`}
+                      className={`w-11 h-11 rounded-full bg-[#141418]/95 border border-white/15 ${action.hoverClass} text-white shadow-2xl flex items-center justify-center transition-all duration-200 active:scale-95 group relative`}
+                    >
+                      {action.icon}
+
+                      {/* Dark Luxury Pill Tooltip */}
+                      <span className="absolute right-full mr-2.5 px-2.5 py-1 rounded-md bg-[#09090B]/95 border border-white/10 text-[10px] font-bold tracking-wider text-zinc-200 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 whitespace-nowrap shadow-2xl">
+                        {action.name}
+                      </span>
+                    </a>
+                  )}
                 </motion.div>
               ))}
             </>

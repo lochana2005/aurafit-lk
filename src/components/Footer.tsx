@@ -114,30 +114,36 @@ export default function Footer() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 py-10 lg:py-12">
           {/* Left: 3-Column Link Grid (7 columns) */}
           <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-8">
-            {/* Column 1: OUR POLICIES */}
+            {/* Column 1: CUSTOMER SUPPORT */}
             <div className="space-y-4">
               <h4 className="text-xs font-black uppercase tracking-widest text-white font-heading">
-                OUR POLICIES
+                CUSTOMER SUPPORT
               </h4>
               <ul className="space-y-2.5 text-xs">
                 <li>
-                  <Link href="/shop" className="text-zinc-300 hover:text-[#E2C275] transition-colors">
-                    Privacy Policy
+                  <Link href="/contact" className="text-zinc-300 hover:text-[#E2C275] font-semibold transition-colors flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#E2C275]" />
+                    <span>Contact Us</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/track-order" className="text-zinc-300 hover:text-[#E2C275] transition-colors">
+                    Track Your Order
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/verify" className="text-zinc-300 hover:text-[#E2C275] transition-colors">
+                    Verify Product Batch
                   </Link>
                 </li>
                 <li>
                   <Link href="/shop" className="text-zinc-300 hover:text-[#E2C275] transition-colors">
-                    Terms &amp; Conditions
+                    Shipping &amp; Delivery Policy
                   </Link>
                 </li>
                 <li>
                   <Link href="/shop" className="text-zinc-300 hover:text-[#E2C275] transition-colors">
                     Refund &amp; Returns Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/shop" className="text-zinc-300 hover:text-[#E2C275] transition-colors">
-                    Shipping Policy
                   </Link>
                 </li>
               </ul>
@@ -151,22 +157,27 @@ export default function Footer() {
               <ul className="space-y-2.5 text-xs">
                 <li>
                   <Link href="/shop" className="text-zinc-300 hover:text-[#E2C275] transition-colors">
-                    About AuraFit
+                    About AuraFit.lk
                   </Link>
                 </li>
                 <li>
-                  <Link href="/shop" className="text-zinc-300 hover:text-[#E2C275] transition-colors">
-                    Contact Us
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/verify" className="text-zinc-300 hover:text-[#E2C275] transition-colors">
-                    Verify Product
+                  <Link href="/contact" className="text-zinc-300 hover:text-[#E2C275] transition-colors">
+                    24/7 Athlete Concierge
                   </Link>
                 </li>
                 <li>
                   <Link href="/ai-coach" className="text-zinc-300 hover:text-[#E2C275] transition-colors">
                     AI Fitness Coach
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/shop" className="text-zinc-300 hover:text-[#E2C275] transition-colors">
+                    Terms &amp; Conditions
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/shop" className="text-zinc-300 hover:text-[#E2C275] transition-colors">
+                    Privacy Policy
                   </Link>
                 </li>
               </ul>

@@ -7,14 +7,14 @@ import { motion } from "framer-motion";
 
 export default function TrustFeatures() {
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.15 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 border-t border-white/[0.08]"
-    >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-14 border-t border-white/[0.08]">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: "some", margin: "0px 0px -40px 0px" }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+      >
         {/* Card 1: Authenticity Scanner */}
         <div className="rounded-2xl bg-gradient-to-br from-[#18181E] to-[#111114] border border-white/12 hover:border-white/20 p-6 sm:p-8 flex flex-col justify-between transition-all shadow-[0_12px_32px_rgba(0,0,0,0.5)]">
           <div className="flex items-start gap-4">
@@ -80,8 +80,8 @@ export default function TrustFeatures() {
             </Link>
           </div>
         </div>
-      </div>
-    </motion.section>
+      </motion.div>
+    </section>
   );
 }
 
