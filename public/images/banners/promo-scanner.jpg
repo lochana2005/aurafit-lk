@@ -1,0 +1,27 @@
+<svg width="600" height="800" viewBox="0 0 600 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg-QRBATCHAUTHENTICATION" x1="0" y1="0" x2="600" y2="800" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#191920"/>
+      <stop offset="0.5" stop-color="#121216"/>
+      <stop offset="1" stop-color="#0A0A0C"/>
+    </linearGradient>
+    <linearGradient id="champagne-QRBATCHAUTHENTICATION" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#FBF4DE"/>
+      <stop offset="0.5" stop-color="#E2C275"/>
+      <stop offset="1" stop-color="#A8842E"/>
+    </linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="600" height="800" fill="url(#bg-QRBATCHAUTHENTICATION)"/>
+  <rect width="600" height="800" fill="url(#grid)"/>
+  <rect x="1" y="1" width="598" height="798" rx="12" stroke="rgba(255,255,255,0.08)"/>
+  <circle cx="300" cy="384" r="96" stroke="rgba(226,194,117,0.25)" stroke-dasharray="4 4" fill="none"/>
+  <text x="300" y="396" text-anchor="middle" fill="url(#champagne-QRBATCHAUTHENTICATION)" font-family="sans-serif" font-weight="800" font-size="21.000000000000004" letter-spacing="2">
+    QR BATCH AUTHENTICATION
+  </text>
+  <text x="300" y="420" text-anchor="middle" fill="#A1A1AA" font-family="sans-serif" font-size="11" letter-spacing="1">
+    VERIFY MANUFACTURER COA
+  </text>
+</svg>

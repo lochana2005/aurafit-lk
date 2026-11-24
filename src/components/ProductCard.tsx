@@ -1,0 +1,178 @@
+"use client";
+
+import React, { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Check, ShieldCheck, Heart, Eye, ShoppingCart } from "lucide-react";
+import { Product } from "@/data/mockProducts";
+import StudioImage from "./StudioImage";
+
+interface ProductCardProps {
+  product: Product;
+}
+
+export default function ProductCard({ product }: ProductCardProps) {
+  const router = useRouter();
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isAdded, setIsAdded] = useState(false);
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000);
+  };
+
+  const handleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsWishlisted(!isWishlisted);
+  };
+
+  const formattedPrice = `Rs. ${product.price.toLocaleString("en-LK", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+
+  const formattedOriginalPrice = product.originalPrice
+    ? `Rs. ${product.originalPrice.toLocaleString("en-LK", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`
+    : null;
+
+  return (
+    <div className="group relative flex flex-col justify-between bg-[#141418] rounded-2xl border border-white/10 hover:border-[#E2C275]/50 transition-all duration-300 p-5 hover:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7),0_0_24px_-6px_rgba(226,194,117,0.15)]">
+      <div>
+        {/* Top of card: Title, Category label, and Gold verified tick */}
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <div className="flex-1">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#A1A1AA] block mb-0.5">
+              {product.brand} &bull; {product.category}
+            </span>
+            <Link href="/shop" className="block group-hover:text-[#E2C275] transition-colors">
+              <h3 className="text-sm font-bold text-white leading-snug line-clamp-2 font-heading">
+                {product.name}
+              </h3>
+            </Link>
+          </div>
+
+          <div
+            title="100% Importer Verified"
+            className="flex-shrink-0 flex items-center gap-1 text-[#E2C275] bg-[#E2C275]/10 border border-[#E2C275]/25 px-2 py-0.5 rounded-full text-[10px] font-bold"
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-[#E2C275]" />
+            <span className="hidden sm:inline">VERIFIED</span>
+          </div>
+        </div>
+
+        {/* Middle of card: Clean aspect-square studio image container with floating hover action icons */}
+        <Link
+          href="/shop"
+          className="relative block aspect-square w-full rounded-xl bg-[#0D0D10] border border-white/6 overflow-hidden my-3 p-4 group/img"
+        >
+          {/* Studio Image Container */}
+          <StudioImage
+            src={product.image}
+            alt={product.name}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+            objectFit="contain"
+            fallbackLabel={product.name}
+            className="transition-transform duration-300 group-hover:scale-105"
+          />
+
+          {/* Floating Badge (e.g. BEST SELLER / TOP RATED) */}
+          {product.badge && (
+            <div className="absolute top-2.5 left-2.5 z-10">
+              <span className="px-2 py-0.5 rounded text-[9px] font-black tracking-wider uppercase text-[#09090B] bg-gradient-to-r from-[#E5C76B] to-[#C9A227] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
+                {product.badge}
+              </span>
+            </div>
+          )}
+
+          {/* Subtle floating hover action icons on the right */}
+          <div className="absolute top-2.5 right-2.5 z-10 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <button
+              type="button"
+              onClick={handleWishlist}
+              aria-label="Add to wishlist"
+              className={`p-2 rounded-lg border transition-all ${
+                isWishlisted
+                  ? "bg-red-500/20 border-red-500/40 text-red-400"
+                  : "bg-[#141418] border-white/10 text-zinc-300 hover:text-white hover:bg-[#1C1C24]"
+              }`}
+            >
+              <Heart
+                className={`w-3.5 h-3.5 ${
+                  isWishlisted ? "fill-red-400 text-red-400" : ""
+                }`}
+              />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                router.push("/shop");
+              }}
+              aria-label="Quick view"
+              className="p-2 rounded-lg bg-[#141418] border border-white/10 text-zinc-300 hover:text-white hover:bg-[#1C1C24] transition-all"
+            >
+              <Eye className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Weight / Servings Tag at Bottom Left */}
+          <div className="absolute bottom-2.5 left-2.5 z-10">
+            <span className="text-[10px] font-mono font-medium text-zinc-400 bg-black/85 px-2 py-0.5 rounded border border-white/8">
+              {product.weightOrServings}
+            </span>
+          </div>
+        </Link>
+      </div>
+
+      {/* Bottom of card: Pricing, KOKO installment line, and Full-Width Add to Cart button */}
+      <div className="mt-2 pt-3 border-t border-white/[0.08]">
+        <div className="flex items-baseline gap-2">
+          <span className="text-base sm:text-lg font-black text-white tracking-tight font-sans">
+            {formattedPrice}
+          </span>
+          {formattedOriginalPrice && (
+            <span className="text-xs text-zinc-500 line-through">
+              {formattedOriginalPrice}
+            </span>
+          )}
+        </div>
+
+        {/* Koko Installment Info Line */}
+        <div className="text-[11px] text-[#A1A1AA] mt-0.5 font-medium flex items-center gap-1">
+          <span>{product.kokoInstallment}</span>
+        </div>
+
+        {/* Full-Width Add to Cart Button */}
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          className={`w-full mt-4 py-2.5 px-4 rounded-xl text-xs font-extrabold uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-200 active:scale-95 ${
+            isAdded
+              ? "bg-emerald-500 text-black shadow-[0_0_15px_rgba(16,185,129,0.4)]"
+              : "bg-[#1C1C21] text-white hover:bg-gradient-to-r hover:from-[#E5C76B] hover:via-[#C9A227] hover:to-[#B08922] hover:text-[#09090B] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] border border-white/12 hover:border-transparent"
+          }`}
+        >
+          {isAdded ? (
+            <>
+              <Check className="w-4 h-4 stroke-[3]" />
+              <span>Added to Cart</span>
+            </>
+          ) : (
+            <>
+              <ShoppingCart className="w-4 h-4" />
+              <span>Add to Cart</span>
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}
