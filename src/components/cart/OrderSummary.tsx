@@ -244,9 +244,6 @@ export default function OrderSummary({ subtotal }: OrderSummaryProps) {
       <div className="space-y-3 pt-2">
         <Link
           href="/checkout"
-          onClick={() => {
-            // If checkout route isn't created yet, user can alert or navigate
-          }}
           className="w-full py-4 rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider text-[#09090B] bg-gradient-to-r from-[#E5C76B] via-[#C9A227] to-[#B08922] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] hover:brightness-105 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer font-heading"
         >
           <span>PROCEED TO CHECKOUT</span>

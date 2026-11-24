@@ -7,9 +7,10 @@ import ProductInfo from "@/components/product/ProductInfo";
 import ProductTabs from "@/components/product/ProductTabs";
 import RelatedProducts from "@/components/product/RelatedProducts";
 
-interface Props {
+type Props = {
   params: Promise<{ slug: string }>;
-}
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+};
 
 export async function generateStaticParams() {
   return MOCK_PRODUCTS.map((product) => ({
@@ -47,16 +48,16 @@ export default async function ProductDetailPage({ params }: Props) {
 
   return (
     <div className="w-full min-h-screen bg-[#09090B] text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        {/* Main 2-Column Product Showcase */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-          {/* Left Column: Studio Gallery (6 cols) */}
-          <div className="lg:col-span-6 lg:sticky lg:top-28 lg:self-start">
+      <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+        {/* Main 2-Column Product Showcase with generous breathing room */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 items-start">
+          {/* Left Column: Compact Studio Gallery (Sticky) */}
+          <div className="lg:col-span-6 max-w-[540px] mx-auto w-full lg:sticky lg:top-28 lg:self-start">
             <ProductGallery product={product} />
           </div>
 
-          {/* Right Column: Pricing, Selectors & Actions (6 cols) */}
-          <div className="lg:col-span-6">
+          {/* Right Column: Pricing, Selectors & Actions */}
+          <div className="lg:col-span-6 w-full">
             <ProductInfo product={product} />
           </div>
         </div>

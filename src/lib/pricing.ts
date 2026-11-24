@@ -25,13 +25,11 @@ export function getKokoInstallment(cashPrice: number): number {
  * @param showDecimals - If true, formats with two decimals e.g. "Rs. 28,500.00", else "Rs. 28,500"
  */
 export function formatLKR(amount: number, showDecimals = true): string {
-  if (showDecimals) {
-    return `Rs. ${amount.toLocaleString("en-LK", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
-  }
-  return `Rs. ${amount.toLocaleString("en-LK")}`;
+  const formatted = amount.toLocaleString("en-US", {
+    minimumFractionDigits: showDecimals ? 2 : 0,
+    maximumFractionDigits: showDecimals ? 2 : 0,
+  });
+  return `Rs. ${formatted}`;
 }
 
 /**
@@ -40,3 +38,4 @@ export function formatLKR(amount: number, showDecimals = true): string {
 export function formatLKRNoDecimals(amount: number): string {
   return formatLKR(amount, false);
 }
+

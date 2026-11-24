@@ -288,16 +288,14 @@ export default function CartDrawer() {
                   </div>
 
                   {/* Checkout Button */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      alert("AuraFit.lk Checkout: Redirecting to secure gateway...");
-                    }}
-                    className="w-full py-3.5 rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider text-[#09090B] bg-gradient-to-r from-[#E5C76B] via-[#C9A227] to-[#B08922] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] hover:brightness-105 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  <Link
+                    href="/checkout"
+                    onClick={closeCart}
+                    className="w-full py-3.5 rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider text-[#09090B] bg-gradient-to-r from-[#E5C76B] via-[#C9A227] to-[#B08922] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] hover:brightness-105 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer font-heading"
                   >
                     <span>Proceed to Checkout</span>
                     <ArrowRight className="w-4 h-4 stroke-[2.5]" />
-                  </button>
+                  </Link>
 
                   {/* View Full Cart Button */}
                   <Link

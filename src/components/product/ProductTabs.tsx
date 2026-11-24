@@ -78,7 +78,7 @@ export default function ProductTabs({ product }: ProductTabsProps) {
       id: "rev-1",
       name: "Dinuk Perera",
       location: "Colombo 07",
-      date: "Verified Buyer &bull; 3 days ago",
+      date: "Verified Buyer • 3 days ago",
       rating: 5,
       comment:
         "Scanned the QR batch hologram immediately after unboxing—verified 100% authentic against the manufacturer's lab test! Mixability is flawless with water. Best price in Sri Lanka.",
@@ -87,7 +87,7 @@ export default function ProductTabs({ product }: ProductTabsProps) {
       id: "rev-2",
       name: "Kavinda Jayasuriya",
       location: "Kandy",
-      date: "Verified Buyer &bull; 1 week ago",
+      date: "Verified Buyer • 1 week ago",
       rating: 5,
       comment:
         "PromptX courier delivered to Kandy in less than 36 hours. Seal was factory-tight and tamper-proof. High quality protein without any digestive bloating.",
@@ -96,7 +96,7 @@ export default function ProductTabs({ product }: ProductTabsProps) {
       id: "rev-3",
       name: "Shehan Fernando",
       location: "Galle",
-      date: "Verified Buyer &bull; 2 weeks ago",
+      date: "Verified Buyer • 2 weeks ago",
       rating: 5,
       comment:
         "Paid with Koko 3 installments which made it super affordable. Results speak for themselves—genuine imported supplement store you can trust.",
