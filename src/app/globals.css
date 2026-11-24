@@ -101,6 +101,21 @@ body {
   background: #32323B;
 }
 
+/* Subtle luxury scrollbar for filter sidebar */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(226, 194, 117, 0.25);
+  border-radius: 9999px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(226, 194, 117, 0.5);
+}
+
 ::selection {
   background: #E2C275;
   color: #09090B;

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, ShieldCheck, Heart, Eye, ShoppingCart } from "lucide-react";
 import { Product } from "@/data/mockProducts";
+import { formatLKR, getKokoTotal, getKokoInstallment } from "@/lib/pricing";
 import { useCart } from "@/context/CartContext";
 import StudioImage from "./StudioImage";
 
@@ -53,8 +54,8 @@ export default function ProductCard({ product }: ProductCardProps) {
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#A1A1AA] block mb-0.5">
               {product.brand} &bull; {product.category}
             </span>
-            <Link href="/shop" className="block group-hover:text-[#E2C275] transition-colors">
-              <h3 className="text-sm font-bold text-white leading-snug line-clamp-2 font-heading">
+            <Link href={`/shop/${product.slug}`} className="block group-hover:text-[#E2C275] transition-colors">
+              <h3 className="text-sm font-bold text-white leading-snug line-clamp-2 font-heading min-h-[38px]">
                 {product.name}
               </h3>
             </Link>
@@ -71,7 +72,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         {/* Middle of card: Clean aspect-square studio image container with floating hover action icons */}
         <Link
-          href="/shop"
+          href={`/shop/${product.slug}`}
           className="relative block aspect-square w-full rounded-xl bg-[#0D0D10] border border-white/6 overflow-hidden my-3 p-4 group/img"
         >
           {/* Studio Image Container */}
@@ -117,7 +118,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                router.push("/shop");
+                router.push(`/shop/${product.slug}`);
               }}
               aria-label="Quick view"
               className="p-2 rounded-lg bg-[#141418] border border-white/10 text-zinc-300 hover:text-white hover:bg-[#1C1C24] transition-all"
@@ -149,8 +150,17 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
 
         {/* Koko Installment Info Line */}
-        <div className="text-[11px] text-[#A1A1AA] mt-0.5 font-medium flex items-center gap-1">
-          <span>{product.kokoInstallment}</span>
+        <div className="text-[11px] text-[#A1A1AA] mt-1 font-medium flex items-center gap-1.5 truncate">
+          <span className="text-[9px] font-bold text-[#A78BFA] bg-[#8B5CF6]/15 border border-[#8B5CF6]/30 px-1 py-0.2 rounded font-heading">
+            KOKO
+          </span>
+          <span className="text-zinc-300 font-sans">
+            {formatLKR(getKokoTotal(product.price), false)}
+          </span>
+          <span className="text-zinc-600">·</span>
+          <span className="text-zinc-400 font-sans">
+            3 × {formatLKR(getKokoInstallment(product.price), false)}
+          </span>
         </div>
 
         {/* Full-Width Add to Cart Button */}

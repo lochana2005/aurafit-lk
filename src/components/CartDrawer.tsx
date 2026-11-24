@@ -15,6 +15,7 @@ import {
   Truck,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { getKokoTotal, getKokoInstallment } from "@/lib/pricing";
 import StudioImage from "./StudioImage";
 
 const FREE_SHIPPING_THRESHOLD = 25000;
@@ -133,7 +134,10 @@ export default function CartDrawer() {
               {/* =========================================================================
                   CART ITEMS LIST (SCROLLABLE)
                   ========================================================================= */}
-              <div className="flex-1 overflow-y-auto p-5 divide-y divide-white/8 space-y-4">
+              <div
+                data-lenis-prevent
+                className="flex-1 overflow-y-auto p-5 divide-y divide-white/8 space-y-4 overscroll-contain"
+              >
                 {items.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center py-16 px-4">
                     <div className="w-16 h-16 rounded-2xl bg-[#1C1C22] border border-white/10 flex items-center justify-center mb-4 text-zinc-500">
@@ -202,7 +206,7 @@ export default function CartDrawer() {
                           <span className="font-mono">{item.product.weight}</span>
                           {item.selectedFlavor && (
                             <>
-                              <span>&bull;</span>
+                              <span className="text-zinc-600">•</span>
                               <span className="truncate">{item.selectedFlavor}</span>
                             </>
                           )}
@@ -263,13 +267,24 @@ export default function CartDrawer() {
                     </div>
 
                     {/* Koko 3-Payment Installment Note */}
-                    <p className="text-[11px] text-zinc-400">
-                      or 3 interest-free installments of{" "}
-                      <strong className="text-[#E2C275]">
-                        Rs. {Math.round(subtotal / 3).toLocaleString()}
-                      </strong>{" "}
-                      with Koko
-                    </p>
+                    <div className="flex items-center justify-between text-[11px] text-zinc-400 pt-1">
+                      <span>
+                        or Koko Pay:{" "}
+                        <strong className="text-white">
+                          Rs. {getKokoTotal(subtotal).toLocaleString()}
+                        </strong>{" "}
+                        <span className="text-zinc-500">
+                          (3 ×{" "}
+                          <strong className="text-[#E2C275]">
+                            Rs. {getKokoInstallment(subtotal).toLocaleString()}
+                          </strong>
+                          )
+                        </span>
+                      </span>
+                      <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#8B5CF6]/20 border border-[#8B5CF6]/30 text-[#A78BFA] uppercase">
+                        KOKO
+                      </span>
+                    </div>
                   </div>
 
                   {/* Checkout Button */}
@@ -284,13 +299,23 @@ export default function CartDrawer() {
                     <ArrowRight className="w-4 h-4 stroke-[2.5]" />
                   </button>
 
+                  {/* View Full Cart Button */}
+                  <Link
+                    href="/cart"
+                    onClick={closeCart}
+                    className="w-full py-3 rounded-full text-xs sm:text-sm font-semibold uppercase tracking-wider text-center text-white hover:text-[#E2C275] bg-[#1C1C22] border border-white/15 hover:border-[#E2C275]/60 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <span>View Full Cart</span>
+                    <ShoppingBag className="w-4 h-4 text-[#E2C275]" />
+                  </Link>
+
                   {/* Security Guarantee Strip */}
                   <div className="flex items-center justify-center gap-4 text-[10px] text-zinc-500 pt-1">
                     <span className="flex items-center gap-1">
                       <Lock className="w-3 h-3 text-[#E2C275]" />
                       SSL Encrypted
                     </span>
-                    <span>&bull;</span>
+                    <span className="text-zinc-600">•</span>
                     <span className="flex items-center gap-1">
                       <ShieldCheck className="w-3 h-3 text-[#E2C275]" />
                       100% Authentic Guarantee
