@@ -207,7 +207,9 @@ export default function CartDrawer() {
                           {item.selectedFlavor && (
                             <>
                               <span className="text-zinc-600">•</span>
-                              <span className="truncate">{item.selectedFlavor}</span>
+                              <span className="truncate">
+                                {item.selectedFlavor.replace("&bull;", "•")}
+                              </span>
                             </>
                           )}
                         </div>

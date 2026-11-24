@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import {
   Search,
   ShoppingCart,
@@ -28,6 +29,7 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { totalItems, openCart } = useCart();
+  const { user, isAuthenticated } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -141,11 +143,21 @@ export default function Navbar() {
 
               {/* Account Button */}
               <Link
-                href="/login"
-                aria-label="User Account"
-                className="p-2 sm:p-2.5 rounded-full text-zinc-300 hover:text-white bg-[#141418] border border-white/10 hover:border-white/20 transition-all active:scale-95 flex items-center justify-center"
+                href={isAuthenticated ? "/profile" : "/login"}
+                aria-label={isAuthenticated ? "User Profile" : "User Login"}
+                className={`p-1.5 sm:p-2 rounded-full transition-all active:scale-95 flex items-center justify-center ${
+                  isAuthenticated
+                    ? "bg-[#141418] border border-[#E2C275]/50 hover:border-[#E2C275] ring-1 ring-[#E2C275]/30 text-white"
+                    : "text-zinc-300 hover:text-white bg-[#141418] border border-white/10 hover:border-white/20"
+                }`}
               >
-                <User className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                {isAuthenticated && user ? (
+                  <span className="w-5 h-5 sm:w-5.5 sm:h-5.5 rounded-full bg-gradient-to-br from-[#E5C76B] to-[#B08922] text-[#09090B] font-black text-[10px] sm:text-xs flex items-center justify-center font-heading">
+                    {user.avatarInitials}
+                  </span>
+                ) : (
+                  <User className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                )}
               </Link>
 
               {/* Brushed Metallic Champagne Gold Cart Button with Badge */}
@@ -255,15 +267,19 @@ export default function Navbar() {
             {/* Bottom Actions */}
             <div className="pt-6 border-t border-white/10 space-y-3">
               <Link
-                href="/login"
+                href={isAuthenticated ? "/profile" : "/login"}
                 onClick={() => setMobileMenuOpen(false)}
                 className="w-full py-3 rounded-xl text-xs font-extrabold uppercase tracking-wider text-center text-[#09090B] bg-gradient-to-r from-[#E5C76B] via-[#C9A227] to-[#B08922] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] flex items-center justify-center gap-2 transition-colors active:scale-95"
               >
                 <User className="w-4 h-4 stroke-[2.5]" />
-                <span>My Account / Sign In</span>
+                <span>
+                  {isAuthenticated && user
+                    ? `My Account (${user.name.split(" ")[0]})`
+                    : "My Account / Sign In"}
+                </span>
               </Link>
               <div className="text-center text-[10px] text-zinc-500">
-                Colombo 03 Flagship Store &bull; +94 77 123 4567
+                Colombo 03 Flagship Store • +94 77 123 4567
               </div>
             </div>
           </div>

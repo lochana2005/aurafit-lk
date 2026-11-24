@@ -65,7 +65,7 @@ export default function CartItemRow({
             {/* Flavor pill */}
             {selectedFlavor && (
               <span className="px-2 py-0.5 rounded-md bg-[#1C1C22] border border-white/10 text-[11px] text-zinc-300 truncate max-w-[150px]">
-                {selectedFlavor}
+                {selectedFlavor.replace("&bull;", "•")}
               </span>
             )}
 

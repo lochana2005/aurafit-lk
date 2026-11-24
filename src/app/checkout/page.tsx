@@ -271,7 +271,7 @@ export default function CheckoutPage() {
               {/* =========================================================================
                   RIGHT COLUMN (5 COLS): STICKY ORDER SUMMARY
                   ========================================================================= */}
-              <div className="lg:col-span-5 lg:sticky lg:top-28 lg:self-start">
+              <div className="lg:col-span-5 lg:sticky lg:top-40 lg:self-start">
                 <CheckoutSummary
                   items={items}
                   subtotal={subtotal}

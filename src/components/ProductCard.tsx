@@ -52,7 +52,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="flex-1">
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#A1A1AA] block mb-0.5">
-              {product.brand} &bull; {product.category}
+              {product.brand} • {product.category}
             </span>
             <Link href={`/shop/${product.slug}`} className="block group-hover:text-[#E2C275] transition-colors">
               <h3 className="text-sm font-bold text-white leading-snug line-clamp-2 font-heading min-h-[38px]">

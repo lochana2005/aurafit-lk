@@ -73,7 +73,7 @@ export default function CheckoutSummary({
   return (
     <div
       data-lenis-prevent
-      className="bg-[#111115] rounded-2xl border border-white/10 p-5 sm:p-6 space-y-5 shadow-2xl lg:max-h-[calc(100vh-130px)] lg:overflow-y-auto overscroll-contain scrollbar-thin"
+      className="bg-[#111115] rounded-2xl border border-white/10 p-5 sm:p-6 space-y-5 shadow-2xl lg:max-h-[calc(100vh-180px)] lg:overflow-y-auto overscroll-contain scrollbar-thin"
     >
       {/* Header */}
       <div className="pb-3 border-b border-white/8 flex items-center justify-between">
@@ -123,7 +123,7 @@ export default function CheckoutSummary({
                   <>
                     <span className="text-zinc-600">•</span>
                     <span className="truncate max-w-[120px]">
-                      {item.selectedFlavor}
+                      {item.selectedFlavor.replace("&bull;", "•")}
                     </span>
                   </>
                 )}
