@@ -178,6 +178,14 @@ export default function OrderSuccess({ order }: OrderSuccessProps) {
           ========================================================================= */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
         <Link
+          href={`/track-order?id=${order.orderId}`}
+          className="w-full sm:w-auto px-8 py-3.5 rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider text-[#09090B] bg-gradient-to-r from-sky-400 via-sky-300 to-sky-500 shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:brightness-105 active:scale-95 transition-all text-center font-heading flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <Truck className="w-4 h-4 text-[#09090B]" />
+          <span>Track This Order Live</span>
+        </Link>
+
+        <Link
           href="/shop"
           className="w-full sm:w-auto px-8 py-3.5 rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider text-[#09090B] bg-gradient-to-r from-[#E5C76B] via-[#C9A227] to-[#B08922] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] hover:brightness-105 active:scale-95 transition-all text-center font-heading"
         >

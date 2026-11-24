@@ -178,15 +178,25 @@ export default function OrdersTab() {
                   </div>
                 </div>
 
-                {/* Batch Verification CTA */}
-                <Link
-                  href="/verify"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-sky-300 bg-sky-950/40 border border-sky-400/25 hover:border-sky-400/50 transition-colors self-start sm:self-auto"
-                >
-                  <QrCode className="w-3.5 h-3.5 text-sky-400" />
-                  <span>Verify Batch Hologram</span>
-                  <ArrowRight className="w-3 h-3" />
-                </Link>
+                {/* Tracking & Batch Verification CTAs */}
+                <div className="flex items-center gap-2 flex-wrap self-start sm:self-auto">
+                  <Link
+                    href={`/track-order?id=${order.id}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-white bg-[#1A1A22] border border-white/10 hover:border-sky-400/50 hover:text-sky-300 transition-colors"
+                  >
+                    <Truck className="w-3.5 h-3.5 text-sky-400" />
+                    <span>Track Live</span>
+                  </Link>
+
+                  <Link
+                    href="/verify"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-sky-300 bg-sky-950/40 border border-sky-400/25 hover:border-sky-400/50 transition-colors"
+                  >
+                    <QrCode className="w-3.5 h-3.5 text-sky-400" />
+                    <span>Verify Hologram</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
               </div>
             </div>
           ))}

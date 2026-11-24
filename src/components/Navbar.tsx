@@ -22,7 +22,7 @@ const NAV_LINKS = [
   { name: "SHOP", href: "/shop" },
   { name: "AI COACH", href: "/ai-coach", isPill: true },
   { name: "VERIFY PRODUCT", href: "/verify" },
-  { name: "TRACK ORDER", href: "/shop" },
+  { name: "TRACK ORDER", href: "/track-order" },
 ];
 
 export default function Navbar() {

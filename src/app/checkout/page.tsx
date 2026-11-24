@@ -166,6 +166,15 @@ export default function CheckoutPage() {
     setOrderPlaced(true);
     setIsSubmitting(false);
 
+    // Save placed order to localStorage for live tracking and profile
+    try {
+      const existing = localStorage.getItem("aurafit_orders");
+      const parsed = existing ? JSON.parse(existing) : [];
+      localStorage.setItem("aurafit_orders", JSON.stringify([orderData, ...parsed]));
+    } catch {
+      // fallback
+    }
+
     // Clear cart in state and local storage
     clearCart();
 

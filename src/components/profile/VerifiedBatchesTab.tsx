@@ -39,6 +39,31 @@ const VERIFIED_BATCHES: VerifiedBatchItem[] = [
 ];
 
 export default function VerifiedBatchesTab() {
+  const [batches] = React.useState<VerifiedBatchItem[]>(() => {
+    if (typeof window === "undefined") return VERIFIED_BATCHES;
+    try {
+      const saved = localStorage.getItem("aurafit_verified_batches");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const combined = [
+            ...parsed,
+            ...VERIFIED_BATCHES.filter(
+              (def) =>
+                !parsed.some(
+                  (p: VerifiedBatchItem) => p.certificateRef === def.certificateRef
+                )
+            ),
+          ];
+          return combined;
+        }
+      }
+    } catch {
+      // fallback
+    }
+    return VERIFIED_BATCHES;
+  });
+
   return (
     <div className="bg-[#141418] rounded-2xl border border-white/8 p-6 sm:p-8 shadow-xl space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/8">
@@ -75,7 +100,7 @@ export default function VerifiedBatchesTab() {
 
       {/* Batches List */}
       <div className="space-y-4">
-        {VERIFIED_BATCHES.map((batch) => (
+        {batches.map((batch) => (
           <div
             key={batch.id}
             className="p-5 rounded-2xl bg-[#0E0E12] border border-white/8 space-y-4 hover:border-sky-400/30 transition-all shadow-lg"
