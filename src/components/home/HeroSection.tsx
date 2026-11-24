@@ -90,10 +90,10 @@ export default function HeroSection() {
           </div>
         </div>
 
-        {/* Right Side Promo Banner (4 columns, luxury 560px height & p-7) */}
-        <div className="lg:col-span-4 relative rounded-2xl bg-gradient-to-br from-[#1C1C22] to-[#111114] border border-sky-400/25 shadow-[0_16px_40px_rgba(0,0,0,0.6),0_0_30px_rgba(56,189,248,0.08)] overflow-hidden min-h-[480px] md:min-h-[520px] lg:min-h-[560px] lg:h-[560px] flex flex-col justify-between p-7 sm:p-8 lg:p-9">
-          {/* Top Full-Width QR Supplement Tub Visual Spanning Edge-to-Edge */}
-          <div className="absolute top-0 inset-x-0 h-56 lg:h-64 z-0 overflow-hidden">
+        {/* Right Side Promo Banner (4 columns, full-bleed studio image with bottom gradient) */}
+        <div className="lg:col-span-4 relative overflow-hidden rounded-2xl bg-[#111115] border border-white/10 shadow-[0_16px_40px_rgba(0,0,0,0.6),0_0_30px_rgba(56,189,248,0.08)] min-h-[520px] lg:min-h-[560px] lg:h-[560px] flex flex-col justify-end p-7 sm:p-8">
+          {/* Full-Bleed Background Studio Image */}
+          <div className="absolute inset-0 w-full h-full z-0">
             <StudioImage
               src="/images/banners/hero-verify.jpg"
               alt="QR Authenticity Verification"
@@ -102,15 +102,15 @@ export default function HeroSection() {
               sizes="(max-width: 1024px) 100vw, 33vw"
               objectFit="cover"
               objectPosition="center"
-              imageClassName="object-cover object-center w-full h-full"
+              imageClassName="object-cover object-[center_12%] w-full h-full"
               fallbackLabel="AUTHENTICITY PROMO PHOTO"
             />
-            {/* Smooth Bottom Fade: blends tub seamlessly into #111115 card background */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#111115] via-[#111115]/25 to-transparent z-10 pointer-events-none" />
+            {/* Smooth Bottom Gradient Overlay: keeps bottom text & CTAs crisp */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#111115] via-[#111115]/85 to-transparent pointer-events-none" />
           </div>
 
           {/* Top Tag inside Right Banner */}
-          <div className="relative z-20 flex items-center justify-between mb-4">
+          <div className="absolute top-6 left-7 right-7 flex items-center justify-between z-10">
             <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#F0D78C] bg-[#09090B]/90 border border-[#F0D78C]/35 px-3.5 py-1.5 rounded-full shadow-lg">
               <span className="w-1.5 h-1.5 rounded-full bg-[#F0D78C] gold-badge-glow" />
               AUTHENTICITY ASSURED
@@ -120,8 +120,8 @@ export default function HeroSection() {
             </div>
           </div>
 
-          {/* Content inside Right Banner: compact & comfortably fit inside 560px */}
-          <div className="relative z-20 mt-auto space-y-3.5">
+          {/* Content inside Right Banner anchored cleanly at bottom */}
+          <div className="relative z-10 space-y-3.5">
             <h3 className="text-2xl lg:text-[1.8rem] font-bold uppercase tracking-wider font-heading text-white leading-tight">
               SCAN &amp; VERIFY YOUR BATCH CODE
             </h3>
