@@ -17,9 +17,9 @@ export default function HeroSection() {
           ========================================================================= */}
       <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
         {/* Left Main Hero Banner (8 columns, luxury 560px height) */}
-        <div className="lg:col-span-8 relative rounded-2xl bg-gradient-to-br from-[#1C1C22] to-[#111114] border border-white/12 shadow-[0_16px_40px_rgba(0,0,0,0.6)] overflow-hidden min-h-[480px] md:min-h-[520px] lg:min-h-[560px] lg:h-[560px] flex flex-col justify-between p-7 sm:p-9 lg:p-11 group">
-          {/* Background Studio Photography Container with Dark Gradient Overlay */}
-          <div className="absolute inset-0 z-0">
+        <div className="lg:col-span-8 relative rounded-2xl bg-gradient-to-br from-[#1C1C22] via-[#111115] to-[#0D0D11] border border-white/12 shadow-[0_16px_40px_rgba(0,0,0,0.6)] overflow-hidden min-h-[480px] md:min-h-[520px] lg:min-h-[560px] lg:h-[560px] flex flex-col justify-between p-7 sm:p-9 lg:p-11 group">
+          {/* Full-Bleed Edge-to-Edge Hero Product Visual Layer */}
+          <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
             <StudioImage
               src={currentHeroSlide.image}
               alt={currentHeroSlide.headline}
@@ -28,14 +28,16 @@ export default function HeroSection() {
               sizes="(max-width: 1024px) 100vw, 66vw"
               objectFit="cover"
               objectPosition="right"
+              imageClassName="object-cover object-[72%_center]"
               fallbackLabel="HERO BANNER STUDIO PHOTOGRAPHY"
             />
-            {/* Subtle left-to-right dark gradient overlay: typography stays crisp while right-side supplement bottles remain clearly visible at true proportion */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#09090B] via-[#09090B]/85 sm:via-[#09090B]/60 to-transparent z-10" />
+            {/* Smooth Directional Gradient Overlays: High contrast for left text, seamless visual on right */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0B0B0E] via-[#0B0B0E]/85 sm:via-[#0B0B0E]/75 lg:via-[#0B0B0E]/60 to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0E]/80 via-transparent to-transparent z-10 pointer-events-none" />
           </div>
 
           {/* Top Tag inside Main Banner */}
-          <div className="relative z-20 max-w-full md:max-w-[62%] lg:max-w-[54%] mb-3 sm:mb-4">
+          <div className="relative z-20 max-w-full md:max-w-[60%] lg:max-w-[50%] mb-3 sm:mb-4">
             <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider text-[#F0D78C] bg-[#09090B]/95 border border-[#F0D78C]/35">
               <span className="w-1.5 h-1.5 rounded-full bg-[#F0D78C] gold-badge-glow" />
               {currentHeroSlide.tag}
@@ -43,7 +45,7 @@ export default function HeroSection() {
           </div>
 
           {/* Content inside Main Banner (Barlow Condensed 2-Line Headline) */}
-          <div className="relative z-20 w-full md:max-w-[62%] lg:max-w-[54%] my-auto">
+          <div className="relative z-20 w-full md:max-w-[60%] lg:max-w-[50%] my-auto">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[3.25rem] font-bold tracking-wide uppercase leading-[1.04] font-heading">
               <span className="text-white block white-glow-headline">PURE PERFORMANCE.</span>
               <span className="gold-shimmer-headline block">100% AUTHENTIC.</span>
@@ -90,8 +92,8 @@ export default function HeroSection() {
 
         {/* Right Side Promo Banner (4 columns, luxury 560px height & p-7) */}
         <div className="lg:col-span-4 relative rounded-2xl bg-gradient-to-br from-[#1C1C22] to-[#111114] border border-sky-400/25 shadow-[0_16px_40px_rgba(0,0,0,0.6),0_0_30px_rgba(56,189,248,0.08)] overflow-hidden min-h-[480px] md:min-h-[520px] lg:min-h-[560px] lg:h-[560px] flex flex-col justify-between p-7 sm:p-8 lg:p-9">
-          {/* Background Studio Photography with object-top alignment */}
-          <div className="absolute inset-0 z-0">
+          {/* Top Full-Width QR Supplement Tub Visual Spanning Edge-to-Edge */}
+          <div className="absolute top-0 inset-x-0 h-56 lg:h-64 z-0 overflow-hidden">
             <StudioImage
               src="/images/banners/hero-verify.jpg"
               alt="QR Authenticity Verification"
@@ -99,11 +101,12 @@ export default function HeroSection() {
               priority
               sizes="(max-width: 1024px) 100vw, 33vw"
               objectFit="cover"
-              objectPosition="top"
+              objectPosition="center"
+              imageClassName="object-cover object-center w-full h-full"
               fallbackLabel="AUTHENTICITY PROMO PHOTO"
             />
-            {/* Gradient overlay: transparent top half so glowing QR code & logo appear cleanly; dark bottom for readable text */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#09090B] from-48% via-[#09090B]/85 via-64% to-transparent z-10" />
+            {/* Smooth Bottom Fade: blends tub seamlessly into #111115 card background */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#111115] via-[#111115]/25 to-transparent z-10 pointer-events-none" />
           </div>
 
           {/* Top Tag inside Right Banner */}

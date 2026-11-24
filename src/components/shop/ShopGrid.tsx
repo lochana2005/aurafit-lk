@@ -49,7 +49,7 @@ export default function ShopGrid({
           ========================================================================= */}
       {hasActiveFilters && (
         <div className="mb-6 p-3.5 rounded-2xl bg-[#111115] border border-white/[0.08] flex flex-wrap items-center gap-2">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 font-heading mr-1">
+          <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 font-sans mr-1">
             Active:
           </span>
 

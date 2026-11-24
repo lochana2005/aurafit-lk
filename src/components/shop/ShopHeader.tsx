@@ -69,7 +69,7 @@ export default function ShopHeader({
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search by product, brand, or flavor..."
-              className="w-full bg-[#141418] border border-white/10 hover:border-white/20 focus:border-[#E2C275]/60 rounded-xl pl-9 pr-8 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none transition-colors"
+              className="w-full bg-[#141418] border border-white/10 hover:border-white/20 focus:border-[#E2C275]/60 rounded-xl pl-9 pr-8 py-2.5 text-sm text-white placeholder-zinc-400 focus:outline-none transition-colors"
             />
             {searchQuery && (
               <button
@@ -89,7 +89,7 @@ export default function ShopHeader({
             <button
               type="button"
               onClick={onOpenMobileFilters}
-              className="lg:hidden flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#141418] border border-white/12 text-xs font-bold text-white hover:border-[#E2C275] transition-all"
+              className="lg:hidden flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#141418] border border-white/12 text-sm font-semibold text-white hover:border-[#E2C275] transition-all"
             >
               <SlidersHorizontal className="w-3.5 h-3.5 text-[#E2C275]" />
               <span>Filters</span>
@@ -107,7 +107,7 @@ export default function ShopHeader({
                   value={sortBy}
                   onChange={(e) => onSortChange(e.target.value)}
                   aria-label="Sort products"
-                  className="w-full sm:w-48 appearance-none bg-[#141418] border border-white/12 hover:border-white/25 focus:border-[#E2C275]/60 rounded-xl pl-3.5 pr-8 py-2.5 text-xs font-semibold text-white focus:outline-none cursor-pointer transition-colors"
+                  className="w-full sm:w-48 appearance-none bg-[#141418] border border-white/12 hover:border-white/25 focus:border-[#E2C275]/60 rounded-xl pl-3.5 pr-8 py-2.5 text-sm font-medium text-white focus:outline-none cursor-pointer transition-colors"
                 >
                   <option value="featured">Featured Stacks</option>
                   <option value="price-asc">Price: Low to High</option>

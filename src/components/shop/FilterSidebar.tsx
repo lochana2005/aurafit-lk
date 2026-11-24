@@ -124,14 +124,14 @@ export default function FilterSidebar({
     <div className="space-y-4 text-xs text-zinc-300">
       {/* Header with Clear Button */}
       <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
-        <span className="text-xs font-black uppercase tracking-wider text-white font-heading">
+        <span className="text-xs font-bold uppercase tracking-wider text-zinc-100 font-sans">
           Filter Catalog
         </span>
         {hasActiveFilters && (
           <button
             type="button"
             onClick={onClearAll}
-            className="text-[11px] font-semibold text-[#E2C275] hover:underline flex items-center gap-1 cursor-pointer"
+            className="text-xs font-semibold text-[#E2C275] hover:underline flex items-center gap-1 cursor-pointer"
           >
             <RotateCcw className="w-3 h-3" />
             <span>Reset All</span>
@@ -144,7 +144,7 @@ export default function FilterSidebar({
         <button
           type="button"
           onClick={() => toggleSection("categories")}
-          className="w-full flex items-center justify-between py-1.5 text-[11px] font-bold uppercase tracking-wider text-zinc-300 hover:text-white font-heading cursor-pointer"
+          className="w-full flex items-center justify-between py-1.5 text-xs font-bold uppercase tracking-wider text-zinc-200 hover:text-white font-sans cursor-pointer"
         >
           <span className="flex items-center gap-2">
             <span>Categories</span>
@@ -162,7 +162,7 @@ export default function FilterSidebar({
         </button>
 
         {openSections.categories && (
-          <div className="mt-2 space-y-1">
+          <div className="mt-2.5 space-y-2.5">
             {ALL_CATEGORIES.map((cat) => {
               const isChecked = filters.categories.includes(cat);
               const count = categoryCounts[cat] || 0;
@@ -183,14 +183,14 @@ export default function FilterSidebar({
                       {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
                     </div>
                     <span
-                      className={`text-xs ${
-                        isChecked ? "text-white font-semibold" : "text-zinc-300"
+                      className={`text-sm font-medium transition-colors ${
+                        isChecked ? "text-white font-semibold" : "text-zinc-300 group-hover:text-white"
                       }`}
                     >
                       {cat}
                     </span>
                   </div>
-                  <span className="text-[11px] font-mono text-zinc-500">
+                  <span className="text-xs font-mono text-zinc-500">
                     {count}
                   </span>
                 </div>
@@ -205,7 +205,7 @@ export default function FilterSidebar({
         <button
           type="button"
           onClick={() => toggleSection("goals")}
-          className="w-full flex items-center justify-between py-1.5 text-[11px] font-bold uppercase tracking-wider text-zinc-300 hover:text-white font-heading cursor-pointer"
+          className="w-full flex items-center justify-between py-1.5 text-xs font-bold uppercase tracking-wider text-zinc-200 hover:text-white font-sans cursor-pointer"
         >
           <span className="flex items-center gap-2">
             <span>Training Goal</span>
@@ -223,7 +223,7 @@ export default function FilterSidebar({
         </button>
 
         {openSections.goals && (
-          <div className="mt-2.5 flex flex-wrap gap-1.5">
+          <div className="mt-2.5 flex flex-wrap gap-2">
             {ALL_GOALS.map((goal) => {
               const isSelected = filters.goals.includes(goal);
               const count = goalCounts[goal] || 0;
@@ -232,14 +232,14 @@ export default function FilterSidebar({
                   key={goal}
                   type="button"
                   onClick={() => toggleGoal(goal)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-150 select-none cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-150 select-none cursor-pointer flex items-center gap-1.5 ${
                     isSelected
                       ? "bg-[#E2C275] text-[#09090B] font-bold shadow-sm"
-                      : "bg-[#141418] text-zinc-400 hover:text-white border border-white/10 hover:border-white/25"
+                      : "bg-[#141418] text-zinc-300 hover:text-white border border-white/10 hover:border-white/25"
                   }`}
                 >
                   <span>{goal}</span>
-                  <span className="text-[10px] font-mono opacity-70">
+                  <span className="text-xs font-mono opacity-70">
                     ({count})
                   </span>
                 </button>
@@ -254,7 +254,7 @@ export default function FilterSidebar({
         <button
           type="button"
           onClick={() => toggleSection("brands")}
-          className="w-full flex items-center justify-between py-1.5 text-[11px] font-bold uppercase tracking-wider text-zinc-300 hover:text-white font-heading cursor-pointer"
+          className="w-full flex items-center justify-between py-1.5 text-xs font-bold uppercase tracking-wider text-zinc-200 hover:text-white font-sans cursor-pointer"
         >
           <span className="flex items-center gap-2">
             <span>Authorized Brands</span>
@@ -272,7 +272,7 @@ export default function FilterSidebar({
         </button>
 
         {openSections.brands && (
-          <div className="mt-2 space-y-1">
+          <div className="mt-2.5 space-y-2.5">
             {ALL_BRANDS.map((brand) => {
               const isChecked = filters.brands.includes(brand);
               const count = brandCounts[brand] || 0;
@@ -293,14 +293,14 @@ export default function FilterSidebar({
                       {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
                     </div>
                     <span
-                      className={`text-xs ${
-                        isChecked ? "text-white font-semibold" : "text-zinc-300"
+                      className={`text-sm font-medium transition-colors ${
+                        isChecked ? "text-white font-semibold" : "text-zinc-300 group-hover:text-white"
                       }`}
                     >
                       {brand}
                     </span>
                   </div>
-                  <span className="text-[11px] font-mono text-zinc-500">
+                  <span className="text-xs font-mono text-zinc-500">
                     {count}
                   </span>
                 </div>
@@ -315,7 +315,7 @@ export default function FilterSidebar({
         <button
           type="button"
           onClick={() => toggleSection("price")}
-          className="w-full flex items-center justify-between py-1.5 text-[11px] font-bold uppercase tracking-wider text-zinc-300 hover:text-white font-heading cursor-pointer"
+          className="w-full flex items-center justify-between py-1.5 text-xs font-bold uppercase tracking-wider text-zinc-200 hover:text-white font-sans cursor-pointer"
         >
           <span>Price Range (LKR)</span>
           <ChevronDown
@@ -326,7 +326,7 @@ export default function FilterSidebar({
         </button>
 
         {openSections.price && (
-          <div className="mt-2 space-y-1">
+          <div className="mt-2.5 space-y-2.5">
             {PRICE_RANGES.map((range) => {
               const isSelected = filters.priceRange === range.id;
               return (
@@ -339,11 +339,11 @@ export default function FilterSidebar({
                     name="priceRange"
                     checked={isSelected}
                     onChange={() => setPriceRange(range.id)}
-                    className="accent-[#E2C275] w-3.5 h-3.5 cursor-pointer"
+                    className="accent-[#E2C275] w-4 h-4 cursor-pointer"
                   />
                   <span
-                    className={`text-xs ${
-                      isSelected ? "text-white font-semibold" : "text-zinc-400"
+                    className={`text-sm font-medium transition-colors ${
+                      isSelected ? "text-white font-semibold" : "text-zinc-300 hover:text-white"
                     }`}
                   >
                     {range.label}
@@ -360,7 +360,7 @@ export default function FilterSidebar({
         <button
           type="button"
           onClick={() => toggleSection("quick")}
-          className="w-full flex items-center justify-between py-1.5 text-[11px] font-bold uppercase tracking-wider text-zinc-300 hover:text-white font-heading cursor-pointer"
+          className="w-full flex items-center justify-between py-1.5 text-xs font-bold uppercase tracking-wider text-zinc-200 hover:text-white font-sans cursor-pointer"
         >
           <span>Quick Filters</span>
           <ChevronDown
@@ -371,10 +371,10 @@ export default function FilterSidebar({
         </button>
 
         {openSections.quick && (
-          <div className="space-y-2 pt-1">
+          <div className="space-y-2.5 pt-1">
             {/* In Stock Only */}
             <label className="flex items-center justify-between p-2.5 rounded-xl bg-[#141418] border border-white/6 hover:border-white/12 transition-colors cursor-pointer select-none">
-              <span className="text-xs text-zinc-200 font-medium">In Stock Only</span>
+              <span className="text-sm text-zinc-200 font-medium">In Stock Only</span>
               <input
                 type="checkbox"
                 checked={filters.inStockOnly}
@@ -386,8 +386,8 @@ export default function FilterSidebar({
             {/* QR Batch Verified Only */}
             <label className="flex items-center justify-between p-2.5 rounded-xl bg-sky-950/20 border border-sky-400/20 hover:border-sky-400/35 transition-colors cursor-pointer select-none">
               <div className="flex items-center gap-1.5 text-sky-200">
-                <ShieldCheck className="w-3.5 h-3.5 text-sky-400" />
-                <span className="text-xs font-semibold">QR Verified Only</span>
+                <ShieldCheck className="w-4 h-4 text-sky-400" />
+                <span className="text-sm font-semibold">QR Verified Only</span>
               </div>
               <input
                 type="checkbox"
@@ -433,7 +433,7 @@ export default function FilterSidebar({
               className="w-screen max-w-xs sm:max-w-sm bg-[#111115] border-r border-white/10 shadow-2xl flex flex-col justify-between p-6 overflow-y-auto overscroll-contain"
             >
               <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
-                <span className="text-base font-bold uppercase tracking-wider text-white font-heading">
+                <span className="text-base font-bold uppercase tracking-wider text-white font-sans">
                   Filter Catalog
                 </span>
                 <button

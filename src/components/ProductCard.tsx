@@ -51,11 +51,11 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Top of card: Title, Category label, and Gold verified tick */}
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="flex-1">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#A1A1AA] block mb-0.5">
+            <span className="text-xs font-semibold tracking-wider text-zinc-400 font-sans block mb-1">
               {product.brand} • {product.category}
             </span>
             <Link href={`/shop/${product.slug}`} className="block group-hover:text-[#E2C275] transition-colors">
-              <h3 className="text-sm font-bold text-white leading-snug line-clamp-2 font-heading min-h-[38px]">
+              <h3 className="text-base sm:text-[17px] font-bold leading-snug text-white font-sans line-clamp-2 min-h-[46px]">
                 {product.name}
               </h3>
             </Link>
@@ -139,26 +139,26 @@ export default function ProductCard({ product }: ProductCardProps) {
       {/* Bottom of card: Pricing, KOKO installment line, and Full-Width Add to Cart button */}
       <div className="mt-2 pt-3 border-t border-white/[0.08]">
         <div className="flex items-baseline gap-2">
-          <span className="text-base sm:text-lg font-black text-white tracking-tight font-sans">
+          <span className="text-xl font-extrabold text-white tracking-tight font-sans">
             {formattedPrice}
           </span>
           {formattedOriginalPrice && (
-            <span className="text-xs text-zinc-500 line-through">
+            <span className="text-xs text-zinc-400 line-through font-sans">
               {formattedOriginalPrice}
             </span>
           )}
         </div>
 
         {/* Koko Installment Info Line */}
-        <div className="text-[11px] text-[#A1A1AA] mt-1 font-medium flex items-center gap-1.5 truncate">
-          <span className="text-[9px] font-bold text-[#A78BFA] bg-[#8B5CF6]/15 border border-[#8B5CF6]/30 px-1 py-0.2 rounded font-heading">
+        <div className="text-xs text-zinc-300 mt-1.5 font-medium flex items-center gap-1.5 truncate font-sans">
+          <span className="text-[10px] font-bold text-[#A78BFA] bg-[#8B5CF6]/15 border border-[#8B5CF6]/30 px-1.5 py-0.5 rounded font-sans">
             KOKO
           </span>
-          <span className="text-zinc-300 font-sans">
+          <span className="text-zinc-200 font-sans">
             {formatLKR(getKokoTotal(product.price), false)}
           </span>
-          <span className="text-zinc-600">·</span>
-          <span className="text-zinc-400 font-sans">
+          <span className="text-zinc-500">·</span>
+          <span className="text-zinc-300 font-sans">
             3 × {formatLKR(getKokoInstallment(product.price), false)}
           </span>
         </div>
