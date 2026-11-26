@@ -16,7 +16,7 @@ import { StackItem } from "@/components/ai-coach/RecommendedStackCard";
 import { ChatSession, ChatMessage } from "@/components/ai-coach/types";
 import { MOCK_PRODUCTS } from "@/data/mockProducts";
 
-//hhhhh
+
 const STORAGE_KEY = "aurafit_ai_chats";
 
 // Helper: Curated Master Stacks based on Goal & Budget
