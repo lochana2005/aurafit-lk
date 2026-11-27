@@ -156,7 +156,7 @@ export default function Footer() {
               </h4>
               <ul className="space-y-2.5 text-xs">
                 <li>
-                  <Link href="/shop" className="text-zinc-300 hover:text-[#E2C275] transition-colors">
+                  <Link href="/about" className="text-zinc-300 hover:text-[#E2C275] transition-colors">
                     About AuraFit.lk
                   </Link>
                 </li>

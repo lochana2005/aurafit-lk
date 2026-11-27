@@ -18,6 +18,7 @@ import {
   PackageCheck,
   Sparkles,
   Headphones,
+  Info,
 } from "lucide-react";
 
 const NAV_LINKS = [
@@ -26,6 +27,7 @@ const NAV_LINKS = [
   { name: "AI COACH", href: "/ai-coach", isPill: true },
   { name: "VERIFY PRODUCT", href: "/verify" },
   { name: "TRACK ORDER", href: "/track-order" },
+  { name: "ABOUT US", href: "/about" },
   { name: "CONTACT", href: "/contact" },
 ];
 
@@ -137,14 +139,14 @@ export default function Navbar() {
               </Link>
 
               {/* Center: Desktop Navigation Links */}
-              <nav className="hidden lg:flex items-center gap-5 xl:gap-7 text-xs font-semibold tracking-wider whitespace-nowrap">
+              <nav className="hidden lg:flex items-center gap-4 xl:gap-6 text-[11px] xl:text-xs font-semibold tracking-wider whitespace-nowrap">
                 {NAV_LINKS.map((link) => {
                   const isActive = pathname === link.href;
                   return (
                     <Link
                       key={link.name}
                       href={link.href}
-                      className={`relative text-xs font-bold tracking-wider uppercase transition-colors py-1 ${
+                      className={`relative text-[11px] xl:text-xs font-bold tracking-wider uppercase transition-colors py-1 ${
                         isActive
                           ? "text-[#E2C275]"
                           : "text-[#A1A1AA] hover:text-white"
@@ -369,6 +371,23 @@ export default function Navbar() {
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#1C170E] text-[#E2C275] font-bold border border-[#E2C275]/25">
                   LIVE LOGISTICS
                 </span>
+              </Link>
+
+              {/* About Us */}
+              <Link
+                href="/about"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center justify-between px-4 py-3.5 rounded-xl font-heading text-base font-bold uppercase tracking-wider transition-all ${
+                  pathname === "/about"
+                    ? "bg-[#181820] text-[#E2C275] border border-[#E2C275]/40"
+                    : "text-zinc-200 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Info className="w-4 h-4 text-[#E2C275]" />
+                  <span>ABOUT US</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-zinc-500" />
               </Link>
 
               {/* Contact Us */}
