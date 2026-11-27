@@ -4,6 +4,8 @@ export type ProductCategory =
   | "Creatine"
   | "Pre Workout"
   | "BCAA"
+  | "Amino"
+  | "Fat Burner"
   | "Multivitamins";
 
 export type FitnessGoal =

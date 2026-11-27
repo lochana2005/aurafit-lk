@@ -4,10 +4,11 @@ import React from "react";
 import { X, RotateCcw, PackageSearch, Sparkles } from "lucide-react";
 import { Product } from "@/data/mockProducts";
 import ProductCard from "@/components/ProductCard";
-import { FilterState } from "./FilterSidebar";
+import { FilterState, MAX_PRICE_LIMIT } from "./FilterSidebar";
 
 interface ShopGridProps {
   products: Product[];
+  viewMode: "grid" | "list";
   filters: FilterState;
   searchQuery: string;
   onRemoveCategory: (cat: string) => void;
@@ -22,6 +23,7 @@ interface ShopGridProps {
 
 export default function ShopGrid({
   products,
+  viewMode,
   filters,
   searchQuery,
   onRemoveCategory,
@@ -33,12 +35,15 @@ export default function ShopGrid({
   onToggleVerified,
   onClearAll,
 }: ShopGridProps) {
+  const hasPriceFilter =
+    filters.minPrice > 0 || filters.maxPrice < MAX_PRICE_LIMIT;
+
   const hasActiveFilters =
     Boolean(searchQuery.trim()) ||
     filters.categories.length > 0 ||
     filters.brands.length > 0 ||
     filters.goals.length > 0 ||
-    filters.priceRange !== "all" ||
+    hasPriceFilter ||
     filters.inStockOnly ||
     filters.verifiedOnly;
 
@@ -123,14 +128,11 @@ export default function ShopGrid({
           ))}
 
           {/* Price Range Chip */}
-          {filters.priceRange !== "all" && (
+          {hasPriceFilter && (
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-zinc-200 bg-[#1C1C22] border border-white/15">
               <span>
-                {filters.priceRange === "under-15k"
-                  ? "< Rs. 15,000"
-                  : filters.priceRange === "15k-30k"
-                  ? "Rs. 15k – 30k"
-                  : "> Rs. 30,000"}
+                Rs. {filters.minPrice.toLocaleString("en-LK")} – Rs.{" "}
+                {filters.maxPrice.toLocaleString("en-LK")}
               </span>
               <button
                 type="button"
@@ -211,10 +213,16 @@ export default function ShopGrid({
             <span>Reset All Filters</span>
           </button>
         </div>
+      ) : viewMode === "list" ? (
+        <div className="flex flex-col gap-4">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} viewMode="list" />
+          ))}
+        </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 lg:gap-6">
           {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard key={product.id} product={product} viewMode="grid" />
           ))}
         </div>
       )}

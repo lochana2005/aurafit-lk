@@ -1,19 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  RotateCcw,
-  ShieldCheck,
-  Check,
-  ChevronDown,
-} from "lucide-react";
+import { RotateCcw, ShieldCheck, Check, Minus, Plus, X } from "lucide-react";
 import { ProductCategory, FitnessGoal } from "@/data/mockProducts";
+
+export const MAX_PRICE_LIMIT = 60000;
+export const PRICE_STEP = 500;
 
 export interface FilterState {
   categories: ProductCategory[];
   goals: FitnessGoal[];
   brands: string[];
-  priceRange: "all" | "under-15k" | "15k-30k" | "over-30k";
+  minPrice: number;
+  maxPrice: number;
   inStockOnly: boolean;
   verifiedOnly: boolean;
 }
@@ -22,6 +21,7 @@ interface FilterSidebarProps {
   filters: FilterState;
   onFilterChange: (next: FilterState) => void;
   onClearAll: () => void;
+  isDesktopOpen: boolean;
   isMobileOpen: boolean;
   onCloseMobile: () => void;
   categoryCounts: Record<string, number>;
@@ -36,6 +36,8 @@ const ALL_CATEGORIES: ProductCategory[] = [
   "Creatine",
   "Pre Workout",
   "BCAA",
+  "Amino",
+  "Fat Burner",
   "Multivitamins",
 ];
 
@@ -49,23 +51,17 @@ const ALL_GOALS: FitnessGoal[] = [
 const ALL_BRANDS = [
   "Optimum Nutrition",
   "Dymatize",
-  "Applied Nutrition",
   "MuscleTech",
+  "Applied Nutrition",
   "Ronnie Coleman",
   "Cellucor",
 ];
-
-const PRICE_RANGES = [
-  { id: "all", label: "All Prices" },
-  { id: "under-15k", label: "Under Rs. 15,000" },
-  { id: "15k-30k", label: "Rs. 15,000 – 30,000" },
-  { id: "over-30k", label: "Rs. 30,000+" },
-] as const;
 
 export default function FilterSidebar({
   filters,
   onFilterChange,
   onClearAll,
+  isDesktopOpen,
   isMobileOpen,
   onCloseMobile,
   categoryCounts,
@@ -73,14 +69,25 @@ export default function FilterSidebar({
   goalCounts,
   hasActiveFilters,
 }: FilterSidebarProps) {
-  // Accordion toggle states
   const [openSections, setOpenSections] = useState({
+    price: true,
     categories: true,
     goals: true,
     brands: true,
-    price: true,
     quick: true,
   });
+
+  // Draft dual-thumb price values committed via FILTER button
+  const [draftMin, setDraftMin] = useState(filters.minPrice);
+  const [draftMax, setDraftMax] = useState(filters.maxPrice);
+  const priceKey = `${filters.minPrice}-${filters.maxPrice}`;
+  const [prevPriceKey, setPrevPriceKey] = useState(priceKey);
+
+  if (priceKey !== prevPriceKey) {
+    setPrevPriceKey(priceKey);
+    setDraftMin(filters.minPrice);
+    setDraftMax(filters.maxPrice);
+  }
 
   const toggleSection = (section: keyof typeof openSections) => {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
@@ -107,8 +114,12 @@ export default function FilterSidebar({
     onFilterChange({ ...filters, brands: next });
   };
 
-  const setPriceRange = (range: FilterState["priceRange"]) => {
-    onFilterChange({ ...filters, priceRange: range });
+  const applyPriceFilter = () => {
+    onFilterChange({
+      ...filters,
+      minPrice: draftMin,
+      maxPrice: draftMax,
+    });
   };
 
   const toggleInStock = () => {
@@ -119,12 +130,14 @@ export default function FilterSidebar({
     onFilterChange({ ...filters, verifiedOnly: !filters.verifiedOnly });
   };
 
-  // Reusable Content Inner
+  const minPercent = (draftMin / MAX_PRICE_LIMIT) * 100;
+  const maxPercent = (draftMax / MAX_PRICE_LIMIT) * 100;
+
   const filterContent = (
-    <div className="space-y-4 text-xs text-zinc-300">
-      {/* Header with Clear Button */}
+    <div className="space-y-5 font-sans text-zinc-300">
+      {/* Header with Reset All */}
       <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
-        <span className="text-xs font-bold uppercase tracking-wider text-zinc-100 font-sans">
+        <span className="text-xs font-bold uppercase tracking-wider text-zinc-100">
           Filter Catalog
         </span>
         {hasActiveFilters && (
@@ -139,30 +152,117 @@ export default function FilterSidebar({
         )}
       </div>
 
-      {/* 1. CATEGORIES ACCORDION */}
-      <div className="pt-1">
+      {/* 1. FILTER BY PRICE (Dual-Thumb Range Slider) */}
+      <div>
+        <button
+          type="button"
+          onClick={() => toggleSection("price")}
+          className="w-full flex items-center justify-between py-1.5 text-xs font-bold uppercase tracking-wider text-white hover:text-[#E2C275] transition-colors cursor-pointer"
+        >
+          <span>FILTER BY PRICE</span>
+          <span className="text-zinc-400">
+            {openSections.price ? (
+              <Minus className="w-3.5 h-3.5" />
+            ) : (
+              <Plus className="w-3.5 h-3.5" />
+            )}
+          </span>
+        </button>
+
+        {openSections.price && (
+          <div className="mt-4 space-y-4">
+            {/* Dual-thumb slider container */}
+            <div className="relative h-6 flex items-center">
+              {/* Background Track */}
+              <div className="absolute inset-x-0 h-1.5 rounded-full bg-white/10" />
+              {/* Active Gold Track */}
+              <div
+                className="absolute h-1.5 rounded-full bg-gradient-to-r from-[#E2C275] to-[#C9A227]"
+                style={{
+                  left: `${minPercent}%`,
+                  right: `${100 - maxPercent}%`,
+                }}
+              />
+              {/* Min Slider Input */}
+              <input
+                type="range"
+                min={0}
+                max={MAX_PRICE_LIMIT}
+                step={PRICE_STEP}
+                value={draftMin}
+                aria-label="Minimum price"
+                onChange={(e) => {
+                  const val = Math.min(Number(e.target.value), draftMax - PRICE_STEP);
+                  setDraftMin(val);
+                }}
+                className="aurafit-range-input absolute inset-x-0 w-full z-20"
+              />
+              {/* Max Slider Input */}
+              <input
+                type="range"
+                min={0}
+                max={MAX_PRICE_LIMIT}
+                step={PRICE_STEP}
+                value={draftMax}
+                aria-label="Maximum price"
+                onChange={(e) => {
+                  const val = Math.max(Number(e.target.value), draftMin + PRICE_STEP);
+                  setDraftMax(val);
+                }}
+                className="aurafit-range-input absolute inset-x-0 w-full z-30"
+              />
+            </div>
+
+            {/* Live Price Readout + Underlined FILTER button */}
+            <div className="flex items-center justify-between gap-2 pt-1">
+              <span className="text-sm text-zinc-300 leading-snug">
+                Price:{" "}
+                <strong className="text-white font-semibold">
+                  Rs. {draftMin.toLocaleString("en-LK")}
+                </strong>{" "}
+                —{" "}
+                <strong className="text-white font-semibold">
+                  Rs. {draftMax.toLocaleString("en-LK")}
+                </strong>
+              </span>
+              <button
+                type="button"
+                onClick={applyPriceFilter}
+                className="text-xs font-bold uppercase tracking-wider text-[#E2C275] underline underline-offset-4 hover:text-[#F5DC93] transition-colors shrink-0 cursor-pointer"
+              >
+                FILTER
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 2. PRODUCT CATEGORIES */}
+      <div className="pt-4 border-t border-white/[0.08]">
         <button
           type="button"
           onClick={() => toggleSection("categories")}
-          className="w-full flex items-center justify-between py-1.5 text-xs font-bold uppercase tracking-wider text-zinc-200 hover:text-white font-sans cursor-pointer"
+          className="w-full flex items-center justify-between py-1.5 text-xs font-bold uppercase tracking-wider text-white hover:text-[#E2C275] transition-colors cursor-pointer"
         >
           <span className="flex items-center gap-2">
-            <span>Categories</span>
+            <span>PRODUCT CATEGORIES</span>
             {filters.categories.length > 0 && (
               <span className="w-4 h-4 rounded-full bg-[#E2C275] text-[#09090B] font-mono text-[9px] font-black flex items-center justify-center">
                 {filters.categories.length}
               </span>
             )}
           </span>
-          <ChevronDown
-            className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${
-              openSections.categories ? "rotate-180" : ""
-            }`}
-          />
+          <span className="text-zinc-400">
+            {openSections.categories ? (
+              <Minus className="w-3.5 h-3.5" />
+            ) : (
+              <Plus className="w-3.5 h-3.5" />
+            )}
+          </span>
         </button>
 
         {openSections.categories && (
-          <div className="mt-2.5 space-y-2.5">
+          <div className="mt-2.5 space-y-1.5">
             {ALL_CATEGORIES.map((cat) => {
               const isChecked = filters.categories.includes(cat);
               const count = categoryCounts[cat] || 0;
@@ -170,7 +270,7 @@ export default function FilterSidebar({
                 <div
                   key={cat}
                   onClick={() => toggleCategory(cat)}
-                  className="flex items-center justify-between p-2 rounded-lg hover:bg-white/[0.04] transition-colors cursor-pointer select-none group"
+                  className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-white/[0.04] transition-colors cursor-pointer select-none group"
                 >
                   <div className="flex items-center gap-2.5">
                     <div
@@ -183,8 +283,10 @@ export default function FilterSidebar({
                       {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
                     </div>
                     <span
-                      className={`text-sm font-medium transition-colors ${
-                        isChecked ? "text-white font-semibold" : "text-zinc-300 group-hover:text-white"
+                      className={`text-sm transition-colors ${
+                        isChecked
+                          ? "text-white font-semibold"
+                          : "text-zinc-300 group-hover:text-white"
                       }`}
                     >
                       {cat}
@@ -200,87 +302,40 @@ export default function FilterSidebar({
         )}
       </div>
 
-      {/* 2. FITNESS GOALS (Pill Toggles) */}
-      <div className="pt-3 border-t border-white/[0.08]">
+      {/* 3. TRAINING GOAL (Collapsible Checkbox List) */}
+      <div className="pt-4 border-t border-white/[0.08]">
         <button
           type="button"
           onClick={() => toggleSection("goals")}
-          className="w-full flex items-center justify-between py-1.5 text-xs font-bold uppercase tracking-wider text-zinc-200 hover:text-white font-sans cursor-pointer"
+          className="w-full flex items-center justify-between py-1.5 text-xs font-bold uppercase tracking-wider text-white hover:text-[#E2C275] transition-colors cursor-pointer"
         >
           <span className="flex items-center gap-2">
-            <span>Training Goal</span>
+            <span>TRAINING GOAL</span>
             {filters.goals.length > 0 && (
               <span className="w-4 h-4 rounded-full bg-[#E2C275] text-[#09090B] font-mono text-[9px] font-black flex items-center justify-center">
                 {filters.goals.length}
               </span>
             )}
           </span>
-          <ChevronDown
-            className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${
-              openSections.goals ? "rotate-180" : ""
-            }`}
-          />
+          <span className="text-zinc-400">
+            {openSections.goals ? (
+              <Minus className="w-3.5 h-3.5" />
+            ) : (
+              <Plus className="w-3.5 h-3.5" />
+            )}
+          </span>
         </button>
 
         {openSections.goals && (
-          <div className="mt-2.5 flex flex-wrap gap-2">
+          <div className="mt-2.5 space-y-1.5">
             {ALL_GOALS.map((goal) => {
-              const isSelected = filters.goals.includes(goal);
+              const isChecked = filters.goals.includes(goal);
               const count = goalCounts[goal] || 0;
               return (
-                <button
-                  key={goal}
-                  type="button"
-                  onClick={() => toggleGoal(goal)}
-                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-150 select-none cursor-pointer flex items-center gap-1.5 ${
-                    isSelected
-                      ? "bg-[#E2C275] text-[#09090B] font-bold shadow-sm"
-                      : "bg-[#141418] text-zinc-300 hover:text-white border border-white/10 hover:border-white/25"
-                  }`}
-                >
-                  <span>{goal}</span>
-                  <span className="text-xs font-mono opacity-70">
-                    ({count})
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* 3. BRANDS ACCORDION */}
-      <div className="pt-3 border-t border-white/[0.08]">
-        <button
-          type="button"
-          onClick={() => toggleSection("brands")}
-          className="w-full flex items-center justify-between py-1.5 text-xs font-bold uppercase tracking-wider text-zinc-200 hover:text-white font-sans cursor-pointer"
-        >
-          <span className="flex items-center gap-2">
-            <span>Authorized Brands</span>
-            {filters.brands.length > 0 && (
-              <span className="w-4 h-4 rounded-full bg-[#E2C275] text-[#09090B] font-mono text-[9px] font-black flex items-center justify-center">
-                {filters.brands.length}
-              </span>
-            )}
-          </span>
-          <ChevronDown
-            className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${
-              openSections.brands ? "rotate-180" : ""
-            }`}
-          />
-        </button>
-
-        {openSections.brands && (
-          <div className="mt-2.5 space-y-2.5">
-            {ALL_BRANDS.map((brand) => {
-              const isChecked = filters.brands.includes(brand);
-              const count = brandCounts[brand] || 0;
-              return (
                 <div
-                  key={brand}
-                  onClick={() => toggleBrand(brand)}
-                  className="flex items-center justify-between p-2 rounded-lg hover:bg-white/[0.04] transition-colors cursor-pointer select-none group"
+                  key={goal}
+                  onClick={() => toggleGoal(goal)}
+                  className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-white/[0.04] transition-colors cursor-pointer select-none group"
                 >
                   <div className="flex items-center gap-2.5">
                     <div
@@ -293,8 +348,75 @@ export default function FilterSidebar({
                       {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
                     </div>
                     <span
-                      className={`text-sm font-medium transition-colors ${
-                        isChecked ? "text-white font-semibold" : "text-zinc-300 group-hover:text-white"
+                      className={`text-sm transition-colors ${
+                        isChecked
+                          ? "text-white font-semibold"
+                          : "text-zinc-300 group-hover:text-white"
+                      }`}
+                    >
+                      {goal}
+                    </span>
+                  </div>
+                  <span className="text-xs font-mono text-zinc-500">
+                    {count}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* 4. AUTHORIZED BRANDS */}
+      <div className="pt-4 border-t border-white/[0.08]">
+        <button
+          type="button"
+          onClick={() => toggleSection("brands")}
+          className="w-full flex items-center justify-between py-1.5 text-xs font-bold uppercase tracking-wider text-white hover:text-[#E2C275] transition-colors cursor-pointer"
+        >
+          <span className="flex items-center gap-2">
+            <span>AUTHORIZED BRANDS</span>
+            {filters.brands.length > 0 && (
+              <span className="w-4 h-4 rounded-full bg-[#E2C275] text-[#09090B] font-mono text-[9px] font-black flex items-center justify-center">
+                {filters.brands.length}
+              </span>
+            )}
+          </span>
+          <span className="text-zinc-400">
+            {openSections.brands ? (
+              <Minus className="w-3.5 h-3.5" />
+            ) : (
+              <Plus className="w-3.5 h-3.5" />
+            )}
+          </span>
+        </button>
+
+        {openSections.brands && (
+          <div className="mt-2.5 space-y-1.5">
+            {ALL_BRANDS.map((brand) => {
+              const isChecked = filters.brands.includes(brand);
+              const count = brandCounts[brand] || 0;
+              return (
+                <div
+                  key={brand}
+                  onClick={() => toggleBrand(brand)}
+                  className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-white/[0.04] transition-colors cursor-pointer select-none group"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div
+                      className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
+                        isChecked
+                          ? "bg-[#E2C275] border-[#E2C275] text-[#09090B]"
+                          : "border-white/20 group-hover:border-white/40 bg-[#1C1C22]"
+                      }`}
+                    >
+                      {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                    </div>
+                    <span
+                      className={`text-sm transition-colors ${
+                        isChecked
+                          ? "text-white font-semibold"
+                          : "text-zinc-300 group-hover:text-white"
                       }`}
                     >
                       {brand}
@@ -310,71 +432,27 @@ export default function FilterSidebar({
         )}
       </div>
 
-      {/* 4. PRICE RANGE ACCORDION */}
-      <div className="pt-3 border-t border-white/[0.08]">
-        <button
-          type="button"
-          onClick={() => toggleSection("price")}
-          className="w-full flex items-center justify-between py-1.5 text-xs font-bold uppercase tracking-wider text-zinc-200 hover:text-white font-sans cursor-pointer"
-        >
-          <span>Price Range (LKR)</span>
-          <ChevronDown
-            className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${
-              openSections.price ? "rotate-180" : ""
-            }`}
-          />
-        </button>
-
-        {openSections.price && (
-          <div className="mt-2.5 space-y-2.5">
-            {PRICE_RANGES.map((range) => {
-              const isSelected = filters.priceRange === range.id;
-              return (
-                <label
-                  key={range.id}
-                  className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-white/[0.04] transition-colors cursor-pointer select-none"
-                >
-                  <input
-                    type="radio"
-                    name="priceRange"
-                    checked={isSelected}
-                    onChange={() => setPriceRange(range.id)}
-                    className="accent-[#E2C275] w-4 h-4 cursor-pointer"
-                  />
-                  <span
-                    className={`text-sm font-medium transition-colors ${
-                      isSelected ? "text-white font-semibold" : "text-zinc-300 hover:text-white"
-                    }`}
-                  >
-                    {range.label}
-                  </span>
-                </label>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* 5. QUICK FILTERS ACCORDION */}
-      <div className="pt-3 border-t border-white/[0.08] space-y-2.5">
+      {/* 5. QUICK FILTERS */}
+      <div className="pt-4 border-t border-white/[0.08]">
         <button
           type="button"
           onClick={() => toggleSection("quick")}
-          className="w-full flex items-center justify-between py-1.5 text-xs font-bold uppercase tracking-wider text-zinc-200 hover:text-white font-sans cursor-pointer"
+          className="w-full flex items-center justify-between py-1.5 text-xs font-bold uppercase tracking-wider text-white hover:text-[#E2C275] transition-colors cursor-pointer"
         >
-          <span>Quick Filters</span>
-          <ChevronDown
-            className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${
-              openSections.quick ? "rotate-180" : ""
-            }`}
-          />
+          <span>QUICK FILTERS</span>
+          <span className="text-zinc-400">
+            {openSections.quick ? (
+              <Minus className="w-3.5 h-3.5" />
+            ) : (
+              <Plus className="w-3.5 h-3.5" />
+            )}
+          </span>
         </button>
 
         {openSections.quick && (
-          <div className="space-y-2.5 pt-1">
-            {/* In Stock Only */}
-            <label className="flex items-center justify-between p-2.5 rounded-xl bg-[#141418] border border-white/6 hover:border-white/12 transition-colors cursor-pointer select-none">
-              <span className="text-sm text-zinc-200 font-medium">In Stock Only</span>
+          <div className="space-y-2.5 pt-2.5">
+            <label className="flex items-center justify-between p-2.5 rounded-xl bg-[#16161C] border border-white/6 hover:border-white/12 transition-colors cursor-pointer select-none">
+              <span className="text-sm text-zinc-300 font-medium">In Stock Only</span>
               <input
                 type="checkbox"
                 checked={filters.inStockOnly}
@@ -383,7 +461,6 @@ export default function FilterSidebar({
               />
             </label>
 
-            {/* QR Batch Verified Only */}
             <label className="flex items-center justify-between p-2.5 rounded-xl bg-sky-950/20 border border-sky-400/20 hover:border-sky-400/35 transition-colors cursor-pointer select-none">
               <div className="flex items-center gap-1.5 text-sky-200">
                 <ShieldCheck className="w-4 h-4 text-sky-400" />
@@ -404,29 +481,29 @@ export default function FilterSidebar({
 
   return (
     <>
-      {/* DESKTOP TRUE STICKY SIDEBAR */}
-      <aside
-        aria-label="Filter Catalog"
-        className="hidden lg:block w-64 shrink-0 lg:sticky lg:top-28 lg:self-start"
-      >
-        <div
-          data-lenis-prevent
-          className="bg-[#111115] rounded-2xl border border-white/[0.08] p-5 shadow-xl lg:max-h-[calc(100vh-135px)] lg:overflow-y-auto overflow-x-hidden scrollbar-thin overscroll-contain"
+      {/* DESKTOP STICKY COLLAPSIBLE SIDEBAR */}
+      {isDesktopOpen && (
+        <aside
+          aria-label="Filter Catalog"
+          className="hidden lg:block w-72 shrink-0 lg:sticky lg:top-28 lg:self-start"
         >
-          {filterContent}
-        </div>
-      </aside>
+          <div
+            data-lenis-prevent
+            className="bg-[#111115] rounded-2xl border border-white/[0.08] p-5 shadow-xl lg:max-h-[calc(100vh-135px)] lg:overflow-y-auto overflow-x-hidden scrollbar-thin overscroll-contain"
+          >
+            {filterContent}
+          </div>
+        </aside>
+      )}
 
       {/* MOBILE SLIDE-OVER DRAWER */}
       {isMobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden overflow-hidden">
-          {/* Backdrop */}
           <div
             onClick={onCloseMobile}
             className="fixed inset-0 bg-black/80 cursor-pointer"
           />
 
-          {/* Drawer container */}
           <div className="fixed inset-y-0 left-0 max-w-full flex pr-10">
             <div
               data-lenis-prevent
@@ -439,9 +516,10 @@ export default function FilterSidebar({
                 <button
                   type="button"
                   onClick={onCloseMobile}
-                  className="p-1.5 text-zinc-400 hover:text-white"
+                  aria-label="Close filters"
+                  className="p-1.5 text-zinc-400 hover:text-white cursor-pointer"
                 >
-                  <RotateCcw className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 

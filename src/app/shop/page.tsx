@@ -9,7 +9,11 @@ import {
   FitnessGoal,
 } from "@/data/mockProducts";
 import ShopHeader from "@/components/shop/ShopHeader";
-import FilterSidebar, { FilterState } from "@/components/shop/FilterSidebar";
+import ShopToolbar from "@/components/shop/ShopToolbar";
+import FilterSidebar, {
+  FilterState,
+  MAX_PRICE_LIMIT,
+} from "@/components/shop/FilterSidebar";
 import ShopGrid from "@/components/shop/ShopGrid";
 
 const SLUG_TO_CATEGORY: Record<string, ProductCategory> = {
@@ -79,7 +83,8 @@ function ShopContent() {
       categories: newCategories,
       goals: newGoals,
       brands: newBrands,
-      priceRange: "all",
+      minPrice: 0,
+      maxPrice: MAX_PRICE_LIMIT,
       inStockOnly: false,
       verifiedOnly: false,
     };
@@ -89,6 +94,9 @@ function ShopContent() {
     () => searchParams.get("q") || searchParams.get("search") || ""
   );
   const [sortBy, setSortBy] = useState("featured");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [itemsPerPage, setItemsPerPage] = useState<number | "all">(12);
+  const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(true);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
   // Compute live category item counts
@@ -158,17 +166,8 @@ function ShopContent() {
         return false;
       }
 
-      // 5. Price Range Filter
-      if (filters.priceRange === "under-15k" && product.price >= 15000) {
-        return false;
-      }
-      if (
-        filters.priceRange === "15k-30k" &&
-        (product.price < 15000 || product.price > 30000)
-      ) {
-        return false;
-      }
-      if (filters.priceRange === "over-30k" && product.price <= 30000) {
+      // 5. Price Range Filter (Dual-Thumb Slider)
+      if (product.price < filters.minPrice || product.price > filters.maxPrice) {
         return false;
       }
 
@@ -187,16 +186,30 @@ function ShopContent() {
       if (sortBy === "price-asc") return a.price - b.price;
       if (sortBy === "price-desc") return b.price - a.price;
       if (sortBy === "rating") return b.rating - a.rating;
-      return 0; // "featured" maintains catalog default order
+      if (sortBy === "newest") {
+        const aNew = a.badge === "NEW" ? 1 : 0;
+        const bNew = b.badge === "NEW" ? 1 : 0;
+        if (aNew !== bNew) return bNew - aNew;
+        return b.id.localeCompare(a.id);
+      }
+      return 0; // "featured" / default sorting maintains catalog order
     });
   }, [filters, searchQuery, sortBy]);
 
-  // Active filter count for mobile badge
+  const displayedProducts = useMemo(() => {
+    if (itemsPerPage === "all") return filteredProducts;
+    return filteredProducts.slice(0, itemsPerPage);
+  }, [filteredProducts, itemsPerPage]);
+
+  const hasPriceFilter =
+    filters.minPrice > 0 || filters.maxPrice < MAX_PRICE_LIMIT;
+
+  // Active filter count for badge
   const activeFilterCount =
     filters.categories.length +
     filters.goals.length +
     filters.brands.length +
-    (filters.priceRange !== "all" ? 1 : 0) +
+    (hasPriceFilter ? 1 : 0) +
     (filters.inStockOnly ? 1 : 0) +
     (filters.verifiedOnly ? 1 : 0);
 
@@ -209,7 +222,8 @@ function ShopContent() {
       categories: [],
       goals: [],
       brands: [],
-      priceRange: "all",
+      minPrice: 0,
+      maxPrice: MAX_PRICE_LIMIT,
       inStockOnly: false,
       verifiedOnly: false,
     });
@@ -218,18 +232,14 @@ function ShopContent() {
 
   return (
     <div className="w-full min-h-screen bg-[#09090B]">
-      {/* 1. Header Toolbar */}
+      {/* 1. Header Banner & Search */}
       <ShopHeader
         totalProducts={filteredProducts.length}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        sortBy={sortBy}
-        onSortChange={setSortBy}
-        onOpenMobileFilters={() => setIsMobileFiltersOpen(true)}
-        activeFilterCount={activeFilterCount}
       />
 
-      {/* 2. Main Shop Content (Sidebar + Product Grid) */}
+      {/* 2. Main Shop Content (Sidebar + Toolbar + Product Grid) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="flex items-start gap-8">
           {/* Desktop Left Sidebar & Mobile Drawer */}
@@ -237,6 +247,7 @@ function ShopContent() {
             filters={filters}
             onFilterChange={setFilters}
             onClearAll={handleClearAll}
+            isDesktopOpen={isDesktopSidebarOpen}
             isMobileOpen={isMobileFiltersOpen}
             onCloseMobile={() => setIsMobileFiltersOpen(false)}
             categoryCounts={categoryCounts}
@@ -245,47 +256,69 @@ function ShopContent() {
             hasActiveFilters={hasActiveFilters}
           />
 
-          {/* Product Grid & Active Chips */}
-          <ShopGrid
-            products={filteredProducts}
-            filters={filters}
-            searchQuery={searchQuery}
-            onRemoveCategory={(cat) =>
-              setFilters((prev) => ({
-                ...prev,
-                categories: prev.categories.filter((c) => c !== cat),
-              }))
-            }
-            onRemoveBrand={(b) =>
-              setFilters((prev) => ({
-                ...prev,
-                brands: prev.brands.filter((brand) => brand !== b),
-              }))
-            }
-            onRemoveGoal={(g) =>
-              setFilters((prev) => ({
-                ...prev,
-                goals: prev.goals.filter((goal) => goal !== g),
-              }))
-            }
-            onResetPrice={() =>
-              setFilters((prev) => ({ ...prev, priceRange: "all" }))
-            }
-            onResetSearch={() => setSearchQuery("")}
-            onToggleInStock={() =>
-              setFilters((prev) => ({
-                ...prev,
-                inStockOnly: !prev.inStockOnly,
-              }))
-            }
-            onToggleVerified={() =>
-              setFilters((prev) => ({
-                ...prev,
-                verifiedOnly: !prev.verifiedOnly,
-              }))
-            }
-            onClearAll={handleClearAll}
-          />
+          {/* Right Column: Top Control Bar + Product Grid */}
+          <div className="flex-1 min-w-0">
+            <ShopToolbar
+              isSidebarOpen={isDesktopSidebarOpen}
+              onToggleSidebar={() => setIsDesktopSidebarOpen((prev) => !prev)}
+              onOpenMobileFilters={() => setIsMobileFiltersOpen(true)}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              visibleCount={displayedProducts.length}
+              totalCount={filteredProducts.length}
+              sortBy={sortBy}
+              onSortChange={setSortBy}
+              itemsPerPage={itemsPerPage}
+              onItemsPerPageChange={setItemsPerPage}
+              activeFilterCount={activeFilterCount}
+            />
+
+            <ShopGrid
+              products={displayedProducts}
+              viewMode={viewMode}
+              filters={filters}
+              searchQuery={searchQuery}
+              onRemoveCategory={(cat) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  categories: prev.categories.filter((c) => c !== cat),
+                }))
+              }
+              onRemoveBrand={(b) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  brands: prev.brands.filter((brand) => brand !== b),
+                }))
+              }
+              onRemoveGoal={(g) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  goals: prev.goals.filter((goal) => goal !== g),
+                }))
+              }
+              onResetPrice={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  minPrice: 0,
+                  maxPrice: MAX_PRICE_LIMIT,
+                }))
+              }
+              onResetSearch={() => setSearchQuery("")}
+              onToggleInStock={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  inStockOnly: !prev.inStockOnly,
+                }))
+              }
+              onToggleVerified={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  verifiedOnly: !prev.verifiedOnly,
+                }))
+              }
+              onClearAll={handleClearAll}
+            />
+          </div>
         </div>
       </div>
     </div>

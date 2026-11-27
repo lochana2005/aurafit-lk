@@ -256,3 +256,44 @@ body::-webkit-scrollbar-corner,
     scrollbar-color: #E2C275 #09090B;
   }
 }
+
+/* =========================================================================
+   DUAL-THUMB PRICE RANGE SLIDER (BRUSHED CHAMPAGNE GOLD)
+   ========================================================================= */
+.aurafit-range-input {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  pointer-events: none;
+}
+
+.aurafit-range-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  pointer-events: auto;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #F5DC93 0%, #E2C275 50%, #B68D40 100%);
+  border: 2px solid #09090B;
+  box-shadow: 0 0 0 1px rgba(226, 194, 117, 0.5), 0 2px 6px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.aurafit-range-input::-webkit-slider-thumb:hover {
+  transform: scale(1.12);
+  box-shadow: 0 0 0 2px rgba(226, 194, 117, 0.8), 0 4px 10px rgba(226, 194, 117, 0.25);
+}
+
+.aurafit-range-input::-moz-range-thumb {
+  pointer-events: auto;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #F5DC93 0%, #E2C275 50%, #B68D40 100%);
+  border: 2px solid #09090B;
+  box-shadow: 0 0 0 1px rgba(226, 194, 117, 0.5), 0 2px 6px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
