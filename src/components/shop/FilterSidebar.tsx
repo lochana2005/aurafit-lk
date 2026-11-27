@@ -534,7 +534,7 @@ export default function FilterSidebar({
                 <button
                   type="button"
                   onClick={onCloseMobile}
-                  className="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-[#09090B] bg-gradient-to-r from-[#E5C76B] via-[#C9A227] to-[#B08922] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] text-center cursor-pointer"
+                  className="w-full py-3 rounded-xl text-xs font-bold uppercase tracking-wider btn-aurafit-gold text-center cursor-pointer"
                 >
                   Apply Filters
                 </button>

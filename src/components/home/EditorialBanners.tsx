@@ -47,7 +47,7 @@ export default function EditorialBanners() {
 
               <Link
                 href={banner.ctaLink}
-                className="inline-flex items-center gap-1.5 mt-3 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider text-white bg-[#1C1C21]/80 hover:bg-gradient-to-r hover:from-[#E5C76B] hover:via-[#C9A227] hover:to-[#B08922] hover:text-[#09090B] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] border border-white/15 hover:border-transparent transition-all"
+                className="inline-flex items-center gap-1.5 mt-3 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider btn-aurafit-dark"
               >
                 <span>{banner.ctaText}</span>
                 <ArrowRight className="w-3.5 h-3.5" />

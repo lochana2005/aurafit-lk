@@ -94,7 +94,7 @@ export default function OrderTrackingResult({
           <button
             type="button"
             onClick={onReset}
-            className="px-5 py-2.5 rounded-xl bg-[#1A1A22] hover:bg-[#22222E] text-zinc-300 hover:text-white border border-white/10 transition-all font-bold text-xs uppercase font-heading tracking-wider flex items-center gap-2 cursor-pointer"
+            className="px-5 py-2.5 rounded-xl btn-aurafit-dark font-bold text-xs uppercase font-heading tracking-wider flex items-center gap-2 cursor-pointer"
           >
             <RotateCcw className="w-4 h-4" />
             <span>Search Another Order</span>

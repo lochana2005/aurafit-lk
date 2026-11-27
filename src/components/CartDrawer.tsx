@@ -154,7 +154,7 @@ export default function CartDrawer() {
                       onClick={() => {
                         closeCart();
                       }}
-                      className="mt-6 inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-[#09090B] bg-gradient-to-r from-[#E5C76B] via-[#C9A227] to-[#B08922] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] hover:brightness-105 active:scale-95 transition-all"
+                      className="mt-6 inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider btn-aurafit-gold cursor-pointer"
                     >
                       <Link href="/shop" onClick={closeCart}>
                         Start Shopping
@@ -293,7 +293,7 @@ export default function CartDrawer() {
                   <Link
                     href="/checkout"
                     onClick={closeCart}
-                    className="w-full py-3.5 rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider text-[#09090B] bg-gradient-to-r from-[#E5C76B] via-[#C9A227] to-[#B08922] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] hover:brightness-105 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer font-heading"
+                    className="w-full py-3.5 rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider btn-aurafit-gold flex items-center justify-center gap-2 cursor-pointer font-heading"
                   >
                     <span>Proceed to Checkout</span>
                     <ArrowRight className="w-4 h-4 stroke-[2.5]" />
@@ -303,7 +303,7 @@ export default function CartDrawer() {
                   <Link
                     href="/cart"
                     onClick={closeCart}
-                    className="w-full py-3 rounded-full text-xs sm:text-sm font-semibold uppercase tracking-wider text-center text-white hover:text-[#E2C275] bg-[#1C1C22] border border-white/15 hover:border-[#E2C275]/60 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full py-3 rounded-full text-xs sm:text-sm font-semibold uppercase tracking-wider text-center btn-aurafit-dark flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <span>View Full Cart</span>
                     <ShoppingBag className="w-4 h-4 text-[#E2C275]" />

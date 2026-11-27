@@ -41,10 +41,10 @@ export default function ShopToolbar({
           type="button"
           onClick={onToggleSidebar}
           aria-expanded={isSidebarOpen}
-          className={`hidden lg:inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border text-sm font-semibold transition-all cursor-pointer font-sans ${
+          className={`hidden lg:inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-semibold cursor-pointer font-sans btn-aurafit-dark ${
             isSidebarOpen
-              ? "bg-[#E2C275]/12 border-[#E2C275]/45 text-[#E2C275]"
-              : "bg-[#16161C] border-white/12 text-zinc-200 hover:border-[#E2C275]/45 hover:text-white"
+              ? "border-[#E2C275]/55 text-[#E2C275]"
+              : ""
           }`}
         >
           <SlidersHorizontal className="w-4 h-4" />

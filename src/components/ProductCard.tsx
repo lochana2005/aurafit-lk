@@ -171,10 +171,10 @@ export default function ProductCard({ product, viewMode = "grid" }: ProductCardP
             <button
               type="button"
               onClick={handleAddToCart}
-              className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-extrabold uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-200 active:scale-95 cursor-pointer ${
+              className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-extrabold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer ${
                 isAdded
-                  ? "bg-emerald-500 text-black shadow-[0_0_15px_rgba(16,185,129,0.4)]"
-                  : "bg-[#1C1C21] text-white hover:bg-gradient-to-r hover:from-[#E5C76B] hover:via-[#C9A227] hover:to-[#B08922] hover:text-[#09090B] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] border border-white/12 hover:border-transparent"
+                  ? "bg-emerald-500 text-black shadow-[0_0_15px_rgba(16,185,129,0.4)] transition-all duration-200"
+                  : "btn-aurafit-dark"
               }`}
             >
               {isAdded ? (
@@ -335,10 +335,10 @@ export default function ProductCard({ product, viewMode = "grid" }: ProductCardP
           <button
             type="button"
             onClick={handleAddToCart}
-            className={`mt-3 w-full py-2.5 px-4 rounded-xl text-xs font-extrabold uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-200 active:scale-95 cursor-pointer ${
+            className={`mt-3 w-full py-2.5 px-4 rounded-xl text-xs font-extrabold uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer ${
               isAdded
-                ? "bg-emerald-500 text-black shadow-[0_0_15px_rgba(16,185,129,0.4)]"
-                : "bg-[#1C1C21] text-white hover:bg-gradient-to-r hover:from-[#E5C76B] hover:via-[#C9A227] hover:to-[#B08922] hover:text-[#09090B] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] border border-white/12 hover:border-transparent"
+                ? "bg-emerald-500 text-black shadow-[0_0_15px_rgba(16,185,129,0.4)] transition-all duration-200"
+                : "btn-aurafit-dark"
             }`}
           >
             {isAdded ? (

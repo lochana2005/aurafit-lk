@@ -297,3 +297,230 @@ body::-webkit-scrollbar-corner,
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
+
+/* =========================================================================
+   SPECULAR GOLD GLINT & AURA BUTTON HOVER SYSTEM
+   ========================================================================= */
+@keyframes aurafit-gold-glint {
+  0% {
+    transform: translateX(-140%) skewX(-22deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.95;
+  }
+  80% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translateX(260%) skewX(-22deg);
+    opacity: 0;
+  }
+}
+
+@keyframes aurafit-ring-ripple {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+/* 1. Primary Solid Champagne Gold Buttons */
+.btn-aurafit-gold {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(135deg, #EAD086 0%, #D4AF37 52%, #B99125 100%);
+  color: #09090B;
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+              filter 0.28s ease;
+}
+
+.btn-aurafit-gold::before {
+  content: "";
+  position: absolute;
+  top: -20%;
+  left: 0;
+  width: 42%;
+  height: 140%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 252, 235, 0.88) 50%, transparent 100%);
+  transform: translateX(-140%) skewX(-22deg);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.btn-aurafit-gold:hover {
+  transform: translateY(-1.5px);
+  filter: brightness(1.06);
+  box-shadow:
+    0 0 0 1px rgba(245, 220, 147, 0.65),
+    0 10px 26px -4px rgba(226, 194, 117, 0.52),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.btn-aurafit-gold:hover::before {
+  animation: aurafit-gold-glint 0.68s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.btn-aurafit-gold:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* 2. Secondary Dark / Matte Charcoal Buttons (ADD TO CART, VERIFY BATCH, BUILD STACK, SHOP NOW, Pills) */
+.btn-aurafit-dark {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background-color: #16161C;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #F4F4F5;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.28s ease,
+              color 0.28s ease,
+              background-color 0.28s ease,
+              box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn-aurafit-dark::before {
+  content: "";
+  position: absolute;
+  top: -20%;
+  left: 0;
+  width: 42%;
+  height: 140%;
+  background: linear-gradient(90deg, transparent 0%, rgba(226, 194, 117, 0.32) 50%, transparent 100%);
+  transform: translateX(-140%) skewX(-22deg);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.btn-aurafit-dark:hover {
+  transform: translateY(-1.5px);
+  background-color: #1C1B22;
+  border-color: rgba(226, 194, 117, 0.72);
+  color: #F5DC93;
+  box-shadow:
+    0 0 0 1px rgba(226, 194, 117, 0.2),
+    0 8px 22px -4px rgba(226, 194, 117, 0.26);
+}
+
+.btn-aurafit-dark:hover::before {
+  animation: aurafit-gold-glint 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.btn-aurafit-dark:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* 3. Circular Gold & Dark Icon Buttons (Cart, Profile, Back-to-Top, Floating Support) */
+.btn-aurafit-gold-circle {
+  position: relative;
+  background: linear-gradient(135deg, #EAD086 0%, #D4AF37 55%, #B99125 100%);
+  color: #09090B;
+  box-shadow: 0 2px 12px rgba(212, 175, 55, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn-aurafit-gold-circle::after,
+.btn-aurafit-dark-circle::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 9999px;
+  border: 1.5px solid #F5DC93;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.btn-aurafit-gold-circle:hover {
+  transform: translateY(-1.5px) scale(1.04);
+  box-shadow:
+    0 0 0 1.5px rgba(245, 220, 147, 0.7),
+    0 0 22px rgba(226, 194, 117, 0.6);
+}
+
+.btn-aurafit-gold-circle:hover::after,
+.btn-aurafit-dark-circle:hover::after {
+  animation: aurafit-ring-ripple 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.btn-aurafit-dark-circle {
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.28s ease,
+              box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn-aurafit-dark-circle:hover {
+  transform: translateY(-1.5px) scale(1.04);
+  border-color: #E2C275;
+  box-shadow: 0 0 18px rgba(226, 194, 117, 0.35);
+}
+
+/* 4. Automatic Global Gold-Button Matching (applies Specular Glint & Aura to all gold CTAs) */
+:is(button, a):is(
+  [class*="bg-[#E2C275]"],
+  [class*="bg-[#D4AF37]"],
+  [class*="bg-[#C9A227]"],
+  [class*="from-[#E2C275]"],
+  [class*="from-[#E5C76B]"]
+):not(.btn-aurafit-gold-circle):not([class*="w-1.5"]):not([class*="w-2"]):not([class*="w-2.5"]):not([class*="bg-[#E2C275]/"]) {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+              filter 0.28s ease;
+}
+
+:is(button, a):is(
+  [class*="bg-[#E2C275]"],
+  [class*="bg-[#D4AF37]"],
+  [class*="bg-[#C9A227]"],
+  [class*="from-[#E2C275]"],
+  [class*="from-[#E5C76B]"]
+):not(.btn-aurafit-gold-circle):not([class*="w-1.5"]):not([class*="w-2"]):not([class*="w-2.5"]):not([class*="bg-[#E2C275]/"])::before {
+  content: "";
+  position: absolute;
+  top: -20%;
+  left: 0;
+  width: 42%;
+  height: 140%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 252, 235, 0.88) 50%, transparent 100%);
+  transform: translateX(-140%) skewX(-22deg);
+  pointer-events: none;
+  z-index: 1;
+}
+
+:is(button, a):is(
+  [class*="bg-[#E2C275]"],
+  [class*="bg-[#D4AF37]"],
+  [class*="bg-[#C9A227]"],
+  [class*="from-[#E2C275]"],
+  [class*="from-[#E5C76B]"]
+):not(.btn-aurafit-gold-circle):not([class*="w-1.5"]):not([class*="w-2"]):not([class*="w-2.5"]):not([class*="bg-[#E2C275]/"]):hover {
+  transform: translateY(-1.5px);
+  filter: brightness(1.06);
+  box-shadow:
+    0 0 0 1px rgba(245, 220, 147, 0.65),
+    0 10px 26px -4px rgba(226, 194, 117, 0.52),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+:is(button, a):is(
+  [class*="bg-[#E2C275]"],
+  [class*="bg-[#D4AF37]"],
+  [class*="bg-[#C9A227]"],
+  [class*="from-[#E2C275]"],
+  [class*="from-[#E5C76B]"]
+):not(.btn-aurafit-gold-circle):not([class*="w-1.5"]):not([class*="w-2"]):not([class*="w-2.5"]):not([class*="bg-[#E2C275]/"]):hover::before {
+  animation: aurafit-gold-glint 0.68s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}

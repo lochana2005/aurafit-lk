@@ -304,7 +304,7 @@ export default function ProductInfo({ product }: ProductInfoProps) {
         <button
           type="button"
           onClick={handleBuyNow}
-          className="w-full h-12 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider text-white bg-[#1C1C21] hover:bg-[#232329] border border-white/15 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer font-heading"
+          className="w-full h-12 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider btn-aurafit-dark flex items-center justify-center gap-2 cursor-pointer font-heading"
         >
           <Zap className="w-4 h-4 text-[#E2C275]" />
           <span>Buy Now • Instant Checkout</span>

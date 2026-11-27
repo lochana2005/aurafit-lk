@@ -207,7 +207,7 @@ export default function ShopGrid({
           <button
             type="button"
             onClick={onClearAll}
-            className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider text-[#09090B] bg-gradient-to-r from-[#E5C76B] via-[#C9A227] to-[#B08922] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] hover:brightness-105 active:scale-95 transition-all cursor-pointer"
+            className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider btn-aurafit-gold cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Reset All Filters</span>
@@ -246,7 +246,7 @@ export default function ShopGrid({
 
           <a
             href="/ai-coach"
-            className="px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-sky-200 bg-sky-400/10 hover:bg-sky-400/20 border border-sky-400/30 transition-all shrink-0"
+            className="px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-sky-200 btn-aurafit-dark border-sky-400/30 shrink-0"
           >
             Launch AI Coach
           </a>

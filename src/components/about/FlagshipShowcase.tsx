@@ -79,7 +79,7 @@ export default function FlagshipShowcase() {
               <div className="space-y-3 pt-2">
                 <Link
                   href="/shop"
-                  className="w-full py-3.5 px-5 rounded-xl text-sm font-bold uppercase tracking-wider text-[#09090B] bg-gradient-to-r from-[#E5C76B] via-[#C9A227] to-[#B08922] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] hover:brightness-105 active:scale-95 transition-all flex items-center justify-center gap-2"
+                  className="w-full py-3.5 px-5 rounded-xl text-sm font-bold uppercase tracking-wider btn-aurafit-gold flex items-center justify-center gap-2"
                 >
                   <span>Explore Supplement Vault</span>
                   <ArrowRight className="w-4 h-4 stroke-[2.3]" />
@@ -87,7 +87,7 @@ export default function FlagshipShowcase() {
 
                 <Link
                   href="/verify"
-                  className="w-full py-3.5 px-5 rounded-xl text-sm font-bold uppercase tracking-wider text-sky-200 bg-[#141418] hover:bg-sky-400/15 border border-sky-400/30 hover:border-sky-400/50 transition-all flex items-center justify-center gap-2"
+                  className="w-full py-3.5 px-5 rounded-xl text-sm font-bold uppercase tracking-wider text-sky-200 btn-aurafit-dark border-sky-400/30 flex items-center justify-center gap-2"
                 >
                   <QrCode className="w-4 h-4 text-[#38BDF8]" />
                   <span>Verify Product Batch</span>

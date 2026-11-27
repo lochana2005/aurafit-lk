@@ -149,7 +149,7 @@ export default function FloatingActions() {
             transition={{ duration: 0.22, ease: "easeOut" }}
             onClick={scrollToTop}
             aria-label="Scroll to top of page"
-            className="w-11 h-11 rounded-full bg-[#141418]/95 border border-[#E2C275]/35 text-[#E2C275] hover:bg-[#E2C275] hover:text-[#09090B] hover:shadow-[0_0_20px_rgba(226,194,117,0.45)] transition-all duration-200 shadow-xl flex items-center justify-center active:scale-95 group mb-1 cursor-pointer"
+            className="w-11 h-11 rounded-full bg-[#141418]/95 text-[#E2C275] hover:bg-[#E2C275] hover:text-[#09090B] btn-aurafit-dark-circle shadow-xl flex items-center justify-center group mb-1 cursor-pointer"
           >
             <ArrowUp className="w-5 h-5 stroke-[2.3] transition-transform duration-200 group-hover:-translate-y-0.5" />
           </motion.button>
@@ -223,7 +223,7 @@ export default function FloatingActions() {
           onClick={() => setIsOpen((prev) => !prev)}
           aria-expanded={isOpen}
           aria-label={isOpen ? "Close social contact menu" : "Open social contact menu"}
-          className="w-14 h-14 rounded-full bg-gradient-to-r from-[#E5C76B] via-[#C9A227] to-[#B08922] text-[#09090B] shadow-[0_0_25px_rgba(226,194,117,0.45)] hover:shadow-[0_0_32px_rgba(226,194,117,0.6)] flex items-center justify-center relative active:scale-95 transition-all duration-200 z-20 cursor-pointer"
+          className="w-14 h-14 rounded-full btn-aurafit-gold-circle flex items-center justify-center relative z-20 cursor-pointer"
         >
           <motion.div
             animate={{ rotate: isOpen ? 90 : 0 }}

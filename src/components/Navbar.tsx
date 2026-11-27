@@ -187,7 +187,7 @@ export default function Navbar() {
                   type="button"
                   onClick={handleOpenMobileSearch}
                   aria-label="Open search"
-                  className="lg:hidden p-2 rounded-full text-zinc-300 hover:text-white bg-[#141418] border border-white/10 active:scale-95 transition-all cursor-pointer"
+                  className="lg:hidden p-2 rounded-full text-zinc-300 hover:text-white bg-[#141418] btn-aurafit-dark-circle cursor-pointer"
                 >
                   <Search className="w-4 h-4" />
                 </button>
@@ -196,10 +196,10 @@ export default function Navbar() {
                 <Link
                   href={isAuthActive ? "/profile" : "/login"}
                   aria-label={isAuthActive ? "User Profile" : "User Login"}
-                  className={`p-1.5 sm:p-2 rounded-full transition-all active:scale-95 flex items-center justify-center ${
+                  className={`p-1.5 sm:p-2 rounded-full flex items-center justify-center btn-aurafit-dark-circle ${
                     isAuthActive
-                      ? "bg-[#141418] border border-[#E2C275]/50 hover:border-[#E2C275] ring-1 ring-[#E2C275]/30 text-white"
-                      : "text-zinc-300 hover:text-white bg-[#141418] border border-white/10 hover:border-white/20"
+                      ? "bg-[#141418] border-[#E2C275]/50 ring-1 ring-[#E2C275]/30 text-white"
+                      : "text-zinc-300 hover:text-white bg-[#141418]"
                   }`}
                 >
                   {isAuthActive && user ? (
@@ -216,7 +216,7 @@ export default function Navbar() {
                   type="button"
                   onClick={openCart}
                   aria-label="Shopping Cart"
-                  className="relative p-2 sm:p-2.5 rounded-full text-[#09090B] bg-gradient-to-r from-[#E5C76B] via-[#C9A227] to-[#B08922] hover:brightness-105 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] transition-all active:scale-95 flex items-center justify-center cursor-pointer"
+                  className="p-2 sm:p-2.5 rounded-full btn-aurafit-gold-circle flex items-center justify-center cursor-pointer"
                 >
                   <ShoppingCart className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-[#09090B] stroke-[2.3]" />
                   {cartCount > 0 && (

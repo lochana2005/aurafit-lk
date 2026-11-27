@@ -56,10 +56,10 @@ export default function TopPicksSection() {
                 key={tab}
                 type="button"
                 onClick={() => setSelectedCategory(tab)}
-                className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-200 shrink-0 select-none ${
+                className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider shrink-0 select-none cursor-pointer ${
                   isActive
-                    ? "bg-gradient-to-r from-[#E5C76B] via-[#C9A227] to-[#B08922] text-[#09090B] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]"
-                    : "bg-[#141418] text-[#A1A1AA] hover:text-white border border-white/10 hover:border-white/20"
+                    ? "btn-aurafit-gold"
+                    : "btn-aurafit-dark text-[#A1A1AA]"
                 }`}
               >
                 {tab}
@@ -86,7 +86,7 @@ export default function TopPicksSection() {
       <div className="mt-12 text-center">
         <Link
           href="/shop"
-          className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-wider text-white bg-[#141418] hover:bg-[#1C1C22] border border-white/12 hover:border-[#E2C275]/50 transition-all shadow-md active:scale-95"
+          className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-xs font-bold uppercase tracking-wider btn-aurafit-dark shadow-md"
         >
           <span>Explore Entire Supplement Catalog (200+ Products)</span>
           <ArrowRight className="w-4 h-4 text-[#E2C275]" />

@@ -194,7 +194,7 @@ export default function OrderSuccess({ order }: OrderSuccessProps) {
 
         <Link
           href="/verify"
-          className="w-full sm:w-auto px-6 py-3.5 rounded-full text-xs sm:text-sm font-semibold uppercase tracking-wider text-zinc-300 hover:text-white bg-[#141418] border border-white/12 hover:border-white/25 transition-all text-center flex items-center justify-center gap-2"
+          className="w-full sm:w-auto px-6 py-3.5 rounded-full text-xs sm:text-sm font-semibold uppercase tracking-wider btn-aurafit-dark text-center flex items-center justify-center gap-2"
         >
           <ShieldCheck className="w-4 h-4 text-[#E2C275]" />
           <span>Verify a Product</span>

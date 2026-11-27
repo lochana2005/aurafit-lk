@@ -57,7 +57,7 @@ export default function HeroSection() {
             <div className="mt-7 flex flex-wrap sm:flex-nowrap items-center gap-3.5">
               <Link
                 href={currentHeroSlide.ctaLink}
-                className="px-6 py-3.5 rounded-full text-sm font-bold uppercase tracking-wider text-[#09090B] bg-gradient-to-r from-[#E5C76B] via-[#C9A227] to-[#B08922] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] hover:brightness-105 active:scale-95 transition-all duration-200 flex items-center gap-2 shrink-0"
+                className="px-6 py-3.5 rounded-full text-sm font-bold uppercase tracking-wider btn-aurafit-gold flex items-center gap-2 shrink-0"
               >
                 <span>{currentHeroSlide.ctaText}</span>
                 <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -65,7 +65,7 @@ export default function HeroSection() {
 
               <Link
                 href="/verify"
-                className="px-5 py-3.5 rounded-full text-sm font-bold uppercase tracking-wider text-sky-100 bg-[#1C1C21] hover:bg-sky-400/10 border border-sky-400/30 hover:border-sky-400/60 transition-all active:scale-95 shrink-0"
+                className="px-5 py-3.5 rounded-full text-sm font-bold uppercase tracking-wider text-sky-100 btn-aurafit-dark border-sky-400/30 shrink-0"
               >
                 Verify Batch
               </Link>
@@ -132,7 +132,7 @@ export default function HeroSection() {
             <div className="space-y-2.5 pt-1.5">
               <Link
                 href="/verify"
-                className="w-full py-3 px-4 rounded-xl text-sm font-bold uppercase tracking-wider text-[#09090B] bg-gradient-to-r from-[#E5C76B] via-[#C9A227] to-[#B08922] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] hover:brightness-105 transition-all flex items-center justify-center gap-2 active:scale-95"
+                className="w-full py-3 px-4 rounded-xl text-sm font-bold uppercase tracking-wider btn-aurafit-gold flex items-center justify-center gap-2"
               >
                 <QrCode className="w-4 h-4 stroke-[2.3]" />
                 <span>Verify Batch Code</span>
@@ -140,7 +140,7 @@ export default function HeroSection() {
 
               <Link
                 href="/ai-coach"
-                className="w-full py-3 px-4 rounded-xl text-sm font-bold uppercase tracking-wider text-sky-200 bg-[#141418] hover:bg-sky-400/15 border border-sky-400/30 hover:border-sky-400/50 transition-all flex items-center justify-center gap-2 text-center"
+                className="w-full py-3 px-4 rounded-xl text-sm font-bold uppercase tracking-wider text-sky-200 btn-aurafit-dark border-sky-400/30 flex items-center justify-center gap-2 text-center"
               >
                 <Sparkles className="w-3.5 h-3.5 text-sky-300" />
                 <span>Build Stack with AI</span>
