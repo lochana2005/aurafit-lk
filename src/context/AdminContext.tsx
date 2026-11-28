@@ -3,6 +3,17 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { MOCK_PRODUCTS, Product } from "@/data/mockProducts";
 import { BATCH_REGISTRY } from "@/data/batchRegistry";
+import {
+  CoachAffiliate,
+  PromoCode,
+  CashbackPayout,
+  DiscountValueType,
+  PromoValidationResult,
+  SEED_COACHES,
+  SEED_PROMO_CODES,
+  SEED_CASHBACK_PAYOUTS,
+  evaluatePromoCode,
+} from "@/data/affiliateSchema";
 import { useToast } from "./ToastContext";
 
 export interface StockHistoryEntry {
@@ -66,6 +77,11 @@ export interface AdminOrder {
   riderNotes?: string;
   itemsSummary: string;
   items: AdminOrderItem[];
+  promoCodeId?: string;
+  promoCode?: string;
+  coachId?: string;
+  discountAmount?: number;
+  cashbackAmount?: number;
 }
 
 export interface AdminBatch {
@@ -97,6 +113,8 @@ export interface AdminCategory {
   name: string;
   slug: string;
   tagline: string;
+  image: string;
+  sortOrder: number;
   isActive: boolean;
 }
 
@@ -120,6 +138,7 @@ interface AdminContextType {
   adjustStock: (id: string, delta: number, note?: string) => void;
   deleteProduct: (id: string) => void;
   orders: AdminOrder[];
+  recordOrder: (order: AdminOrder) => void;
   updateOrderDispatch: (
     orderId: string,
     updates: {
@@ -142,15 +161,46 @@ interface AdminContextType {
   messages: AdminMessage[];
   toggleMessageResolved: (id: string) => void;
   categories: AdminCategory[];
-  addCategory: (name: string, tagline?: string) => void;
+  addCategory: (
+    input:
+      | string
+      | { name: string; tagline?: string; image?: string; isActive?: boolean },
+    tagline?: string
+  ) => void;
   updateCategory: (id: string, updates: Partial<AdminCategory>) => void;
   deleteCategory: (id: string) => void;
   toggleCategoryStatus: (id: string) => void;
+  reorderCategory: (id: string, direction: "up" | "down") => void;
   brands: AdminBrand[];
   addBrand: (name: string, originCountry?: string) => void;
   updateBrand: (id: string, updates: Partial<AdminBrand>) => void;
   deleteBrand: (id: string) => void;
   toggleBrandStatus: (id: string) => void;
+  coaches: CoachAffiliate[];
+  promoCodes: PromoCode[];
+  cashbackPayouts: CashbackPayout[];
+  savePromoAffiliate: (input: {
+    promoId?: string;
+    coachId?: string;
+    code: string;
+    coachName: string;
+    contactInfo: string;
+    email?: string;
+    discountType: DiscountValueType;
+    discountValue: number;
+    cashbackType: DiscountValueType;
+    cashbackValue: number;
+    isActive: boolean;
+  }) => { ok: boolean; error?: string };
+  togglePromoStatus: (id: string) => void;
+  deletePromoCode: (id: string) => void;
+  recordCashbackPayout: (input: {
+    coachId: string;
+    promoCodeId: string;
+    amountLkr: number;
+    referenceNote: string;
+  }) => void;
+  validatePromoCode: (code: string, subtotal: number) => PromoValidationResult;
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -164,6 +214,9 @@ export const ADMIN_KEYS = {
   CONTACT_TICKETS: "aurafit_contact_tickets",
   CATEGORIES: "aurafit_admin_categories",
   BRANDS: "aurafit_admin_brands",
+  COACHES: "aurafit_admin_coaches",
+  PROMO_CODES: "aurafit_admin_promos",
+  CASHBACK_PAYOUTS: "aurafit_admin_payouts",
 };
 
 const toSlug = (val: string) =>
@@ -174,15 +227,35 @@ const toSlug = (val: string) =>
     .replace(/(^-|-$)/g, "");
 
 export const SEED_CATEGORIES: AdminCategory[] = [
-  { id: "cat_1", name: "Whey Protein", slug: "whey-protein", tagline: "Ultra-pure isolates & blends", isActive: true },
-  { id: "cat_2", name: "Mass Gainer", slug: "mass-gainer", tagline: "Clean caloric surplus formulas", isActive: true },
-  { id: "cat_3", name: "Creatine", slug: "creatine", tagline: "Micronized ATP strength fuel", isActive: true },
-  { id: "cat_4", name: "Pre Workout", slug: "pre-workout", tagline: "Explosive focus & nitric pump", isActive: true },
-  { id: "cat_5", name: "BCAA", slug: "bcaa", tagline: "Intra-workout amino recovery", isActive: true },
-  { id: "cat_6", name: "Amino", slug: "amino", tagline: "Essential EAA & hydration support", isActive: true },
-  { id: "cat_7", name: "Fat Burner", slug: "fat-burner", tagline: "Thermogenic shred & metabolism", isActive: true },
-  { id: "cat_8", name: "Multivitamins", slug: "multivitamins", tagline: "Daily athlete micronutrient packs", isActive: true },
+  { id: "cat_1", name: "Whey Protein", slug: "whey-protein", tagline: "Ultra-pure isolates & blends", image: "/images/categories/whey-protein.png", sortOrder: 0, isActive: true },
+  { id: "cat_2", name: "Mass Gainer", slug: "mass-gainer", tagline: "Clean caloric surplus formulas", image: "/images/categories/mass-gainer.png", sortOrder: 1, isActive: true },
+  { id: "cat_3", name: "Creatine", slug: "creatine", tagline: "Micronized ATP strength fuel", image: "/images/categories/creatine.png", sortOrder: 2, isActive: true },
+  { id: "cat_4", name: "Pre Workout", slug: "pre-workout", tagline: "Explosive focus & nitric pump", image: "/images/categories/pre-workout.png", sortOrder: 3, isActive: true },
+  { id: "cat_5", name: "BCAA", slug: "bcaa", tagline: "Intra-workout amino recovery", image: "/images/categories/bcaa.png", sortOrder: 4, isActive: true },
+  { id: "cat_6", name: "Amino", slug: "amino", tagline: "Essential EAA & hydration support", image: "/images/categories/amino.png", sortOrder: 5, isActive: true },
+  { id: "cat_7", name: "Fat Burner", slug: "fat-burner", tagline: "Thermogenic shred & metabolism", image: "/images/categories/fat-burner.png", sortOrder: 6, isActive: true },
+  { id: "cat_8", name: "Multivitamins", slug: "multivitamins", tagline: "Daily athlete micronutrient packs", image: "/images/categories/multivitamins.png", sortOrder: 7, isActive: true },
 ];
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizeCategories(raw: any[]): AdminCategory[] {
+  return raw
+    .map((c, idx) => {
+      const matchedSeed = SEED_CATEGORIES.find(
+        (s) => s.id === c.id || s.slug === c.slug || s.name.toLowerCase() === String(c.name || "").toLowerCase()
+      );
+      return {
+        id: c.id || `cat_${idx}`,
+        name: c.name || "Category",
+        slug: c.slug || toSlug(c.name || "category"),
+        tagline: c.tagline || matchedSeed?.tagline || "Certified sports nutrition formula",
+        image: typeof c.image === "string" ? c.image : matchedSeed?.image || "",
+        sortOrder: typeof c.sortOrder === "number" ? c.sortOrder : idx,
+        isActive: typeof c.isActive === "boolean" ? c.isActive : true,
+      };
+    })
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+}
 
 export const SEED_BRANDS: AdminBrand[] = [
   { id: "brd_1", name: "Optimum Nutrition", slug: "optimum-nutrition", originCountry: "USA Direct", isActive: true },
@@ -242,6 +315,11 @@ const SEED_ORDERS: AdminOrder[] = [
         flavor: "Double Rich Chocolate",
       },
     ],
+    promoCodeId: "promo_coach10",
+    promoCode: "COACH10",
+    coachId: "coach_kasun_01",
+    discountAmount: 3250,
+    cashbackAmount: 1463,
   },
   {
     id: "AF-2026-7105",
@@ -267,6 +345,11 @@ const SEED_ORDERS: AdminOrder[] = [
         flavor: "Icy Blue Razz",
       },
     ],
+    promoCodeId: "promo_coach10",
+    promoCode: "COACH10",
+    coachId: "coach_kasun_01",
+    discountAmount: 2100,
+    cashbackAmount: 945,
   },
   {
     id: "AF-2026-7055",
@@ -298,6 +381,11 @@ const SEED_ORDERS: AdminOrder[] = [
         flavor: "Unflavored",
       },
     ],
+    promoCodeId: "promo_rohan1500",
+    promoCode: "ROHAN1500",
+    coachId: "coach_rohan_02",
+    discountAmount: 1500,
+    cashbackAmount: 1000,
   },
   {
     id: "AF-2026-6910",
@@ -380,6 +468,11 @@ function normalizeOrderRecord(raw: any): AdminOrder {
     riderNotes: raw.riderNotes,
     itemsSummary,
     items: itemsArr,
+    promoCodeId: raw.promoCodeId,
+    promoCode: raw.promoCode,
+    coachId: raw.coachId,
+    discountAmount: typeof raw.discountAmount === "number" ? raw.discountAmount : undefined,
+    cashbackAmount: typeof raw.cashbackAmount === "number" ? raw.cashbackAmount : undefined,
   };
 }
 
@@ -430,6 +523,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [messages, setMessages] = useState<AdminMessage[]>(SEED_MESSAGES);
   const [categories, setCategories] = useState<AdminCategory[]>(SEED_CATEGORIES);
   const [brands, setBrands] = useState<AdminBrand[]>(SEED_BRANDS);
+  const [coaches, setCoaches] = useState<CoachAffiliate[]>(SEED_COACHES);
+  const [promoCodes, setPromoCodes] = useState<PromoCode[]>(SEED_PROMO_CODES);
+  const [cashbackPayouts, setCashbackPayouts] = useState<CashbackPayout[]>(
+    SEED_CASHBACK_PAYOUTS
+  );
 
   const loadOrdersFromStorage = useCallback(() => {
     try {
@@ -466,10 +564,19 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         if (b) setBatches(JSON.parse(b));
 
         const c = window.localStorage.getItem(ADMIN_KEYS.CATEGORIES);
-        if (c) setCategories(JSON.parse(c));
+        if (c) setCategories(normalizeCategories(JSON.parse(c)));
 
         const br = window.localStorage.getItem(ADMIN_KEYS.BRANDS);
         if (br) setBrands(JSON.parse(br));
+
+        const co = window.localStorage.getItem(ADMIN_KEYS.COACHES);
+        if (co) setCoaches(JSON.parse(co));
+
+        const pr = window.localStorage.getItem(ADMIN_KEYS.PROMO_CODES);
+        if (pr) setPromoCodes(JSON.parse(pr));
+
+        const py = window.localStorage.getItem(ADMIN_KEYS.CASHBACK_PAYOUTS);
+        if (py) setCashbackPayouts(JSON.parse(py));
 
         const m = window.localStorage.getItem(ADMIN_KEYS.MESSAGES);
         const contactTickets = window.localStorage.getItem(ADMIN_KEYS.CONTACT_TICKETS);
@@ -502,7 +609,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       }
       if (e.key === ADMIN_KEYS.CATEGORIES && e.newValue) {
         try {
-          setCategories(JSON.parse(e.newValue));
+          setCategories(normalizeCategories(JSON.parse(e.newValue)));
         } catch {
           // ignore
         }
@@ -510,6 +617,27 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       if (e.key === ADMIN_KEYS.BRANDS && e.newValue) {
         try {
           setBrands(JSON.parse(e.newValue));
+        } catch {
+          // ignore
+        }
+      }
+      if (e.key === ADMIN_KEYS.COACHES && e.newValue) {
+        try {
+          setCoaches(JSON.parse(e.newValue));
+        } catch {
+          // ignore
+        }
+      }
+      if (e.key === ADMIN_KEYS.PROMO_CODES && e.newValue) {
+        try {
+          setPromoCodes(JSON.parse(e.newValue));
+        } catch {
+          // ignore
+        }
+      }
+      if (e.key === ADMIN_KEYS.CASHBACK_PAYOUTS && e.newValue) {
+        try {
+          setCashbackPayouts(JSON.parse(e.newValue));
         } catch {
           // ignore
         }
@@ -532,10 +660,27 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem(ADMIN_KEYS.MESSAGES, JSON.stringify(messages));
       localStorage.setItem(ADMIN_KEYS.CATEGORIES, JSON.stringify(categories));
       localStorage.setItem(ADMIN_KEYS.BRANDS, JSON.stringify(brands));
+      localStorage.setItem(ADMIN_KEYS.COACHES, JSON.stringify(coaches));
+      localStorage.setItem(ADMIN_KEYS.PROMO_CODES, JSON.stringify(promoCodes));
+      localStorage.setItem(
+        ADMIN_KEYS.CASHBACK_PAYOUTS,
+        JSON.stringify(cashbackPayouts)
+      );
     } catch {
       // ignore
     }
-  }, [products, orders, batches, messages, categories, brands, isHydrated]);
+  }, [
+    products,
+    orders,
+    batches,
+    messages,
+    categories,
+    brands,
+    coaches,
+    promoCodes,
+    cashbackPayouts,
+    isHydrated,
+  ]);
 
   const adminLogin = useCallback(
     (email: string, pin: string) => {
@@ -755,17 +900,42 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   );
 
   const addCategory = useCallback(
-    (name: string, tagline = "") => {
-      const cleanName = name.trim();
+    (
+      input:
+        | string
+        | { name: string; tagline?: string; image?: string; isActive?: boolean },
+      taglineArg = ""
+    ) => {
+      const cleanName = (typeof input === "string" ? input : input.name).trim();
       if (!cleanName) return;
-      const newCat: AdminCategory = {
-        id: `cat_${Date.now()}`,
-        name: cleanName,
-        slug: toSlug(cleanName),
-        tagline: tagline.trim() || "Certified sports nutrition formula",
-        isActive: true,
-      };
-      setCategories((prev) => [...prev, newCat]);
+      const resolvedTagline =
+        typeof input === "string"
+          ? taglineArg.trim()
+          : (input.tagline || "").trim();
+      const resolvedImage = typeof input === "string" ? "" : input.image || "";
+      const resolvedActive =
+        typeof input === "string"
+          ? true
+          : typeof input.isActive === "boolean"
+          ? input.isActive
+          : true;
+
+      setCategories((prev) => {
+        const nextOrder =
+          prev.length > 0
+            ? Math.max(...prev.map((c) => c.sortOrder ?? 0)) + 1
+            : 0;
+        const newCat: AdminCategory = {
+          id: `cat_${Date.now()}`,
+          name: cleanName,
+          slug: toSlug(cleanName),
+          tagline: resolvedTagline || "Certified sports nutrition formula",
+          image: resolvedImage,
+          sortOrder: nextOrder,
+          isActive: resolvedActive,
+        };
+        return [...prev, newCat];
+      });
       showToast({
         type: "gold",
         title: "Category Added",
@@ -813,7 +983,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   const deleteCategory = useCallback(
     (id: string) => {
-      setCategories((prev) => prev.filter((c) => c.id !== id));
+      setCategories((prev) =>
+        prev
+          .filter((c) => c.id !== id)
+          .map((c, idx) => ({ ...c, sortOrder: idx }))
+      );
       showToast({
         type: "gold",
         title: "Category Deleted",
@@ -822,6 +996,19 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     },
     [showToast]
   );
+
+  const reorderCategory = useCallback((id: string, direction: "up" | "down") => {
+    setCategories((prev) => {
+      const sorted = [...prev].sort((a, b) => a.sortOrder - b.sortOrder);
+      const idx = sorted.findIndex((c) => c.id === id);
+      if (idx === -1) return prev;
+      const targetIdx = direction === "up" ? idx - 1 : idx + 1;
+      if (targetIdx < 0 || targetIdx >= sorted.length) return prev;
+      const [moved] = sorted.splice(idx, 1);
+      sorted.splice(targetIdx, 0, moved);
+      return sorted.map((c, i) => ({ ...c, sortOrder: i }));
+    });
+  }, []);
 
   const addBrand = useCallback(
     (name: string, originCountry = "USA Direct") => {
@@ -892,6 +1079,181 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     [showToast]
   );
 
+  const recordOrder = useCallback((order: AdminOrder) => {
+    setOrders((prev) => [order, ...prev.filter((o) => o.id !== order.id)]);
+  }, []);
+
+  const savePromoAffiliate = useCallback(
+    (input: {
+      promoId?: string;
+      coachId?: string;
+      code: string;
+      coachName: string;
+      contactInfo: string;
+      email?: string;
+      discountType: DiscountValueType;
+      discountValue: number;
+      cashbackType: DiscountValueType;
+      cashbackValue: number;
+      isActive: boolean;
+    }): { ok: boolean; error?: string } => {
+      const cleanCode = input.code.trim().toUpperCase().replace(/\s+/g, "");
+      const cleanCoachName = input.coachName.trim();
+      const cleanContact = input.contactInfo.trim();
+
+      if (!cleanCode || cleanCode.length < 3) {
+        return { ok: false, error: "Promo code must be at least 3 characters." };
+      }
+      if (!cleanCoachName) {
+        return { ok: false, error: "Coach / Seller name is required." };
+      }
+
+      const duplicate = promoCodes.find(
+        (p) => p.code.toUpperCase() === cleanCode && p.id !== input.promoId
+      );
+      if (duplicate) {
+        return { ok: false, error: `Promo code "${cleanCode}" already exists.` };
+      }
+
+      const nowIso = new Date().toISOString();
+      const targetCoachId = input.coachId || `coach_${Date.now()}`;
+
+      setCoaches((prev) => {
+        const exists = prev.some((c) => c.id === targetCoachId);
+        if (exists) {
+          return prev.map((c) =>
+            c.id === targetCoachId
+              ? {
+                  ...c,
+                  name: cleanCoachName,
+                  contactInfo: cleanContact || c.contactInfo,
+                  email: input.email?.trim() || c.email,
+                }
+              : c
+          );
+        }
+        return [
+          {
+            id: targetCoachId,
+            name: cleanCoachName,
+            contactInfo: cleanContact || "N/A",
+            email: input.email?.trim() || undefined,
+            isActive: true,
+            createdAt: nowIso,
+          },
+          ...prev,
+        ];
+      });
+
+      const targetPromoId = input.promoId || `promo_${Date.now()}`;
+      setPromoCodes((prev) => {
+        const exists = prev.some((p) => p.id === targetPromoId);
+        if (exists) {
+          return prev.map((p) =>
+            p.id === targetPromoId
+              ? {
+                  ...p,
+                  code: cleanCode,
+                  coachId: targetCoachId,
+                  discountType: input.discountType,
+                  discountValue: Math.max(0, Number(input.discountValue) || 0),
+                  cashbackType: input.cashbackType,
+                  cashbackValue: Math.max(0, Number(input.cashbackValue) || 0),
+                  isActive: input.isActive,
+                }
+              : p
+          );
+        }
+        return [
+          {
+            id: targetPromoId,
+            code: cleanCode,
+            coachId: targetCoachId,
+            discountType: input.discountType,
+            discountValue: Math.max(0, Number(input.discountValue) || 0),
+            cashbackType: input.cashbackType,
+            cashbackValue: Math.max(0, Number(input.cashbackValue) || 0),
+            isActive: input.isActive,
+            createdAt: nowIso,
+          },
+          ...prev,
+        ];
+      });
+
+      showToast({
+        type: "gold",
+        title: input.promoId ? "Promo Code Updated" : "Promo Code Created",
+        subtitle: `${cleanCode} linked to ${cleanCoachName}.`,
+      });
+      return { ok: true };
+    },
+    [promoCodes, showToast]
+  );
+
+  const togglePromoStatus = useCallback(
+    (id: string) => {
+      setPromoCodes((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, isActive: !p.isActive } : p))
+      );
+      showToast({
+        type: "gold",
+        title: "Promo Status Updated",
+        subtitle: "Checkout promo validation updated live.",
+      });
+    },
+    [showToast]
+  );
+
+  const deletePromoCode = useCallback(
+    (id: string) => {
+      setPromoCodes((prev) => prev.filter((p) => p.id !== id));
+      showToast({
+        type: "gold",
+        title: "Promo Code Deleted",
+        subtitle: "Promo code removed from active roster.",
+      });
+    },
+    [showToast]
+  );
+
+  const recordCashbackPayout = useCallback(
+    (input: {
+      coachId: string;
+      promoCodeId: string;
+      amountLkr: number;
+      referenceNote: string;
+    }) => {
+      const amount = Math.max(0, Math.round(Number(input.amountLkr) || 0));
+      if (amount <= 0) return;
+      const newPayout: CashbackPayout = {
+        id: `pay_${Date.now()}`,
+        coachId: input.coachId,
+        promoCodeId: input.promoCodeId,
+        amountLkr: amount,
+        referenceNote: input.referenceNote.trim() || "Bank Transfer",
+        paidAt: new Date().toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }),
+        recordedBy: "Admin Vault",
+      };
+      setCashbackPayouts((prev) => [newPayout, ...prev]);
+      showToast({
+        type: "gold",
+        title: "Cashback Payout Recorded",
+        subtitle: `Rs. ${amount.toLocaleString()} marked as paid.`,
+      });
+    },
+    [showToast]
+  );
+
+  const validatePromoCode = useCallback(
+    (code: string, subtotal: number) =>
+      evaluatePromoCode(code, subtotal, promoCodes, coaches),
+    [promoCodes, coaches]
+  );
+
   return (
     <AdminContext.Provider
       value={{
@@ -906,6 +1268,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         adjustStock,
         deleteProduct,
         orders,
+        recordOrder,
         updateOrderDispatch,
         batches,
         generateBatch,
@@ -917,11 +1280,20 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         updateCategory,
         deleteCategory,
         toggleCategoryStatus,
+        reorderCategory,
         brands,
         addBrand,
         updateBrand,
         deleteBrand,
         toggleBrandStatus,
+        coaches,
+        promoCodes,
+        cashbackPayouts,
+        savePromoAffiliate,
+        togglePromoStatus,
+        deletePromoCode,
+        recordCashbackPayout,
+        validatePromoCode,
       }}
     >
       {children}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ShoppingBag, Lock, ChevronRight } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
+import { useAdmin, AdminOrder } from "@/context/AdminContext";
 import CheckoutForm, { CheckoutFormData } from "@/components/checkout/CheckoutForm";
 import PaymentSelector, { PaymentMethod } from "@/components/checkout/PaymentSelector";
 import CheckoutSummary from "@/components/checkout/CheckoutSummary";
@@ -17,6 +18,7 @@ const STANDARD_SHIPPING_FEE = 450;
 export default function CheckoutPage() {
   const { items, subtotal, clearCart } = useCart();
   const { showToast } = useToast();
+  const { validatePromoCode, recordOrder } = useAdmin();
 
   // Form State
   const [formData, setFormData] = useState<CheckoutFormData>({
@@ -39,10 +41,7 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
 
   // Promo Code State
-  const [appliedPromo, setAppliedPromo] = useState<{
-    code: string;
-    percent: number;
-  } | null>(null);
+  const [appliedCode, setAppliedCode] = useState<string | null>(null);
 
   // Submission State
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -63,27 +62,39 @@ export default function CheckoutPage() {
   };
 
   // Promo handlers
+  const activePromoResult = appliedCode
+    ? validatePromoCode(appliedCode, subtotal)
+    : null;
+
+  const appliedPromo =
+    activePromoResult && activePromoResult.valid && activePromoResult.promo
+      ? {
+          code: activePromoResult.promo.code,
+          discountLabel: activePromoResult.discountLabel,
+        }
+      : null;
+
   const handleApplyPromo = (code: string) => {
-    const cleaned = code.trim().toUpperCase();
-    if (cleaned === "AURA10") {
-      setAppliedPromo({ code: "AURA10", percent: 10 });
+    const res = validatePromoCode(code, subtotal);
+    if (res.valid && res.promo) {
+      setAppliedCode(res.promo.code);
       showToast({
         type: "gold",
-        title: "VIP Promo Unlocked",
-        subtitle: "10% AuraFit member discount applied to your order.",
+        title: `Promo ${res.promo.code} Unlocked`,
+        subtitle: `${res.discountLabel} applied to your order.`,
       });
       return true;
     }
     showToast({
       type: "error",
       title: "Invalid Promo Code",
-      subtitle: "Try code AURA10 for 10% off your supplement stack.",
+      subtitle: res.error || "Try code AURA10 or COACH10.",
     });
     return false;
   };
 
   const handleRemovePromo = () => {
-    setAppliedPromo(null);
+    setAppliedCode(null);
   };
 
   // Delivery fee calculation
@@ -91,9 +102,10 @@ export default function CheckoutPage() {
   const shippingFee = isFreeShipping || subtotal === 0 ? 0 : STANDARD_SHIPPING_FEE;
 
   // Discount calculation
-  const discountAmount = appliedPromo
-    ? Math.round((subtotal * appliedPromo.percent) / 100)
-    : 0;
+  const discountAmount =
+    activePromoResult && activePromoResult.valid
+      ? activePromoResult.discountAmount
+      : 0;
 
   // Form Validation
   const validateForm = () => {
@@ -178,11 +190,71 @@ export default function CheckoutPage() {
     setOrderPlaced(true);
     setIsSubmitting(false);
 
-    // Save placed order to localStorage for live tracking and profile
+    // Save placed order to localStorage & AdminContext for live tracking, profile & affiliate cashback
+    const adminOrderRecord: AdminOrder = {
+      id: orderRef,
+      customerName: formData.fullName,
+      email: formData.email,
+      phone: formData.phone,
+      address: formData.apartment
+        ? `${formData.address}, ${formData.apartment}`
+        : formData.address,
+      city: formData.city,
+      district: formData.district,
+      postalCode: formData.postalCode,
+      notes: formData.notes,
+      date: new Date().toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+      paymentMethod:
+        paymentMethod === "koko"
+          ? "KOKO 3x"
+          : paymentMethod === "cod"
+          ? "COD"
+          : "Card",
+      total: finalTotal,
+      status: "Order Placed",
+      courier: "PromptX Courier",
+      waybillNumber: "",
+      estimatedArrival: "Within 24–48 Hours",
+      itemsSummary: items
+        .map((i) => `${i.product.name} × ${i.quantity}`)
+        .join(" + "),
+      items: items.map((i) => ({
+        name: i.product.name,
+        quantity: i.quantity,
+        price: i.product.price,
+        flavor: i.selectedFlavor,
+      })),
+      promoCodeId:
+        activePromoResult && activePromoResult.valid
+          ? activePromoResult.promo?.id
+          : undefined,
+      promoCode:
+        activePromoResult && activePromoResult.valid
+          ? activePromoResult.promo?.code
+          : undefined,
+      coachId:
+        activePromoResult && activePromoResult.valid
+          ? activePromoResult.promo?.coachId
+          : undefined,
+      discountAmount: discountAmount > 0 ? discountAmount : undefined,
+      cashbackAmount:
+        activePromoResult &&
+        activePromoResult.valid &&
+        activePromoResult.cashbackAmount > 0
+          ? activePromoResult.cashbackAmount
+          : undefined,
+    };
+
+    recordOrder(adminOrderRecord);
+
     try {
       const existing = localStorage.getItem("aurafit_orders");
       const parsed = existing ? JSON.parse(existing) : [];
-      localStorage.setItem("aurafit_orders", JSON.stringify([orderData, ...parsed]));
+      localStorage.setItem("aurafit_orders", JSON.stringify([adminOrderRecord, ...parsed]));
     } catch {
       // fallback
     }

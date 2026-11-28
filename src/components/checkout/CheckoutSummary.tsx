@@ -21,7 +21,7 @@ interface CheckoutSummaryProps {
   subtotal: number;
   shipping: number;
   discountAmount: number;
-  appliedPromo: { code: string; percent: number } | null;
+  appliedPromo: { code: string; discountLabel: string } | null;
   onApplyPromo: (code: string) => boolean;
   onRemovePromo: () => void;
   selectedPaymentMethod: PaymentMethod;
@@ -152,7 +152,7 @@ export default function CheckoutSummary({
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               <span>
                 Promo <strong>{appliedPromo.code}</strong> applied (
-                {appliedPromo.percent}% OFF)
+                {appliedPromo.discountLabel})
               </span>
             </div>
             <button
@@ -207,7 +207,7 @@ export default function CheckoutSummary({
 
         {appliedPromo && (
           <div className="flex justify-between items-center text-emerald-400">
-            <span>Coupon Discount ({appliedPromo.percent}%)</span>
+            <span>Coupon Discount ({appliedPromo.discountLabel})</span>
             <span className="font-semibold font-mono">
               - Rs. {discountAmount.toLocaleString()}
             </span>

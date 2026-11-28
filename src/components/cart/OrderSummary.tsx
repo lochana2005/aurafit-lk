@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { getKokoTotal, getKokoInstallment } from "@/lib/pricing";
 import { useToast } from "@/context/ToastContext";
+import { useAdmin } from "@/context/AdminContext";
 
 interface OrderSummaryProps {
   subtotal: number;
@@ -25,12 +26,20 @@ const STANDARD_SHIPPING_FEE = 450;
 
 export default function OrderSummary({ subtotal }: OrderSummaryProps) {
   const { showToast } = useToast();
+  const { validatePromoCode } = useAdmin();
   const [promoInput, setPromoInput] = useState("");
   const [promoError, setPromoError] = useState<string | null>(null);
-  const [appliedPromo, setAppliedPromo] = useState<{
-    code: string;
-    discountPercent: number;
-  } | null>(null);
+  const [appliedCode, setAppliedCode] = useState<string | null>(null);
+
+  const activePromo = appliedCode ? validatePromoCode(appliedCode, subtotal) : null;
+  const appliedPromo =
+    activePromo && activePromo.valid && activePromo.promo
+      ? {
+          code: activePromo.promo.code,
+          discountLabel: activePromo.discountLabel,
+          discountAmount: activePromo.discountAmount,
+        }
+      : null;
 
   // Free shipping calculations
   const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
@@ -41,9 +50,7 @@ export default function OrderSummary({ subtotal }: OrderSummaryProps) {
   const remainingForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
 
   // Discount calculation
-  const discountAmount = appliedPromo
-    ? Math.round((subtotal * appliedPromo.discountPercent) / 100)
-    : 0;
+  const discountAmount = appliedPromo ? appliedPromo.discountAmount : 0;
 
   // Shipping fee
   const shippingFee = isFreeShipping || subtotal === 0 ? 0 : STANDARD_SHIPPING_FEE;
@@ -59,27 +66,28 @@ export default function OrderSummary({ subtotal }: OrderSummaryProps) {
 
     if (!cleaned) return;
 
-    if (cleaned === "AURA10") {
-      setAppliedPromo({ code: "AURA10", discountPercent: 10 });
+    const res = validatePromoCode(cleaned, subtotal);
+    if (res.valid && res.promo) {
+      setAppliedCode(res.promo.code);
       setPromoInput("");
       setPromoError(null);
       showToast({
         type: "gold",
-        title: "VIP Promo Unlocked",
-        subtitle: "10% AuraFit member discount applied to your order.",
+        title: `Promo ${res.promo.code} Unlocked`,
+        subtitle: `${res.discountLabel} applied to your order.`,
       });
     } else {
-      setPromoError('Invalid coupon. Try "AURA10" for 10% off.');
+      setPromoError(res.error || 'Invalid coupon. Try "AURA10" or "COACH10".');
       showToast({
         type: "error",
         title: "Invalid Promo Code",
-        subtitle: "Try code AURA10 for 10% off your supplement stack.",
+        subtitle: res.error || "Try code AURA10 or COACH10.",
       });
     }
   };
 
   const handleRemovePromo = () => {
-    setAppliedPromo(null);
+    setAppliedCode(null);
     setPromoError(null);
   };
 
@@ -135,7 +143,7 @@ export default function OrderSummary({ subtotal }: OrderSummaryProps) {
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               <span>
                 Promo <strong>{appliedPromo.code}</strong> applied (
-                {appliedPromo.discountPercent}% OFF)
+                {appliedPromo.discountLabel})
               </span>
             </div>
             <button
@@ -190,7 +198,7 @@ export default function OrderSummary({ subtotal }: OrderSummaryProps) {
         {/* Promo Discount */}
         {appliedPromo && (
           <div className="flex justify-between items-center text-emerald-400">
-            <span>Coupon Discount ({appliedPromo.discountPercent}%)</span>
+            <span>Coupon Discount ({appliedPromo.discountLabel})</span>
             <span className="font-semibold font-mono">
               - Rs. {discountAmount.toLocaleString()}
             </span>

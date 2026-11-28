@@ -131,20 +131,25 @@ export default function CategorySection() {
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
 
   const displayedCategories: CategoryItem[] = isHydrated
-    ? adminCategories
+    ? [...adminCategories]
         .filter((c) => c.isActive)
+        .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
         .map((c) => {
           const matched = CATEGORIES_8.find(
             (item) => item.name.toLowerCase() === c.name.toLowerCase()
           );
-          if (matched) return matched;
+          const resolvedImage = c.image || matched?.image || "";
           return {
             id: c.id,
             name: c.name,
             href: `/shop?category=${encodeURIComponent(c.name)}`,
-            image: "",
-            color: "#E2C275",
-            subBadge: c.tagline ? c.tagline.split(" ")[0].toUpperCase().slice(0, 10) : "FORMULA",
+            image: resolvedImage,
+            color: matched?.color || "#E2C275",
+            subBadge:
+              matched?.subBadge ||
+              (c.tagline
+                ? c.tagline.split(" ")[0].toUpperCase().slice(0, 10)
+                : "FORMULA"),
           };
         })
     : CATEGORIES_8;
