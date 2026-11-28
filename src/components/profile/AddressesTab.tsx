@@ -1,8 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Plus, Check, Trash2, Home, Building } from "lucide-react";
 import { SRI_LANKAN_DISTRICTS } from "@/components/checkout/CheckoutForm";
+import { useToast } from "@/context/ToastContext";
+
+const ADDRESSES_STORAGE_KEY = "aurafit_addresses";
 
 interface Address {
   id: string;
@@ -42,8 +45,29 @@ const INITIAL_ADDRESSES: Address[] = [
 ];
 
 export default function AddressesTab() {
-  const [addresses, setAddresses] = useState<Address[]>(INITIAL_ADDRESSES);
+  const { showToast } = useToast();
+  const [addresses, setAddresses] = useState<Address[]>(() => {
+    if (typeof window === "undefined") return INITIAL_ADDRESSES;
+    try {
+      const saved = window.localStorage.getItem(ADDRESSES_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {
+      // fallback
+    }
+    return INITIAL_ADDRESSES;
+  });
   const [isAdding, setIsAdding] = useState(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(ADDRESSES_STORAGE_KEY, JSON.stringify(addresses));
+    } catch {
+      // ignore
+    }
+  }, [addresses]);
 
   const [newAddr, setNewAddr] = useState({
     label: "Gym / Work",
@@ -80,6 +104,11 @@ export default function AddressesTab() {
 
     setAddresses([...addresses, added]);
     setIsAdding(false);
+    showToast({
+      type: "gold",
+      title: "Delivery Address Saved",
+      subtitle: `${added.city}, ${added.district} added to your vault addresses.`,
+    });
     setNewAddr({
       label: "Office / Gym",
       name: "Kasun Perera",

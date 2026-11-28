@@ -1,11 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { User, Mail, Phone, Target, CheckCircle2, Loader2, Sparkles } from "lucide-react";
+import { User, Mail, Phone, Target, CheckCircle2, Loader2, Sparkles, Package, Heart, ShieldCheck } from "lucide-react";
 import { UserProfile, useAuth } from "@/context/AuthContext";
+import { useWatchlist } from "@/context/WatchlistContext";
+import { useToast } from "@/context/ToastContext";
 
 interface ProfileDetailsTabProps {
   user: UserProfile;
+  ordersCount?: number;
+  stacksCount?: number;
+  batchesCount?: number;
 }
 
 const FITNESS_GOALS = [
@@ -15,8 +20,15 @@ const FITNESS_GOALS = [
   "General Wellness",
 ] as const;
 
-export default function ProfileDetailsTab({ user }: ProfileDetailsTabProps) {
+export default function ProfileDetailsTab({
+  user,
+  ordersCount = 3,
+  stacksCount = 2,
+  batchesCount = 2,
+}: ProfileDetailsTabProps) {
   const { updateProfile } = useAuth();
+  const { watchlistCount } = useWatchlist();
+  const { showToast } = useToast();
 
   const [formData, setFormData] = useState({
     name: user.name,
@@ -38,6 +50,11 @@ export default function ProfileDetailsTab({ user }: ProfileDetailsTabProps) {
     updateProfile(formData);
     setIsSaving(false);
     setSuccessMessage(true);
+    showToast({
+      type: "gold",
+      title: "Athlete Profile Updated",
+      subtitle: "Your personal details and training goal have been saved.",
+    });
 
     setTimeout(() => {
       setSuccessMessage(false);
@@ -46,6 +63,40 @@ export default function ProfileDetailsTab({ user }: ProfileDetailsTabProps) {
 
   return (
     <div className="bg-[#141418] rounded-2xl border border-white/8 p-6 sm:p-8 shadow-xl space-y-6">
+      {/* 4-Column Quick Vault Stats Row */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="rounded-xl bg-[#16161C] border border-white/8 p-3.5">
+          <div className="flex items-center justify-between text-zinc-400 mb-1">
+            <span className="text-[10px] font-bold uppercase tracking-wider">TOTAL ORDERS</span>
+            <Package className="w-3.5 h-3.5 text-[#E2C275]" />
+          </div>
+          <div className="text-xl font-black text-white font-heading">{ordersCount}</div>
+        </div>
+
+        <div className="rounded-xl bg-[#16161C] border border-white/8 p-3.5">
+          <div className="flex items-center justify-between text-zinc-400 mb-1">
+            <span className="text-[10px] font-bold uppercase tracking-wider">WATCHLIST ITEMS</span>
+            <Heart className="w-3.5 h-3.5 text-[#E2C275]" />
+          </div>
+          <div className="text-xl font-black text-white font-heading">{watchlistCount}</div>
+        </div>
+
+        <div className="rounded-xl bg-[#16161C] border border-white/8 p-3.5">
+          <div className="flex items-center justify-between text-zinc-400 mb-1">
+            <span className="text-[10px] font-bold uppercase tracking-wider">SAVED AI STACKS</span>
+            <Sparkles className="w-3.5 h-3.5 text-[#38BDF8]" />
+          </div>
+          <div className="text-xl font-black text-white font-heading">{stacksCount}</div>
+        </div>
+
+        <div className="rounded-xl bg-[#16161C] border border-white/8 p-3.5">
+          <div className="flex items-center justify-between text-zinc-400 mb-1">
+            <span className="text-[10px] font-bold uppercase tracking-wider">VERIFIED TUBS</span>
+            <ShieldCheck className="w-3.5 h-3.5 text-[#38BDF8]" />
+          </div>
+          <div className="text-xl font-black text-white font-heading">{batchesCount}</div>
+        </div>
+      </div>
       {/* Tab Header */}
       <div className="flex items-center justify-between pb-4 border-b border-white/8">
         <div>

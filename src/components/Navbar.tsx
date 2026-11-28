@@ -56,7 +56,7 @@ export default function Navbar() {
     () => false
   );
   const { totalItems, openCart } = useCart();
-  const { watchlistCount, openWatchlist } = useWatchlist();
+  const { watchlistCount } = useWatchlist();
   const { user, isAuthenticated } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
@@ -229,9 +229,8 @@ export default function Navbar() {
                 )}
               </Link>
 
-              <button
-                type="button"
-                onClick={openWatchlist}
+              <Link
+                href="/profile?tab=watchlist"
                 aria-label="Saved Watchlist"
                 className="relative p-2 rounded-full btn-aurafit-dark-circle bg-[#141418] text-zinc-200 hover:text-[#E2C275] flex items-center justify-center cursor-pointer"
               >
@@ -241,7 +240,7 @@ export default function Navbar() {
                     {savedCount}
                   </span>
                 )}
-              </button>
+              </Link>
 
               <button
                 type="button"
@@ -320,23 +319,8 @@ export default function Navbar() {
                 )}
               </Link>
 
-              <button
-                type="button"
-                onClick={openWatchlist}
-                aria-label="Saved Watchlist"
-                className="relative p-2 rounded-full btn-aurafit-dark-circle bg-[#141418] text-zinc-200 hover:text-[#E2C275] flex items-center justify-center cursor-pointer"
-              >
-                <Heart className={`w-4.5 h-4.5 ${savedCount > 0 ? "text-[#E2C275] fill-[#E2C275]" : ""}`} />
-                {savedCount > 0 && (
-                  <span className="absolute -top-1 -right-1 z-10 flex items-center justify-center min-w-[17px] h-[17px] px-1 text-[10px] font-black text-[#09090B] bg-[#E2C275] rounded-full">
-                    {savedCount}
-                  </span>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={openWatchlist}
+              <Link
+                href="/profile?tab=watchlist"
                 aria-label="Saved Watchlist"
                 className="relative w-9 h-9 rounded-full btn-aurafit-dark-circle bg-[#141418] text-zinc-200 flex items-center justify-center cursor-pointer"
               >
@@ -346,7 +330,7 @@ export default function Navbar() {
                     {savedCount}
                   </span>
                 )}
-              </button>
+              </Link>
 
               <button
                 type="button"
@@ -529,33 +513,49 @@ export default function Navbar() {
 
             {/* 4. Drawer Footer: Account & Direct Support Info from Top Bar */}
             <div className="p-5 border-t border-white/10 bg-[#0E0E13] space-y-4">
-              {/* My Account / Orders Link Card */}
-              <Link
-                href={isAuthActive ? "/profile" : "/login"}
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between p-3 rounded-xl bg-[#16161C] border border-white/10 hover:border-[#E2C275]/45 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-[#09090B] border border-[#E2C275]/30 flex items-center justify-center text-[#E2C275]">
-                    {isAuthActive && user ? (
-                      <span className="text-xs font-black font-heading">
-                        {user.avatarInitials}
-                      </span>
-                    ) : (
-                      <User className="w-4 h-4" />
-                    )}
-                  </div>
-                  <div>
-                    <div className="text-sm font-semibold text-white">
-                      {isAuthActive && user ? user.name : "My Account / Orders"}
+              {/* My Account / Orders & Watchlist Quick Links */}
+              <div className="space-y-2">
+                <Link
+                  href={isAuthActive ? "/profile" : "/login"}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-between p-3 rounded-xl bg-[#16161C] border border-white/10 hover:border-[#E2C275]/45 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-[#09090B] border border-[#E2C275]/30 flex items-center justify-center text-[#E2C275]">
+                      {isAuthActive && user ? (
+                        <span className="text-xs font-black font-heading">
+                          {user.avatarInitials}
+                        </span>
+                      ) : (
+                        <User className="w-4 h-4" />
+                      )}
                     </div>
-                    <div className="text-xs text-zinc-400">
-                      {isAuthActive ? "View profile & order history" : "Sign in or register"}
+                    <div>
+                      <div className="text-sm font-semibold text-white">
+                        {isAuthActive && user ? user.name : "My Account / Orders"}
+                      </div>
+                      <div className="text-xs text-zinc-400">
+                        {isAuthActive ? "View profile & order history" : "Sign in or register"}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-zinc-500" />
-              </Link>
+                  <ChevronRight className="w-4 h-4 text-zinc-500" />
+                </Link>
+
+                <Link
+                  href="/profile?tab=watchlist"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#16161C] border border-white/10 hover:border-[#E2C275]/45 transition-colors text-xs font-semibold text-zinc-200"
+                >
+                  <span className="flex items-center gap-2">
+                    <Heart className={`w-3.5 h-3.5 ${savedCount > 0 ? "text-[#E2C275] fill-[#E2C275]" : "text-[#E2C275]"}`} />
+                    <span>Saved Watchlist</span>
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-[#E2C275]/15 text-[#E2C275] font-mono text-[10px] font-bold">
+                    {savedCount}
+                  </span>
+                </Link>
+              </div>
 
               {/* Direct Hotline & Trust Badges */}
               <div className="space-y-2 text-xs text-zinc-300">

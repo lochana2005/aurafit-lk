@@ -1,29 +1,98 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   User,
   Package,
   MapPin,
-  QrCode,
   LogOut,
   ChevronRight,
   ShieldCheck,
+  Heart,
+  Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useWatchlist } from "@/context/WatchlistContext";
 import ProfileDetailsTab from "@/components/profile/ProfileDetailsTab";
+import WatchlistTab from "@/components/profile/WatchlistTab";
+import SavedStacksTab, {
+  SAVED_STACKS_KEY,
+  SEEDED_SAVED_STACKS,
+} from "@/components/profile/SavedStacksTab";
 import OrdersTab from "@/components/profile/OrdersTab";
 import AddressesTab from "@/components/profile/AddressesTab";
 import VerifiedBatchesTab from "@/components/profile/VerifiedBatchesTab";
 
-type TabType = "profile" | "orders" | "addresses" | "batches";
+type TabType =
+  | "profile"
+  | "watchlist"
+  | "stacks"
+  | "orders"
+  | "addresses"
+  | "batches";
 
-export default function ProfilePage() {
+const VALID_TABS: TabType[] = [
+  "profile",
+  "watchlist",
+  "stacks",
+  "orders",
+  "addresses",
+  "batches",
+];
+
+function resolveInitialTab(param: string | null): TabType {
+  if (param && VALID_TABS.includes(param as TabType)) {
+    return param as TabType;
+  }
+  return "profile";
+}
+
+function ProfileContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+
   const { user, isAuthenticated, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<TabType>("profile");
+  const { watchlistCount } = useWatchlist();
+
+  const [activeTab, setActiveTab] = useState<TabType>(() =>
+    resolveInitialTab(tabParam)
+  );
+  const [prevTabParam, setPrevTabParam] = useState(tabParam);
+  if (tabParam !== prevTabParam) {
+    setPrevTabParam(tabParam);
+    setActiveTab(resolveInitialTab(tabParam));
+  }
+
+  const [stacksCount, setStacksCount] = useState<number>(() => {
+    if (typeof window === "undefined") return SEEDED_SAVED_STACKS.length;
+    try {
+      const saved = window.localStorage.getItem(SAVED_STACKS_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed.length;
+      }
+    } catch {
+      // fallback
+    }
+    return SEEDED_SAVED_STACKS.length;
+  });
+
+  const [batchesCount] = useState<number>(() => {
+    if (typeof window === "undefined") return 2;
+    try {
+      const saved = window.localStorage.getItem("aurafit_verified_batches");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed.length;
+      }
+    } catch {
+      // fallback
+    }
+    return 2;
+  });
 
   // Protect route: redirect to /login if unauthenticated
   useEffect(() => {
@@ -51,9 +120,7 @@ export default function ProfilePage() {
   return (
     <div className="w-full min-h-screen bg-[#09090B] text-white">
       <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-        {/* =========================================================================
-            BREADCRUMBS
-            ========================================================================= */}
+        {/* Breadcrumbs */}
         <nav
           aria-label="Breadcrumb"
           className="flex items-center gap-2 text-xs sm:text-sm text-zinc-400 mb-6 flex-wrap"
@@ -76,7 +143,7 @@ export default function ProfilePage() {
             </h1>
             <p className="text-xs sm:text-sm text-zinc-400 mt-1">
               Welcome back, <strong className="text-white">{user.name}</strong>. Manage
-              your authentic supplement orders and verified batch reports.
+              your saved watchlist, AI stacks, orders, and verified batch reports.
             </p>
           </div>
 
@@ -86,19 +153,14 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* =========================================================================
-            12-COLUMN DASHBOARD GRID
-            ========================================================================= */}
+        {/* 12-Column Dashboard Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* =========================================================================
-              LEFT SIDEBAR (STICKY NAVIGATION)
-              ========================================================================= */}
+          {/* Left Sticky Sidebar */}
           <aside className="lg:col-span-4 xl:col-span-3 lg:sticky lg:top-36 lg:self-start space-y-4">
             {/* User Profile Mini Card */}
             <div className="bg-[#111115] rounded-2xl border border-white/10 p-5 shadow-xl text-center space-y-3 relative overflow-hidden">
               <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#E5C76B] to-[#C9A227]" />
 
-              {/* Avatar Initials Circle */}
               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#E5C76B] via-[#C9A227] to-[#B08922] text-[#09090B] font-black text-xl flex items-center justify-center font-heading mx-auto shadow-lg ring-4 ring-white/5">
                 {user.avatarInitials}
               </div>
@@ -119,9 +181,9 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Navigation Tabs List */}
+            {/* 6 Navigation Tabs */}
             <div className="bg-[#111115] rounded-2xl border border-white/8 p-2.5 shadow-xl space-y-1">
-              {/* Tab 1: Profile Details */}
+              {/* 1. PROFILE DETAILS */}
               <button
                 type="button"
                 onClick={() => setActiveTab("profile")}
@@ -133,12 +195,62 @@ export default function ProfilePage() {
               >
                 <div className="flex items-center gap-2.5">
                   <User className="w-4 h-4" />
-                  <span>Profile Details</span>
+                  <span>PROFILE DETAILS</span>
                 </div>
                 <ChevronRight className="w-3.5 h-3.5 opacity-60" />
               </button>
 
-              {/* Tab 2: My Orders */}
+              {/* 2. SAVED WATCHLIST */}
+              <button
+                type="button"
+                onClick={() => setActiveTab("watchlist")}
+                className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer font-heading ${
+                  activeTab === "watchlist"
+                    ? "bg-gradient-to-r from-[#E5C76B] via-[#C9A227] to-[#B08922] text-[#09090B] shadow-md"
+                    : "text-zinc-300 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Heart className="w-4 h-4" />
+                  <span>SAVED WATCHLIST</span>
+                </div>
+                <span
+                  className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                    activeTab === "watchlist"
+                      ? "bg-[#09090B] text-white"
+                      : "bg-[#E2C275]/15 text-[#E2C275] border border-[#E2C275]/30"
+                  }`}
+                >
+                  {watchlistCount}
+                </span>
+              </button>
+
+              {/* 3. SAVED AI STACKS */}
+              <button
+                type="button"
+                onClick={() => setActiveTab("stacks")}
+                className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer font-heading ${
+                  activeTab === "stacks"
+                    ? "bg-gradient-to-r from-[#E5C76B] via-[#C9A227] to-[#B08922] text-[#09090B] shadow-md"
+                    : "text-zinc-300 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Sparkles className="w-4 h-4 text-[#38BDF8]" />
+                  <span>SAVED AI STACKS</span>
+                </div>
+                <span
+                  className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                    activeTab === "stacks"
+                      ? "bg-[#09090B] text-white"
+                      : "bg-[#1C1C22] text-[#38BDF8]"
+                  }`}
+                >
+                  {stacksCount}
+                </span>
+              </button>
+
+              {/* 4. MY ORDERS */}
               <button
                 type="button"
                 onClick={() => setActiveTab("orders")}
@@ -150,7 +262,7 @@ export default function ProfilePage() {
               >
                 <div className="flex items-center gap-2.5">
                   <Package className="w-4 h-4" />
-                  <span>My Orders</span>
+                  <span>MY ORDERS</span>
                 </div>
                 <span
                   className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
@@ -163,7 +275,7 @@ export default function ProfilePage() {
                 </span>
               </button>
 
-              {/* Tab 3: Saved Addresses */}
+              {/* 5. SAVED ADDRESSES */}
               <button
                 type="button"
                 onClick={() => setActiveTab("addresses")}
@@ -175,12 +287,12 @@ export default function ProfilePage() {
               >
                 <div className="flex items-center gap-2.5">
                   <MapPin className="w-4 h-4" />
-                  <span>Saved Addresses</span>
+                  <span>SAVED ADDRESSES</span>
                 </div>
                 <ChevronRight className="w-3.5 h-3.5 opacity-60" />
               </button>
 
-              {/* Tab 4: Verified Batches */}
+              {/* 6. VERIFIED BATCHES */}
               <button
                 type="button"
                 onClick={() => setActiveTab("batches")}
@@ -191,8 +303,8 @@ export default function ProfilePage() {
                 }`}
               >
                 <div className="flex items-center gap-2.5">
-                  <QrCode className="w-4 h-4 text-sky-400" />
-                  <span>Verified Batches</span>
+                  <ShieldCheck className="w-4 h-4 text-sky-400" />
+                  <span>VERIFIED BATCHES</span>
                 </div>
                 <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
               </button>
@@ -211,11 +323,20 @@ export default function ProfilePage() {
             </div>
           </aside>
 
-          {/* =========================================================================
-              RIGHT CONTENT AREA
-              ========================================================================= */}
+          {/* Right Content Area */}
           <main className="lg:col-span-8 xl:col-span-9 w-full">
-            {activeTab === "profile" && <ProfileDetailsTab user={user} />}
+            {activeTab === "profile" && (
+              <ProfileDetailsTab
+                user={user}
+                ordersCount={3}
+                stacksCount={stacksCount}
+                batchesCount={batchesCount}
+              />
+            )}
+            {activeTab === "watchlist" && <WatchlistTab />}
+            {activeTab === "stacks" && (
+              <SavedStacksTab onCountChange={setStacksCount} />
+            )}
             {activeTab === "orders" && <OrdersTab />}
             {activeTab === "addresses" && <AddressesTab />}
             {activeTab === "batches" && <VerifiedBatchesTab />}
@@ -223,5 +344,19 @@ export default function ProfilePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#09090B] flex items-center justify-center text-zinc-500 font-heading tracking-widest text-sm uppercase">
+          Loading Athlete Vault...
+        </div>
+      }
+    >
+      <ProfileContent />
+    </Suspense>
   );
 }

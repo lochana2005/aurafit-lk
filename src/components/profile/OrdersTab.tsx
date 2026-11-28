@@ -2,7 +2,10 @@
 
 import React from "react";
 import Link from "next/link";
-import { Package, Truck, QrCode, ArrowRight, CreditCard, Banknote } from "lucide-react";
+import { Package, Truck, QrCode, ArrowRight, CreditCard, Banknote, RotateCcw } from "lucide-react";
+import { MOCK_PRODUCTS } from "@/data/mockProducts";
+import { useCart } from "@/context/CartContext";
+import { useToast } from "@/context/ToastContext";
 
 interface MockOrder {
   id: string;
@@ -75,6 +78,26 @@ const MOCK_ORDERS: MockOrder[] = [
 ];
 
 export default function OrdersTab() {
+  const { addToCart, openCart } = useCart();
+  const { showToast } = useToast();
+
+  const handleReorder = (order: MockOrder) => {
+    order.items.forEach((orderItem) => {
+      const matched =
+        MOCK_PRODUCTS.find((p) =>
+          orderItem.name.toLowerCase().includes(p.name.split(" (")[0].toLowerCase())
+        ) || MOCK_PRODUCTS[0];
+      addToCart(matched, orderItem.quantity, orderItem.variant);
+    });
+    showToast({
+      type: "gold",
+      title: "Order Items Added to Cart",
+      subtitle: `Items from order ${order.id} are ready in your cart.`,
+      actionLabel: "VIEW CART →",
+      onAction: () => openCart(),
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="bg-[#141418] rounded-2xl border border-white/8 p-6 sm:p-8 shadow-xl">
@@ -178,19 +201,28 @@ export default function OrdersTab() {
                   </div>
                 </div>
 
-                {/* Tracking & Batch Verification CTAs */}
+                {/* Reorder, Tracking & Batch Verification CTAs */}
                 <div className="flex items-center gap-2 flex-wrap self-start sm:self-auto">
+                  <button
+                    type="button"
+                    onClick={() => handleReorder(order)}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider btn-aurafit-gold cursor-pointer"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>REORDER STACK</span>
+                  </button>
+
                   <Link
                     href={`/track-order?id=${order.id}`}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-white bg-[#1A1A22] border border-white/10 hover:border-sky-400/50 hover:text-sky-300 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider btn-aurafit-dark"
                   >
-                    <Truck className="w-3.5 h-3.5 text-sky-400" />
-                    <span>Track Live</span>
+                    <Truck className="w-3.5 h-3.5 text-[#38BDF8]" />
+                    <span>TRACK SHIPMENT</span>
                   </Link>
 
                   <Link
                     href="/verify"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-sky-300 bg-sky-950/40 border border-sky-400/25 hover:border-sky-400/50 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-sky-300 bg-sky-950/40 border border-sky-400/25 hover:border-sky-400/50 transition-colors"
                   >
                     <QrCode className="w-3.5 h-3.5 text-sky-400" />
                     <span>Verify Hologram</span>
