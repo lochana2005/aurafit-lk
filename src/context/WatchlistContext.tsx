@@ -7,6 +7,7 @@ import { useToast } from "./ToastContext";
 interface WatchlistContextType {
   watchlist: Product[];
   watchlistCount: number;
+  isHydrated: boolean;
   isInWatchlist: (id: string) => boolean;
   toggleWatchlist: (product: Product) => void;
   removeFromWatchlist: (id: string) => void;
@@ -21,31 +22,45 @@ const WATCHLIST_STORAGE_KEY = "aurafit_watchlist";
 
 export function WatchlistProvider({ children }: { children: React.ReactNode }) {
   const { showToast } = useToast();
-  const [watchlist, setWatchlist] = useState<Product[]>(() => {
-    if (typeof window === "undefined") return [];
-    try {
-      const stored = window.localStorage.getItem(WATCHLIST_STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [watchlist, setWatchlist] = useState<Product[]>([]);
+  const [isHydrated, setIsHydrated] = useState(false);
   const [isWatchlistOpen, setIsWatchlistOpen] = useState(false);
 
+  // Hydrate from localStorage strictly after client mount
   useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        const stored = window.localStorage.getItem(WATCHLIST_STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            setWatchlist(parsed);
+          }
+        }
+      } catch {
+        // ignore storage errors
+      }
+      setIsHydrated(true);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Persist changes only after hydration completes
+  useEffect(() => {
+    if (!isHydrated) return;
     try {
       localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(watchlist));
     } catch (e) {
       console.error("Failed to save watchlist to localStorage", e);
     }
-  }, [watchlist]);
+  }, [watchlist, isHydrated]);
 
   const openWatchlist = useCallback(() => setIsWatchlistOpen(true), []);
   const closeWatchlist = useCallback(() => setIsWatchlistOpen(false), []);
 
   const isInWatchlist = useCallback(
-    (id: string) => watchlist.some((item) => item.id === id),
-    [watchlist]
+    (id: string) => isHydrated && watchlist.some((item) => item.id === id),
+    [watchlist, isHydrated]
   );
 
   const toggleWatchlist = useCallback(
@@ -100,7 +115,8 @@ export function WatchlistProvider({ children }: { children: React.ReactNode }) {
     <WatchlistContext.Provider
       value={{
         watchlist,
-        watchlistCount: watchlist.length,
+        watchlistCount: isHydrated ? watchlist.length : 0,
+        isHydrated,
         isInWatchlist,
         toggleWatchlist,
         removeFromWatchlist,

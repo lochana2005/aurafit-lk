@@ -18,10 +18,10 @@ interface ProductCardProps {
 export default function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
   const router = useRouter();
   const { addToCart } = useCart();
-  const { isInWatchlist, toggleWatchlist } = useWatchlist();
+  const { isHydrated, isInWatchlist, toggleWatchlist } = useWatchlist();
   const [isAdded, setIsAdded] = useState(false);
 
-  const isWishlisted = isInWatchlist(product.id);
+  const isWishlisted = isHydrated && isInWatchlist(product.id);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -217,47 +217,49 @@ export default function ProductCard({ product, viewMode = "grid" }: ProductCardP
   return (
     <div className="group relative flex flex-col bg-[#141418] rounded-2xl border border-white/10 hover:border-[#E2C275]/50 overflow-hidden transition-all duration-300 hover:shadow-[0_12px_36px_-6px_rgba(0,0,0,0.7),0_0_24px_-6px_rgba(226,194,117,0.15)]">
       {/* 1. Top Image Stage (Aligned Across Every Row) */}
-      <Link
-        href={`/shop/${product.slug}`}
-        className="relative block aspect-square w-full bg-[#15151B] border-b border-white/[0.06] overflow-hidden p-4"
-      >
-        <StudioImage
-          src={product.image}
-          alt={product.name}
-          fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-          objectFit="contain"
-          fallbackLabel={product.name}
-          className="transition-transform duration-300 group-hover:scale-105"
-        />
+      <div className="relative aspect-square w-full bg-[#15151B] border-b border-white/[0.06] overflow-hidden">
+        <Link
+          href={`/shop/${product.slug}`}
+          className="relative block w-full h-full p-4"
+        >
+          <StudioImage
+            src={product.image}
+            alt={product.name}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+            objectFit="contain"
+            fallbackLabel={product.name}
+            className="transition-transform duration-300 group-hover:scale-105"
+          />
 
-        {/* Top-Left: Product Highlight Badge */}
-        {product.badge && (
-          <div className="absolute top-3 left-3 z-10">
-            <span className="px-2.5 py-1 rounded text-[9px] font-black tracking-wider uppercase text-[#09090B] bg-gradient-to-r from-[#E5C76B] to-[#C9A227] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
-              {product.badge}
+          {/* Top-Left: Product Highlight Badge */}
+          {product.badge && (
+            <div className="absolute top-3 left-3 z-10">
+              <span className="px-2.5 py-1 rounded text-[9px] font-black tracking-wider uppercase text-[#09090B] bg-gradient-to-r from-[#E5C76B] to-[#C9A227] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
+                {product.badge}
+              </span>
+            </div>
+          )}
+
+          {/* Top-Right: Compact VERIFIED Authenticity Shield Pill */}
+          <div
+            title="100% Importer Verified"
+            className="absolute top-3 right-3 z-10 inline-flex items-center gap-1 bg-[#09090B]/85 border border-[#E2C275]/40 text-[#E2C275] text-[10px] font-bold px-2 py-0.5 rounded-full"
+          >
+            <ShieldCheck className="w-3 h-3 text-[#E2C275]" />
+            <span>VERIFIED</span>
+          </div>
+
+          {/* Bottom-Left: Serving / Weight Badge */}
+          <div className="absolute bottom-3 left-3 z-10">
+            <span className="inline-block bg-[#09090B]/85 border border-white/10 text-zinc-300 text-[11px] font-medium px-2.5 py-1 rounded-md font-sans">
+              {product.weightOrServings}
             </span>
           </div>
-        )}
+        </Link>
 
-        {/* Top-Right: Compact VERIFIED Authenticity Shield Pill */}
-        <div
-          title="100% Importer Verified"
-          className="absolute top-3 right-3 z-10 inline-flex items-center gap-1 bg-[#09090B]/85 border border-[#E2C275]/40 text-[#E2C275] text-[10px] font-bold px-2 py-0.5 rounded-full"
-        >
-          <ShieldCheck className="w-3 h-3 text-[#E2C275]" />
-          <span>VERIFIED</span>
-        </div>
-
-        {/* Bottom-Left: Serving / Weight Badge */}
-        <div className="absolute bottom-3 left-3 z-10">
-          <span className="inline-block bg-[#09090B]/85 border border-white/10 text-zinc-300 text-[11px] font-medium px-2.5 py-1 rounded-md font-sans">
-            {product.weightOrServings}
-          </span>
-        </div>
-
-        {/* Bottom-Right: Subtle Hover Action Icons */}
-        <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        {/* Bottom-Right: Sibling Hover Action Icons (Outside <Link> to avoid nested interactive elements) */}
+        <div className="absolute bottom-3 right-3 z-20 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <button
             type="button"
             data-no-glint
@@ -288,7 +290,7 @@ export default function ProductCard({ product, viewMode = "grid" }: ProductCardP
             <Eye className="w-3.5 h-3.5" />
           </button>
         </div>
-      </Link>
+      </div>
 
       {/* 2. Structured Typography Block Below Image */}
       <div className="flex-1 flex flex-col p-4 sm:p-5">

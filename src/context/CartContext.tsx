@@ -12,6 +12,7 @@ export interface CartItem {
 
 interface CartContextType {
   items: CartItem[];
+  isHydrated: boolean;
   addToCart: (product: Product, quantity?: number, selectedFlavor?: string) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
@@ -30,25 +31,38 @@ const LOCAL_STORAGE_KEY = "aurafit_cart_v1";
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const { showToast } = useToast();
-  const [items, setItems] = useState<CartItem[]>(() => {
-    if (typeof window === "undefined") return [];
-    try {
-      const stored = window.localStorage.getItem(LOCAL_STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [isHydrated, setIsHydrated] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // Save cart changes to localStorage
+  // Hydrate from localStorage strictly after client mount
   useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        const stored = window.localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            setItems(parsed);
+          }
+        }
+      } catch {
+        // ignore storage errors
+      }
+      setIsHydrated(true);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Save cart changes to localStorage only after hydration
+  useEffect(() => {
+    if (!isHydrated) return;
     try {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(items));
     } catch (e) {
       console.error("Failed to save cart to localStorage", e);
     }
-  }, [items]);
+  }, [items, isHydrated]);
 
   const addToCart = (product: Product, quantity = 1, selectedFlavor?: string) => {
     setItems((prev) => {
@@ -71,7 +85,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         },
       ];
     });
-    // Open drawer smoothly upon adding item
     setIsCartOpen(true);
     const detail = selectedFlavor || product.weightOrServings || product.flavors?.[0];
     showToast({
@@ -120,16 +133,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const closeCart = () => setIsCartOpen(false);
   const toggleCart = () => setIsCartOpen((prev) => !prev);
 
-  const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
-  const subtotal = items.reduce(
-    (acc, item) => acc + item.product.price * item.quantity,
-    0
-  );
+  const totalItems = isHydrated
+    ? items.reduce((acc, item) => acc + item.quantity, 0)
+    : 0;
+  const subtotal = isHydrated
+    ? items.reduce((acc, item) => acc + item.product.price * item.quantity, 0)
+    : 0;
 
   return (
     <CartContext.Provider
       value={{
         items,
+        isHydrated,
         addToCart,
         removeFromCart,
         updateQuantity,
