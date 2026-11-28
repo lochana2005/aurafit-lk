@@ -14,14 +14,16 @@ import {
 interface VerificationConsoleProps {
   onVerify: (code: string) => void;
   isLoading: boolean;
+  initialCode?: string;
 }
 
 export default function VerificationConsole({
   onVerify,
   isLoading,
+  initialCode = "",
 }: VerificationConsoleProps) {
   const [mode, setMode] = useState<"code" | "qr">("code");
-  const [inputCode, setInputCode] = useState("");
+  const [inputCode, setInputCode] = useState(initialCode);
   const [isScanning, setIsScanning] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {

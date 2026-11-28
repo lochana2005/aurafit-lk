@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   MessageSquare,
   Sliders,
@@ -311,35 +312,93 @@ function generateAIResponse(userText: string) {
   };
 }
 
-export default function AICoachPage() {
+function mapGoalParam(rawGoal: string | null): AthleteConfig["goal"] | null {
+  if (!rawGoal) return null;
+  const lower = rawGoal.toLowerCase();
+  if (lower.includes("fat") || lower.includes("cut")) return "Lean Cutting";
+  if (lower.includes("strength") || lower.includes("pump") || lower.includes("power"))
+    return "Strength & Power";
+  if (lower.includes("recovery")) return "Recovery";
+  if (lower.includes("weight") || lower.includes("mass") || lower.includes("bulk") || lower.includes("muscle"))
+    return "Muscle Gain";
+  return null;
+}
+
+function buildGoalSession(rawGoal: string, mappedGoal: AthleteConfig["goal"]): ChatSession {
+  const stack = resolveStack({
+    goal: mappedGoal,
+    weightKg: 75,
+    heightCm: 175,
+    frequency: "5–6 Days/wk",
+    budget: "Rs. 20k – 45k",
+  });
+  return {
+    id: `session_goal_${mappedGoal.toLowerCase().replace(/\s+/g, "_")}`,
+    title: `${rawGoal} Protocol`,
+    createdAt: "Just now",
+    updatedAt: Date.now(),
+    messages: [
+      {
+        id: "msg_goal_q",
+        role: "user",
+        content: `Build me an authentic supplement stack for: ${rawGoal}.`,
+        timestamp: "Just now",
+      },
+      {
+        id: "msg_goal_a",
+        role: "assistant",
+        content: `I have formulated your tailored **${stack.title}** protocol based on your **${rawGoal}** objective.\n\n${stack.rationale}`,
+        timestamp: "Just now",
+        recommendedStack: stack,
+      },
+    ],
+    recommendedStack: stack,
+  };
+}
+
+function AICoachContent() {
+  const searchParams = useSearchParams();
+  const goalParam = searchParams.get("goal");
+  const mappedGoal = mapGoalParam(goalParam);
+
   const [sessions, setSessions] = useState<ChatSession[]>(() => {
-    if (typeof window === "undefined") return SEEDED_CHATS;
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+    let base: ChatSession[] = SEEDED_CHATS;
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            base = parsed;
+          }
         }
+      } catch (e) {
+        console.error("Failed to load chat history from localStorage", e);
       }
-    } catch (e) {
-      console.error("Failed to load chat history from localStorage", e);
     }
-    return SEEDED_CHATS;
+    if (goalParam && mappedGoal) {
+      const goalSession = buildGoalSession(goalParam, mappedGoal);
+      return [goalSession, ...base.filter((s) => s.id !== goalSession.id)];
+    }
+    return base;
   });
 
   const [activeSessionId, setActiveSessionId] = useState<string>(() => {
-    if (typeof window === "undefined") return SEEDED_CHATS[0].id;
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed[0].id;
+    if (goalParam && mappedGoal) {
+      return `session_goal_${mappedGoal.toLowerCase().replace(/\s+/g, "_")}`;
+    }
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed[0].id;
+          }
         }
+      } catch {
+        // fallback
       }
-    } catch {
-      // fallback
     }
     return SEEDED_CHATS[0].id;
   });
@@ -680,5 +739,19 @@ export default function AICoachPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AICoachPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#09090B] flex items-center justify-center text-zinc-500 font-heading tracking-widest text-sm uppercase">
+          Loading AI Stack Coach...
+        </div>
+      }
+    >
+      <AICoachContent />
+    </Suspense>
   );
 }

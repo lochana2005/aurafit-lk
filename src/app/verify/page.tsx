@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ChevronRight, QrCode } from "lucide-react";
 import VerificationConsole from "@/components/verify/VerificationConsole";
 import VerificationResult from "@/components/verify/VerificationResult";
@@ -9,10 +10,19 @@ import HowToVerifySteps from "@/components/verify/HowToVerifySteps";
 import TrustStatsStrip from "@/components/verify/TrustStatsStrip";
 import { lookupBatch, BatchVerificationRecord } from "@/data/batchRegistry";
 
-export default function VerifyPage() {
-  const [searchedCode, setSearchedCode] = useState("");
-  const [activeRecord, setActiveRecord] = useState<BatchVerificationRecord | null>(null);
-  const [isNotFound, setIsNotFound] = useState(false);
+function VerifyContent() {
+  const searchParams = useSearchParams();
+  const initialCode = (searchParams.get("code") || "").trim().toUpperCase();
+
+  const [searchedCode, setSearchedCode] = useState(initialCode);
+  const [activeRecord, setActiveRecord] = useState<BatchVerificationRecord | null>(() => {
+    if (!initialCode) return null;
+    return lookupBatch(initialCode);
+  });
+  const [isNotFound, setIsNotFound] = useState(() => {
+    if (!initialCode) return false;
+    return lookupBatch(initialCode) === null;
+  });
   const [isLoading, setIsLoading] = useState(false);
 
   const handleVerify = (code: string) => {
@@ -109,7 +119,11 @@ export default function VerifyPage() {
         {/* =========================================================================
             MAIN INTERACTIVE SCANNER & INPUT HUB
             ========================================================================= */}
-        <VerificationConsole onVerify={handleVerify} isLoading={isLoading} />
+        <VerificationConsole
+          onVerify={handleVerify}
+          isLoading={isLoading}
+          initialCode={initialCode}
+        />
 
         {/* =========================================================================
             VERIFICATION RESULT DISPLAY (Loading / Authentic / Counterfeit Warning)
@@ -137,5 +151,19 @@ export default function VerifyPage() {
         <TrustStatsStrip />
       </div>
     </div>
+  );
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#09090B] flex items-center justify-center text-zinc-500 font-heading tracking-widest text-sm uppercase">
+          Loading Authenticity Vault...
+        </div>
+      }
+    >
+      <VerifyContent />
+    </Suspense>
   );
 }

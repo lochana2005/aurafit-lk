@@ -4,6 +4,8 @@ import EditorialBanners from "@/components/home/EditorialBanners";
 import TopPicksSection from "@/components/home/TopPicksSection";
 import TrustFeatures from "@/components/home/TrustFeatures";
 import BrandMarquee from "@/components/home/BrandMarquee";
+import AiCoachShowcase from "@/components/home/AiCoachShowcase";
+import VerificationTrackingHub from "@/components/home/VerificationTrackingHub";
 
 export default function HomePage() {
   return (
@@ -14,6 +16,8 @@ export default function HomePage() {
       <TopPicksSection />
       <TrustFeatures />
       <BrandMarquee />
+      <AiCoachShowcase />
+      <VerificationTrackingHub />
     </div>
   );
 }
