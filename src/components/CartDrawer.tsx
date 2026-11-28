@@ -2,6 +2,7 @@
 
 import React, { useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -21,6 +22,7 @@ import StudioImage from "./StudioImage";
 const FREE_SHIPPING_THRESHOLD = 25000;
 
 export default function CartDrawer() {
+  const pathname = usePathname();
   const {
     items,
     isCartOpen,
@@ -49,6 +51,8 @@ export default function CartDrawer() {
     Math.round((subtotal / FREE_SHIPPING_THRESHOLD) * 100)
   );
   const remainingForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
+
+  if (pathname?.startsWith("/admin")) return null;
 
   return (
     <AnimatePresence>

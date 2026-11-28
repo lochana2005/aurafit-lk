@@ -9,6 +9,8 @@ import {
   QrCode,
   ArrowRight,
   Package,
+  BellRing,
+  CheckCircle2,
 } from "lucide-react";
 import { useAdmin, AdminOrderStatus } from "@/context/AdminContext";
 import { formatLKR } from "@/lib/pricing";
@@ -16,6 +18,7 @@ import { formatLKR } from "@/lib/pricing";
 const ORDER_STATUSES: AdminOrderStatus[] = [
   "Order Placed",
   "Packed & QR Sealed",
+  "Handed to Courier",
   "In Transit",
   "Out for Delivery",
   "Delivered",
@@ -30,11 +33,13 @@ export default function AdminOverviewPage() {
     .reduce((sum, o) => sum + o.total, 0);
   const cashCardRevenue = totalRevenue - kokoRevenue;
 
+  const newIncomingOrders = orders.filter((o) => o.status === "Order Placed");
   const activeOrdersCount = orders.filter((o) => o.status !== "Delivered").length;
-  const lowStockProducts = products.filter((p) => p.stockCount <= 5);
+  const lowStockProducts = products.filter(
+    (p) => p.stockCount <= (p.lowStockThreshold ?? 5)
+  );
   const totalScans = batches.reduce((sum, b) => sum + b.scanCount, 0);
 
-  // Category breakdown from products
   const categoryMap: Record<string, number> = {};
   products.forEach((p) => {
     categoryMap[p.category] = (categoryMap[p.category] || 0) + 1;
@@ -44,9 +49,76 @@ export default function AdminOverviewPage() {
 
   return (
     <div className="space-y-6">
+      {/* Prominent New Incoming Orders Highlight Feed */}
+      {newIncomingOrders.length > 0 && (
+        <div className="bg-gradient-to-r from-[#191610] via-[#141418] to-[#111115] border border-[#E2C275]/45 rounded-2xl p-5 sm:p-6 space-y-4 shadow-[0_12px_36px_rgba(226,194,117,0.12)]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#E2C275]/15 border border-[#E2C275]/40 flex items-center justify-center text-[#E2C275]">
+                <BellRing className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-black uppercase tracking-wider text-[#E2C275] font-heading">
+                  NEW INCOMING ORDERS (AWAITING DISPATCH) · {newIncomingOrders.length}
+                </h3>
+                <p className="text-xs text-zinc-300">
+                  Live checkout orders waiting for QR hologram sealing &amp; courier assignment
+                </p>
+              </div>
+            </div>
+
+            <Link
+              href="/admin/orders?filter=new"
+              className="text-xs font-bold text-[#E2C275] hover:underline flex items-center gap-1 shrink-0"
+            >
+              <span>Open Dispatch Center</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {newIncomingOrders.slice(0, 4).map((order) => (
+              <div
+                key={order.id}
+                className="p-4 rounded-xl bg-[#0B0B0F] border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-bold text-[#E2C275]">
+                      {order.id}
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-[#16161C] border border-white/10 text-[10px] font-semibold text-zinc-300">
+                      {order.paymentMethod}
+                    </span>
+                  </div>
+                  <div className="text-sm font-bold text-white truncate mt-0.5">
+                    {order.customerName} · {order.city}
+                  </div>
+                  <div className="text-xs text-zinc-400 truncate">
+                    {order.itemsSummary} · {formatLKR(order.total, false)}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateOrderDispatch(order.id, {
+                      status: "Packed & QR Sealed",
+                    })
+                  }
+                  className="px-3.5 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wider btn-aurafit-gold inline-flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>ACCEPT &amp; PACK ORDER</span>
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* 4 Executive KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        {/* KPI 1: Total Revenue */}
         <div className="bg-[#111115] border border-white/10 rounded-2xl p-5 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
@@ -67,7 +139,6 @@ export default function AdminOverviewPage() {
           </div>
         </div>
 
-        {/* KPI 2: Active Orders to Dispatch */}
         <div className="bg-[#111115] border border-white/10 rounded-2xl p-5 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
@@ -85,7 +156,6 @@ export default function AdminOverviewPage() {
           </div>
         </div>
 
-        {/* KPI 3: Low-Stock Products Alert */}
         <div className="bg-[#111115] border border-white/10 rounded-2xl p-5 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
@@ -99,11 +169,12 @@ export default function AdminOverviewPage() {
             {lowStockProducts.length}
           </div>
           <div className="text-xs text-zinc-400 pt-1 border-t border-white/[0.06]">
-            SKUs with 5 or fewer units remaining
+            <Link href="/admin/inventory" className="text-[#E2C275] hover:underline">
+              Open Inventory &amp; Stock Audit →
+            </Link>
           </div>
         </div>
 
-        {/* KPI 4: Verified QR Batch Scans */}
         <div className="bg-[#111115] border border-white/10 rounded-2xl p-5 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
@@ -124,7 +195,6 @@ export default function AdminOverviewPage() {
 
       {/* Category Breakdown & Low-Stock Alerts */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Category Revenue & Catalog Breakdown */}
         <div className="lg:col-span-7 bg-[#111115] border border-white/10 rounded-2xl p-6 space-y-5">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold uppercase tracking-wider text-white font-heading">
@@ -160,15 +230,17 @@ export default function AdminOverviewPage() {
           </div>
         </div>
 
-        {/* Low Stock Restock Alerts */}
         <div className="lg:col-span-5 bg-[#111115] border border-white/10 rounded-2xl p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold uppercase tracking-wider text-white font-heading">
               Low Stock Restock Alerts
             </h3>
-            <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-400/30 text-[10px] font-bold text-amber-300">
-              ACTION NEEDED
-            </span>
+            <Link
+              href="/admin/inventory"
+              className="px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-400/30 text-[10px] font-bold text-amber-300 hover:brightness-110"
+            >
+              RESTOCK NOW
+            </Link>
           </div>
 
           {lowStockProducts.length === 0 ? (

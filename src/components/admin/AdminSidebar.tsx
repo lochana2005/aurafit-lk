@@ -12,6 +12,7 @@ import {
   ExternalLink,
   LogOut,
   X,
+  Boxes,
 } from "lucide-react";
 import { useAdmin } from "@/context/AdminContext";
 
@@ -23,6 +24,7 @@ interface AdminSidebarProps {
 const ADMIN_NAV = [
   { name: "Overview", href: "/admin", icon: LayoutDashboard },
   { name: "Products & Stock", href: "/admin/products", icon: Package },
+  { name: "Inventory & Stock", href: "/admin/inventory", icon: Boxes },
   { name: "Orders & Dispatch", href: "/admin/orders", icon: Truck },
   { name: "QR Batch Vault", href: "/admin/batches", icon: QrCode },
   { name: "Customer Inquiries", href: "/admin/messages", icon: MessageSquare },
@@ -33,8 +35,11 @@ export default function AdminSidebar({
   onCloseMobile,
 }: AdminSidebarProps) {
   const pathname = usePathname();
-  const { orders, messages, adminLogout } = useAdmin();
+  const { products, orders, messages, adminLogout } = useAdmin();
 
+  const lowStockCount = products.filter(
+    (p) => p.stockCount <= (p.lowStockThreshold ?? 5)
+  ).length;
   const pendingOrders = orders.filter((o) => o.status !== "Delivered").length;
   const openMessages = messages.filter((m) => !m.resolved).length;
 
@@ -68,9 +73,14 @@ export default function AdminSidebar({
         <nav className="space-y-1.5" aria-label="Admin Navigation">
           {ADMIN_NAV.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href;
+            const isActive =
+              item.href === "/admin/products"
+                ? pathname.startsWith("/admin/products")
+                : pathname === item.href;
             const badgeCount =
-              item.href === "/admin/orders"
+              item.href === "/admin/inventory"
+                ? lowStockCount
+                : item.href === "/admin/orders"
                 ? pendingOrders
                 : item.href === "/admin/messages"
                 ? openMessages

@@ -2,6 +2,7 @@
 
 import React, { useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Heart, ShoppingCart, Trash2, ArrowRight } from "lucide-react";
 import { useWatchlist } from "@/context/WatchlistContext";
@@ -9,6 +10,7 @@ import { useCart } from "@/context/CartContext";
 import StudioImage from "./StudioImage";
 
 export default function WatchlistDrawer() {
+  const pathname = usePathname();
   const {
     watchlist,
     watchlistCount,
@@ -29,6 +31,8 @@ export default function WatchlistDrawer() {
       document.body.style.overflow = "";
     };
   }, [isWatchlistOpen]);
+
+  if (pathname?.startsWith("/admin")) return null;
 
   return (
     <AnimatePresence>

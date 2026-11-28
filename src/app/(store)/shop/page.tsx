@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, Suspense } from "react";
+import React, { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   MOCK_PRODUCTS,
@@ -98,37 +98,60 @@ function ShopContent() {
   const [itemsPerPage, setItemsPerPage] = useState<number | "all">(12);
   const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(true);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  const [catalogProducts, setCatalogProducts] = useState<Product[]>(MOCK_PRODUCTS);
+
+  useEffect(() => {
+    const syncAdminProducts = () => {
+      try {
+        const stored = window.localStorage.getItem("aurafit_admin_products");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setCatalogProducts(parsed);
+          }
+        }
+      } catch {
+        // ignore
+      }
+    };
+    const timer = setTimeout(syncAdminProducts, 0);
+    window.addEventListener("storage", syncAdminProducts);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("storage", syncAdminProducts);
+    };
+  }, []);
 
   // Compute live category item counts
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    MOCK_PRODUCTS.forEach((p) => {
+    catalogProducts.forEach((p) => {
       counts[p.category] = (counts[p.category] || 0) + 1;
     });
     return counts;
-  }, []);
+  }, [catalogProducts]);
 
   // Compute live brand item counts
   const brandCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    MOCK_PRODUCTS.forEach((p) => {
+    catalogProducts.forEach((p) => {
       counts[p.brand] = (counts[p.brand] || 0) + 1;
     });
     return counts;
-  }, []);
+  }, [catalogProducts]);
 
   // Compute live goal item counts
   const goalCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    MOCK_PRODUCTS.forEach((p) => {
+    catalogProducts.forEach((p) => {
       counts[p.goal] = (counts[p.goal] || 0) + 1;
     });
     return counts;
-  }, []);
+  }, [catalogProducts]);
 
   // Filter and sort products
   const filteredProducts = useMemo(() => {
-    return MOCK_PRODUCTS.filter((product) => {
+    return catalogProducts.filter((product) => {
       // 1. Search Query Filter
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase().trim();
@@ -194,7 +217,7 @@ function ShopContent() {
       }
       return 0; // "featured" / default sorting maintains catalog order
     });
-  }, [filters, searchQuery, sortBy]);
+  }, [catalogProducts, filters, searchQuery, sortBy]);
 
   const displayedProducts = useMemo(() => {
     if (itemsPerPage === "all") return filteredProducts;

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowUp, MessageCircle, X, Headphones } from "lucide-react";
 
@@ -81,6 +82,7 @@ const SOCIAL_ACTIONS: SocialAction[] = [
 ];
 
 export default function FloatingActions() {
+  const pathname = usePathname();
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -135,6 +137,8 @@ export default function FloatingActions() {
       }
     }
   };
+
+  if (pathname?.startsWith("/admin")) return null;
 
   return (
     <aside aria-label="Quick Actions" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 select-none">

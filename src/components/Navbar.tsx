@@ -105,6 +105,8 @@ export default function Navbar() {
   const cartCount = mounted ? totalItems : 0;
   const savedCount = mounted ? watchlistCount : 0;
 
+  if (pathname?.startsWith("/admin")) return null;
+
   return (
     <>
       {/* =========================================================================
