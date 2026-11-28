@@ -321,21 +321,35 @@ export default function Navbar() {
           {/* Mobile/Tablet Slide-Down Search Bar (< xl) */}
           {mobileSearchOpen && (
             <div className="xl:hidden px-4 py-3 bg-[#0E0E12] border-t border-white/10">
-              <form onSubmit={handleSearchSubmit} className="relative">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
+              <form
+                onSubmit={handleSearchSubmit}
+                className="flex items-center w-full rounded-full bg-[#141418] border border-white/15 focus-within:border-[#E2C275] pl-4 pr-1.5 py-1 transition-colors"
+              >
                 <input
                   ref={mobileSlideSearchRef}
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search whey, creatine, pre-workout..."
-                  className="w-full bg-[#16161C] border border-white/15 focus:border-[#E2C275] rounded-full pl-10 pr-20 py-2.5 text-sm text-white placeholder-zinc-400 focus:outline-none transition-colors"
+                  placeholder="Search whey, creatine, pre-workouts..."
+                  className="flex-1 min-w-0 bg-transparent text-sm text-white placeholder:text-zinc-400 focus:outline-none pr-2"
                 />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    data-no-glint
+                    onClick={() => setSearchQuery("")}
+                    aria-label="Clear search"
+                    className="p-1 text-zinc-400 hover:text-white shrink-0 mr-1 cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
                 <button
                   type="submit"
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider btn-aurafit-gold cursor-pointer"
+                  aria-label="Search supplements"
+                  className="w-8 h-8 rounded-full shrink-0 flex items-center justify-center bg-[#E2C275] text-[#09090B] cursor-pointer"
                 >
-                  Go
+                  <Search className="w-4 h-4 stroke-[2.5]" />
                 </button>
               </form>
             </div>
@@ -390,15 +404,35 @@ export default function Navbar() {
               </div>
 
               {/* 2. Integrated Drawer Search Input */}
-              <form onSubmit={handleSearchSubmit} className="relative">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
+              <form
+                onSubmit={handleSearchSubmit}
+                className="flex items-center w-full rounded-full bg-[#141418] border border-white/15 focus-within:border-[#E2C275] pl-4 pr-1.5 py-1 transition-colors"
+              >
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search supplements, brands..."
-                  className="w-full bg-[#16161C] border border-white/12 focus:border-[#E2C275] rounded-full pl-10 pr-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none transition-colors"
+                  placeholder="Search whey, creatine, pre-workouts..."
+                  className="flex-1 min-w-0 bg-transparent text-sm text-white placeholder:text-zinc-400 focus:outline-none pr-2"
                 />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    data-no-glint
+                    onClick={() => setSearchQuery("")}
+                    aria-label="Clear search"
+                    className="p-1 text-zinc-400 hover:text-white shrink-0 mr-1 cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  aria-label="Search supplements"
+                  className="w-8 h-8 rounded-full shrink-0 flex items-center justify-center bg-[#E2C275] text-[#09090B] cursor-pointer"
+                >
+                  <Search className="w-4 h-4 stroke-[2.5]" />
+                </button>
               </form>
 
               {/* 3. All 7 Navigation Links with Icons & Active Gold States */}
