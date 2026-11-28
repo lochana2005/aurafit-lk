@@ -30,7 +30,8 @@ export type AdminOrderStatus =
   | "Handed to Courier"
   | "In Transit"
   | "Out for Delivery"
-  | "Delivered";
+  | "Delivered"
+  | "Cancelled";
 
 export type CourierProvider =
   | "Koombiyo Express"
@@ -53,6 +54,7 @@ export interface AdminOrder {
   address: string;
   city: string;
   district: string;
+  postalCode?: string;
   notes?: string;
   date: string;
   paymentMethod: "Card" | "COD" | "KOKO 3x";
@@ -303,6 +305,7 @@ function normalizeOrderRecord(raw: any): AdminOrder {
     address: raw.address || "",
     city: raw.city || "Colombo",
     district: raw.district || "Colombo",
+    postalCode: raw.postalCode || "00300",
     notes: raw.notes,
     date:
       raw.date ||

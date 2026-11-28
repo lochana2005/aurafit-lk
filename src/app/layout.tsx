@@ -6,6 +6,7 @@ import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { WatchlistProvider } from "@/context/WatchlistContext";
+import { AdminProvider } from "@/context/AdminContext";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-sans",
@@ -54,8 +55,10 @@ export default function RootLayout({
           <AuthProvider>
             <WatchlistProvider>
               <CartProvider>
-                {children}
-                <ToastContainer />
+                <AdminProvider>
+                  {children}
+                  <ToastContainer />
+                </AdminProvider>
               </CartProvider>
             </WatchlistProvider>
           </AuthProvider>

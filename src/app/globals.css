@@ -543,3 +543,29 @@ body::-webkit-scrollbar-corner,
     transform: scaleX(0);
   }
 }
+
+/* =========================================================================
+   THERMAL / A6 WAYBILL LABEL PRINT STYLES
+   ========================================================================= */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  #aurafit-print-label,
+  #aurafit-print-label * {
+    visibility: visible !important;
+  }
+  #aurafit-print-label {
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 148mm !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 2px solid #000000 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 16px !important;
+  }
+}
