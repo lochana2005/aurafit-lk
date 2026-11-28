@@ -7,6 +7,7 @@ import { Check, ShieldCheck, Heart, Eye, ShoppingCart, Star } from "lucide-react
 import { Product } from "@/data/mockProducts";
 import { formatLKR, getKokoTotal, getKokoInstallment } from "@/lib/pricing";
 import { useCart } from "@/context/CartContext";
+import { useWatchlist } from "@/context/WatchlistContext";
 import StudioImage from "./StudioImage";
 
 interface ProductCardProps {
@@ -17,8 +18,10 @@ interface ProductCardProps {
 export default function ProductCard({ product, viewMode = "grid" }: ProductCardProps) {
   const router = useRouter();
   const { addToCart } = useCart();
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const { isInWatchlist, toggleWatchlist } = useWatchlist();
   const [isAdded, setIsAdded] = useState(false);
+
+  const isWishlisted = isInWatchlist(product.id);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -31,7 +34,7 @@ export default function ProductCard({ product, viewMode = "grid" }: ProductCardP
   const handleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsWishlisted(!isWishlisted);
+    toggleWatchlist(product);
   };
 
   const formattedPrice = `Rs. ${product.price.toLocaleString("en-LK", {
@@ -192,16 +195,17 @@ export default function ProductCard({ product, viewMode = "grid" }: ProductCardP
 
             <button
               type="button"
+              data-no-glint
               onClick={handleWishlist}
               aria-label="Add to wishlist"
               className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
                 isWishlisted
-                  ? "bg-red-500/20 border-red-500/40 text-red-400"
-                  : "bg-[#1C1C21] border-white/12 text-zinc-300 hover:text-white hover:border-white/25"
+                  ? "bg-[#E2C275]/15 border-[#E2C275]/50 text-[#E2C275]"
+                  : "bg-[#1C1C21] border-white/12 text-zinc-300 hover:text-white hover:border-[#E2C275]/40"
               }`}
             >
               <Heart
-                className={`w-4 h-4 ${isWishlisted ? "fill-red-400 text-red-400" : ""}`}
+                className={`w-4 h-4 ${isWishlisted ? "fill-[#E2C275] text-[#E2C275]" : ""}`}
               />
             </button>
           </div>
@@ -256,17 +260,18 @@ export default function ProductCard({ product, viewMode = "grid" }: ProductCardP
         <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <button
             type="button"
+            data-no-glint
             onClick={handleWishlist}
             aria-label="Add to wishlist"
             className={`p-2 rounded-lg border transition-all cursor-pointer ${
               isWishlisted
-                ? "bg-red-500/20 border-red-500/40 text-red-400"
+                ? "bg-[#E2C275]/20 border-[#E2C275]/50 text-[#E2C275]"
                 : "bg-[#09090B]/90 border-white/15 text-zinc-300 hover:text-white hover:border-[#E2C275]/40"
             }`}
           >
             <Heart
               className={`w-3.5 h-3.5 ${
-                isWishlisted ? "fill-red-400 text-red-400" : ""
+                isWishlisted ? "fill-[#E2C275] text-[#E2C275]" : ""
               }`}
             />
           </button>

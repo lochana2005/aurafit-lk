@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Product } from "@/data/mockProducts";
+import { useToast } from "./ToastContext";
 
 export interface CartItem {
   product: Product;
@@ -28,6 +29,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 const LOCAL_STORAGE_KEY = "aurafit_cart_v1";
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const { showToast } = useToast();
   const [items, setItems] = useState<CartItem[]>(() => {
     if (typeof window === "undefined") return [];
     try {
@@ -71,10 +73,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
     // Open drawer smoothly upon adding item
     setIsCartOpen(true);
+    const detail = selectedFlavor || product.weightOrServings || product.flavors?.[0];
+    showToast({
+      type: "gold",
+      title: "Added to Supplement Vault",
+      subtitle: detail ? `${product.name} (${detail})` : product.name,
+      actionLabel: "VIEW CART →",
+      onAction: () => setIsCartOpen(true),
+    });
   };
 
   const removeFromCart = (productId: string) => {
+    const target = items.find((i) => i.product.id === productId);
     setItems((prev) => prev.filter((item) => item.product.id !== productId));
+    if (target) {
+      showToast({
+        type: "gold",
+        title: "Item removed from cart",
+        subtitle: `${target.product.name} removed.`,
+      });
+    }
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
@@ -91,6 +109,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = () => {
     setItems([]);
+    showToast({
+      type: "gold",
+      title: "Cart cleared",
+      subtitle: "All items removed from your supplement vault.",
+    });
   };
 
   const openCart = () => setIsCartOpen(true);

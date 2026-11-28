@@ -6,8 +6,12 @@ import Footer from "@/components/Footer";
 import FloatingActions from "@/components/FloatingActions";
 import SmoothScroll from "@/components/SmoothScroll";
 import CartDrawer from "@/components/CartDrawer";
+import WatchlistDrawer from "@/components/WatchlistDrawer";
+import ToastContainer from "@/components/ui/ToastContainer";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
+import { ToastProvider } from "@/context/ToastContext";
+import { WatchlistProvider } from "@/context/WatchlistContext";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-sans",
@@ -52,19 +56,25 @@ export default function RootLayout({
       className={`${plusJakartaSans.variable} ${barlowCondensed.variable} dark h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#141418] text-white selection:bg-[#E2C275] selection:text-black">
-        <AuthProvider>
-          <CartProvider>
-            <SmoothScroll>
-              <Navbar />
-              <main className="flex-1 w-full bg-[#09090B] rounded-b-[36px] md:rounded-b-[48px] border-b border-[#E2C275]/25 relative z-10 overflow-x-clip pb-12 sm:pb-16">
-                {children}
-              </main>
-              <Footer />
-              <FloatingActions />
-              <CartDrawer />
-            </SmoothScroll>
-          </CartProvider>
-        </AuthProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <WatchlistProvider>
+              <CartProvider>
+                <SmoothScroll>
+                  <Navbar />
+                  <main className="flex-1 w-full bg-[#09090B] rounded-b-[36px] md:rounded-b-[48px] border-b border-[#E2C275]/25 relative z-10 overflow-x-clip pb-12 sm:pb-16">
+                    {children}
+                  </main>
+                  <Footer />
+                  <FloatingActions />
+                  <CartDrawer />
+                  <WatchlistDrawer />
+                  <ToastContainer />
+                </SmoothScroll>
+              </CartProvider>
+            </WatchlistProvider>
+          </AuthProvider>
+        </ToastProvider>
       </body>
     </html>
   );

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { ShoppingBag, Lock, ChevronRight } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useToast } from "@/context/ToastContext";
 import CheckoutForm, { CheckoutFormData } from "@/components/checkout/CheckoutForm";
 import PaymentSelector, { PaymentMethod } from "@/components/checkout/PaymentSelector";
 import CheckoutSummary from "@/components/checkout/CheckoutSummary";
@@ -15,6 +16,7 @@ const STANDARD_SHIPPING_FEE = 450;
 
 export default function CheckoutPage() {
   const { items, subtotal, clearCart } = useCart();
+  const { showToast } = useToast();
 
   // Form State
   const [formData, setFormData] = useState<CheckoutFormData>({
@@ -65,8 +67,18 @@ export default function CheckoutPage() {
     const cleaned = code.trim().toUpperCase();
     if (cleaned === "AURA10") {
       setAppliedPromo({ code: "AURA10", percent: 10 });
+      showToast({
+        type: "gold",
+        title: "VIP Promo Unlocked",
+        subtitle: "10% AuraFit member discount applied to your order.",
+      });
       return true;
     }
+    showToast({
+      type: "error",
+      title: "Invalid Promo Code",
+      subtitle: "Try code AURA10 for 10% off your supplement stack.",
+    });
     return false;
   };
 
@@ -177,6 +189,12 @@ export default function CheckoutPage() {
 
     // Clear cart in state and local storage
     clearCart();
+
+    showToast({
+      type: "success",
+      title: "Order Confirmed!",
+      subtitle: `Reference ${orderRef} is queued for 24–48H express dispatch.`,
+    });
 
     // Scroll to top to see confirmation
     window.scrollTo({ top: 0, behavior: "smooth" });

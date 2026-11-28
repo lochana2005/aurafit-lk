@@ -14,6 +14,7 @@ import {
   Banknote,
 } from "lucide-react";
 import { getKokoTotal, getKokoInstallment } from "@/lib/pricing";
+import { useToast } from "@/context/ToastContext";
 
 interface OrderSummaryProps {
   subtotal: number;
@@ -23,6 +24,7 @@ const FREE_SHIPPING_THRESHOLD = 25000;
 const STANDARD_SHIPPING_FEE = 450;
 
 export default function OrderSummary({ subtotal }: OrderSummaryProps) {
+  const { showToast } = useToast();
   const [promoInput, setPromoInput] = useState("");
   const [promoError, setPromoError] = useState<string | null>(null);
   const [appliedPromo, setAppliedPromo] = useState<{
@@ -61,8 +63,18 @@ export default function OrderSummary({ subtotal }: OrderSummaryProps) {
       setAppliedPromo({ code: "AURA10", discountPercent: 10 });
       setPromoInput("");
       setPromoError(null);
+      showToast({
+        type: "gold",
+        title: "VIP Promo Unlocked",
+        subtitle: "10% AuraFit member discount applied to your order.",
+      });
     } else {
       setPromoError('Invalid coupon. Try "AURA10" for 10% off.');
+      showToast({
+        type: "error",
+        title: "Invalid Promo Code",
+        subtitle: "Try code AURA10 for 10% off your supplement stack.",
+      });
     }
   };
 

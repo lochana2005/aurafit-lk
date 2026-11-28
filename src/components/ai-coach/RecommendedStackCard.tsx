@@ -2,8 +2,10 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Sparkles, ShoppingBag, Clock, Check, ArrowRight, Truck } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useToast } from "@/context/ToastContext";
 import StudioImage from "@/components/StudioImage";
 import { formatLKR, getKokoTotal, getKokoInstallment } from "@/lib/pricing";
 import { StackItem } from "./types";
@@ -21,7 +23,9 @@ export default function RecommendedStackCard({
   goalTitle,
   rationale,
 }: RecommendedStackCardProps) {
+  const router = useRouter();
   const { addToCart, openCart } = useCart();
+  const { showToast } = useToast();
   const [isAdded, setIsAdded] = useState(false);
 
   if (!stackItems || stackItems.length === 0) return null;
@@ -37,6 +41,13 @@ export default function RecommendedStackCard({
     });
     setIsAdded(true);
     openCart();
+    showToast({
+      type: "cyan",
+      title: "AI Stack Added to Cart",
+      subtitle: "All recommended supplements added with bundle pricing.",
+      actionLabel: "CHECKOUT →",
+      onAction: () => router.push("/checkout"),
+    });
     setTimeout(() => setIsAdded(false), 2000);
   };
 

@@ -534,3 +534,12 @@ body::-webkit-scrollbar-corner,
 ):not(.btn-aurafit-gold-circle):not(.btn-aurafit-dark-circle):not([data-no-glint]):not([class*="w-1.5"]):not([class*="w-2"]):not([class*="w-2.5"]):active {
   transform: translateY(0) scale(0.98) !important;
 }
+
+@keyframes aurafit-toast-shrink {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}

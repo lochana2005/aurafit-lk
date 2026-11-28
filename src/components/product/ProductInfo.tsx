@@ -15,9 +15,11 @@ import {
   Truck,
   Check,
   ShieldCheck,
+  Heart,
 } from "lucide-react";
 import { Product } from "@/data/mockProducts";
 import { useCart } from "@/context/CartContext";
+import { useWatchlist } from "@/context/WatchlistContext";
 import { formatLKR, getKokoTotal, getKokoInstallment } from "@/lib/pricing";
 
 interface ProductInfoProps {
@@ -27,6 +29,8 @@ interface ProductInfoProps {
 export default function ProductInfo({ product }: ProductInfoProps) {
   const router = useRouter();
   const { addToCart } = useCart();
+  const { isInWatchlist, toggleWatchlist } = useWatchlist();
+  const isWishlisted = isInWatchlist(product.id);
   const [selectedFlavor, setSelectedFlavor] = useState(
     product.flavors?.[0] || "Standard"
   );
@@ -297,6 +301,23 @@ export default function ProductInfo({ product }: ProductInfoProps) {
                 <span>Add to Cart</span>
               </>
             )}
+          </button>
+
+          {/* Watchlist Heart Button */}
+          <button
+            type="button"
+            data-no-glint
+            onClick={() => toggleWatchlist(product)}
+            aria-label={isWishlisted ? "Remove from watchlist" : "Save to watchlist"}
+            className={`w-12 h-12 rounded-xl border flex items-center justify-center shrink-0 transition-all cursor-pointer ${
+              isWishlisted
+                ? "bg-[#E2C275]/15 border-[#E2C275]/60 text-[#E2C275]"
+                : "bg-[#141418] border-white/15 text-zinc-300 hover:text-white hover:border-[#E2C275]/45"
+            }`}
+          >
+            <Heart
+              className={`w-5 h-5 ${isWishlisted ? "fill-[#E2C275] text-[#E2C275]" : ""}`}
+            />
           </button>
         </div>
 

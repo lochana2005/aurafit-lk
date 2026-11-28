@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/context/ToastContext";
 import {
   Truck,
   ShieldCheck,
@@ -70,6 +71,7 @@ interface TicketSummary {
 
 export default function SupportTicketForm() {
   const { user, isAuthenticated } = useAuth();
+  const { showToast } = useToast();
 
   const [category, setCategory] = useState<InquiryCategory>("Order & Delivery Issue");
   const [name, setName] = useState(() => user?.name || "");
@@ -102,6 +104,11 @@ export default function SupportTicketForm() {
     if (!submittedTicket) return;
     navigator.clipboard.writeText(submittedTicket.ticketId);
     setCopied(true);
+    showToast({
+      type: "gold",
+      title: "Copied to Clipboard",
+      subtitle: `${submittedTicket.ticketId} ready to paste.`,
+    });
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -149,6 +156,11 @@ export default function SupportTicketForm() {
 
     setSubmittedTicket(newTicket);
     setIsSubmitting(false);
+    showToast({
+      type: "success",
+      title: "Concierge Request Sent",
+      subtitle: "Our Colombo 03 specialist team will reply shortly.",
+    });
   };
 
   const handleReset = () => {

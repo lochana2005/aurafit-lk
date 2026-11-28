@@ -9,9 +9,11 @@ import VerificationResult from "@/components/verify/VerificationResult";
 import HowToVerifySteps from "@/components/verify/HowToVerifySteps";
 import TrustStatsStrip from "@/components/verify/TrustStatsStrip";
 import { lookupBatch, BatchVerificationRecord } from "@/data/batchRegistry";
+import { useToast } from "@/context/ToastContext";
 
 function VerifyContent() {
   const searchParams = useSearchParams();
+  const { showToast } = useToast();
   const initialCode = (searchParams.get("code") || "").trim().toUpperCase();
 
   const [searchedCode, setSearchedCode] = useState(initialCode);
@@ -39,6 +41,11 @@ function VerifyContent() {
       if (found) {
         setActiveRecord(found);
         setIsNotFound(false);
+        showToast({
+          type: "cyan",
+          title: "100% Authentic Batch Verified",
+          subtitle: `Certificate of Analysis matched for ${found.batchNumber}.`,
+        });
 
         // Save to user's verified history in localStorage so Profile can display it
         try {
@@ -67,6 +74,11 @@ function VerifyContent() {
         }
       } else {
         setIsNotFound(true);
+        showToast({
+          type: "error",
+          title: "Batch Code Not Found",
+          subtitle: `No official AuraFit lab record matched ${code.trim().toUpperCase()}.`,
+        });
       }
     }, 800);
   };

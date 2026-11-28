@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import { useWatchlist } from "@/context/WatchlistContext";
 import {
   Search,
   ShoppingCart,
@@ -20,6 +21,7 @@ import {
   Home,
   ShoppingBag,
   Award,
+  Heart,
 } from "lucide-react";
 
 const NAV_LINKS = [
@@ -54,6 +56,7 @@ export default function Navbar() {
     () => false
   );
   const { totalItems, openCart } = useCart();
+  const { watchlistCount, openWatchlist } = useWatchlist();
   const { user, isAuthenticated } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
@@ -100,6 +103,7 @@ export default function Navbar() {
 
   const isAuthActive = mounted && isAuthenticated && !!user;
   const cartCount = mounted ? totalItems : 0;
+  const savedCount = mounted ? watchlistCount : 0;
 
   return (
     <>
@@ -227,6 +231,20 @@ export default function Navbar() {
 
               <button
                 type="button"
+                onClick={openWatchlist}
+                aria-label="Saved Watchlist"
+                className="relative p-2 rounded-full btn-aurafit-dark-circle bg-[#141418] text-zinc-200 hover:text-[#E2C275] flex items-center justify-center cursor-pointer"
+              >
+                <Heart className={`w-4.5 h-4.5 ${savedCount > 0 ? "text-[#E2C275] fill-[#E2C275]" : ""}`} />
+                {savedCount > 0 && (
+                  <span className="absolute -top-1 -right-1 z-10 flex items-center justify-center min-w-[17px] h-[17px] px-1 text-[10px] font-black text-[#09090B] bg-[#E2C275] rounded-full">
+                    {savedCount}
+                  </span>
+                )}
+              </button>
+
+              <button
+                type="button"
                 onClick={openCart}
                 aria-label="Shopping Cart"
                 className="p-2.5 rounded-full btn-aurafit-gold-circle flex items-center justify-center cursor-pointer"
@@ -301,6 +319,34 @@ export default function Navbar() {
                   <User className="w-4 h-4" />
                 )}
               </Link>
+
+              <button
+                type="button"
+                onClick={openWatchlist}
+                aria-label="Saved Watchlist"
+                className="relative p-2 rounded-full btn-aurafit-dark-circle bg-[#141418] text-zinc-200 hover:text-[#E2C275] flex items-center justify-center cursor-pointer"
+              >
+                <Heart className={`w-4.5 h-4.5 ${savedCount > 0 ? "text-[#E2C275] fill-[#E2C275]" : ""}`} />
+                {savedCount > 0 && (
+                  <span className="absolute -top-1 -right-1 z-10 flex items-center justify-center min-w-[17px] h-[17px] px-1 text-[10px] font-black text-[#09090B] bg-[#E2C275] rounded-full">
+                    {savedCount}
+                  </span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={openWatchlist}
+                aria-label="Saved Watchlist"
+                className="relative w-9 h-9 rounded-full btn-aurafit-dark-circle bg-[#141418] text-zinc-200 flex items-center justify-center cursor-pointer"
+              >
+                <Heart className={`w-4 h-4 ${savedCount > 0 ? "text-[#E2C275] fill-[#E2C275]" : ""}`} />
+                {savedCount > 0 && (
+                  <span className="absolute -top-1 -right-1 z-10 flex items-center justify-center min-w-[16px] h-[16px] px-1 text-[9px] font-black text-[#09090B] bg-[#E2C275] rounded-full">
+                    {savedCount}
+                  </span>
+                )}
+              </button>
 
               <button
                 type="button"
