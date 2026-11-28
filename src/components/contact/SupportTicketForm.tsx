@@ -156,6 +156,16 @@ export default function SupportTicketForm() {
 
     setSubmittedTicket(newTicket);
     setIsSubmitting(false);
+    try {
+      const existing = localStorage.getItem("aurafit_contact_tickets");
+      const parsed = existing ? JSON.parse(existing) : [];
+      localStorage.setItem(
+        "aurafit_contact_tickets",
+        JSON.stringify([{ id: `msg_${Date.now()}`, ...newTicket, resolved: false }, ...parsed])
+      );
+    } catch {
+      // ignore
+    }
     showToast({
       type: "success",
       title: "Concierge Request Sent",
