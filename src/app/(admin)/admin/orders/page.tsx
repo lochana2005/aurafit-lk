@@ -192,10 +192,10 @@ function AdminOrdersCockpitContent() {
   };
 
   return (
-    <div className="-m-4 sm:-m-6 lg:-m-8 px-4 sm:px-6 lg:px-8 pt-4 sm:pt-5 lg:pt-6 xl:h-[calc(100vh-4rem)] flex flex-col xl:overflow-hidden">
-      {/* Top Filter & Search Bar (Fixed Non-Scrolling Header) */}
-      <div className="shrink-0 bg-[#09090B] border-b border-white/[0.08] pb-4 space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
+    <div className="-m-4 sm:-m-6 lg:-m-8 h-[calc(100vh-4rem)] flex flex-col overflow-hidden bg-[#09090B]">
+      {/* Compact Single-Row Flush Filter & Search Bar */}
+      <div className="shrink-0 px-4 sm:px-6 py-3 bg-[#09090B] border-b border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-1.5">
           {(
             [
               "NEW ORDERS",
@@ -210,13 +210,13 @@ function AdminOrdersCockpitContent() {
               key={t}
               type="button"
               onClick={() => setTab(t)}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider inline-flex items-center gap-2 cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider inline-flex items-center gap-1.5 cursor-pointer ${
                 tab === t ? "btn-aurafit-gold" : "btn-aurafit-dark"
               }`}
             >
               <span>{t}</span>
               <span
-                className={`px-1.5 py-0.5 rounded-full font-mono text-[10px] ${
+                className={`px-1.5 py-0.5 rounded-full font-mono text-[10px] leading-none ${
                   tab === t
                     ? "bg-[#09090B] text-white"
                     : "bg-[#09090B]/70 text-[#E2C275]"
@@ -228,24 +228,24 @@ function AdminOrdersCockpitContent() {
           ))}
         </div>
 
-        <div className="relative max-w-lg">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
+        <div className="relative w-full sm:w-72 lg:w-80">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400 pointer-events-none" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search Order ID, customer name, phone, city, or waybill..."
-            className="w-full bg-[#16161C] border border-white/12 focus:border-[#E2C275] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none"
+            placeholder="Search Order ID, name, phone, city..."
+            className="w-full bg-[#16161C] border border-white/12 focus:border-[#E2C275] rounded-lg pl-9 pr-3 py-1.5 text-xs sm:text-sm text-white placeholder-zinc-500 focus:outline-none"
           />
         </div>
       </div>
 
-      {/* Split Master-Detail Cockpit */}
-      <div className="flex-1 xl:min-h-0 grid grid-cols-1 xl:grid-cols-12 gap-6 pt-4">
-        {/* Left Column (5 cols): Scannable Order Queue */}
+      {/* Split-Pane Body */}
+      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-5 p-4 sm:p-6 overflow-hidden">
+        {/* Left Column — Order Queue */}
         <div
           data-lenis-prevent
-          className="xl:col-span-5 xl:h-full xl:overflow-y-auto xl:pr-1.5 pb-6 space-y-3 scrollbar-thin"
+          className="lg:col-span-4 h-full overflow-y-auto pr-2 space-y-3 scrollbar-thin"
         >
           {filtered.length === 0 ? (
             <div className="bg-[#111115] border border-white/10 rounded-2xl p-10 text-center text-sm text-zinc-400">
@@ -266,9 +266,9 @@ function AdminOrdersCockpitContent() {
                   type="button"
                   data-no-glint
                   onClick={() => setSelectedOrderId(order.id)}
-                  className={`w-full text-left rounded-2xl p-4 border transition-all cursor-pointer space-y-2.5 ${
+                  className={`w-full text-left rounded-xl p-3.5 border transition-all cursor-pointer space-y-2 ${
                     isSelected
-                      ? "border-[#E2C275] bg-[#16161C] shadow-[0_0_24px_rgba(226,194,117,0.14)]"
+                      ? "border-[#d4af37]/60 bg-[#d4af37]/[0.05] shadow-[0_0_20px_rgba(212,175,55,0.12)]"
                       : "border-white/10 bg-[#111115] hover:border-white/25"
                   }`}
                 >
@@ -331,19 +331,16 @@ function AdminOrdersCockpitContent() {
           )}
         </div>
 
-        {/* Right Column (7 cols): Interactive Order Fulfillment & Waybill Cockpit */}
-        <div
-          data-lenis-prevent
-          className="xl:col-span-7 xl:h-full xl:overflow-y-auto xl:pr-1.5 pb-6 scrollbar-thin"
-        >
+        {/* Right Column — 3-Part Structured Order Workspace */}
+        <div className="lg:col-span-8 h-full flex flex-col overflow-hidden rounded-xl border border-white/[0.08] bg-[#0e0e12]">
           {!activeOrder ? (
-            <div className="bg-[#111115] border border-white/10 rounded-2xl p-12 text-center text-zinc-400 text-sm">
+            <div className="flex-1 flex items-center justify-center p-12 text-center text-zinc-400 text-sm">
               Select an order from the queue to begin fulfillment.
             </div>
           ) : (
-            <div className="bg-[#111115] border border-white/10 rounded-2xl p-5 sm:p-7 space-y-6">
-              {/* 1. Header & Guided Next-Step Action Bar */}
-              <div className="space-y-4 pb-5 border-b border-white/[0.08]">
+            <>
+              {/* A. Pinned Card Header */}
+              <div className="shrink-0 p-4 sm:p-5 border-b border-white/[0.08] bg-[#121217] space-y-3.5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2.5">
@@ -416,7 +413,12 @@ function AdminOrdersCockpitContent() {
                 </div>
               </div>
 
-              {/* 2. Customer & Delivery Location Card (2-Column Grid) */}
+              {/* B. Scrollable Middle Content */}
+              <div
+                data-lenis-prevent
+                className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 space-y-4 scrollbar-thin"
+              >
+                {/* 2. Customer & Delivery Location Card (2-Column Grid) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Customer Contact */}
                 <div className="p-4 rounded-xl bg-[#16161C] border border-white/8 space-y-2.5">
@@ -638,9 +640,10 @@ function AdminOrdersCockpitContent() {
                   </div>
                 </div>
               </div>
+              </div>
 
-              {/* 5. Courier Assignment & Printable Waybill Label */}
-              <div className="pt-4 border-t border-white/[0.08] space-y-4">
+              {/* C. Pinned Card Footer */}
+              <div className="shrink-0 p-4 border-t border-white/[0.08] bg-[#121217] space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
@@ -720,7 +723,7 @@ function AdminOrdersCockpitContent() {
                   </button>
                 </div>
               </div>
-            </div>
+            </>
           )}
         </div>
       </div>

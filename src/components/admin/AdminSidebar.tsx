@@ -16,6 +16,7 @@ import {
   Tags,
   Layers,
   TicketPercent,
+  Users,
 } from "lucide-react";
 import { useAdmin } from "@/context/AdminContext";
 
@@ -33,6 +34,7 @@ const ADMIN_NAV = [
   { name: "Orders & Dispatch", href: "/admin/orders", icon: Truck },
   { name: "Promo & Affiliates", href: "/admin/promo-affiliates", icon: TicketPercent },
   { name: "QR Batch Vault", href: "/admin/batches", icon: QrCode },
+  { name: "Customers", href: "/admin/customers", icon: Users },
   { name: "Customer Inquiries", href: "/admin/messages", icon: MessageSquare },
 ];
 

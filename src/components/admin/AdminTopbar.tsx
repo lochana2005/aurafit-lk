@@ -16,6 +16,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/admin/orders": "Orders & Delivery Dispatch",
   "/admin/promo-affiliates": "Promo Codes & Coach Cashback",
   "/admin/batches": "QR Batch Authenticity Vault",
+  "/admin/customers": "Customer Management",
   "/admin/messages": "Customer Support Inquiries",
 };
 
