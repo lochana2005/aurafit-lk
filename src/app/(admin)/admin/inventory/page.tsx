@@ -118,7 +118,7 @@ export default function AdminInventoryPage() {
       </div>
 
       {/* Filter Tabs & Search */}
-      <div className="bg-[#111115] border border-white/10 rounded-2xl p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="sticky top-0 z-30 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 bg-[#09090B] border-b border-white/[0.08] flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-2">
           {(
             ["All Products", "Healthy Stock", "Low Stock", "Out of Stock"] as const

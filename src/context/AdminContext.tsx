@@ -1,18 +1,20 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback } from "react";
 import { MOCK_PRODUCTS, Product } from "@/data/mockProducts";
 import { BATCH_REGISTRY } from "@/data/batchRegistry";
 import {
   CoachAffiliate,
   PromoCode,
   CashbackPayout,
+  CommissionTier,
   DiscountValueType,
   PromoValidationResult,
   SEED_COACHES,
   SEED_PROMO_CODES,
   SEED_CASHBACK_PAYOUTS,
   evaluatePromoCode,
+  resolveTierForSales,
 } from "@/data/affiliateSchema";
 import { useToast } from "./ToastContext";
 
@@ -186,11 +188,14 @@ interface AdminContextType {
     coachName: string;
     contactInfo: string;
     email?: string;
+    gymOrNotes?: string;
     discountType: DiscountValueType;
     discountValue: number;
     cashbackType: DiscountValueType;
     cashbackValue: number;
     isActive: boolean;
+    isLevelSystemEnabled: boolean;
+    commissionTiers: CommissionTier[];
   }) => { ok: boolean; error?: string };
   togglePromoStatus: (id: string) => void;
   deletePromoCode: (id: string) => void;
@@ -236,26 +241,6 @@ export const SEED_CATEGORIES: AdminCategory[] = [
   { id: "cat_7", name: "Fat Burner", slug: "fat-burner", tagline: "Thermogenic shred & metabolism", image: "/images/categories/fat-burner.png", sortOrder: 6, isActive: true },
   { id: "cat_8", name: "Multivitamins", slug: "multivitamins", tagline: "Daily athlete micronutrient packs", image: "/images/categories/multivitamins.png", sortOrder: 7, isActive: true },
 ];
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function normalizeCategories(raw: any[]): AdminCategory[] {
-  return raw
-    .map((c, idx) => {
-      const matchedSeed = SEED_CATEGORIES.find(
-        (s) => s.id === c.id || s.slug === c.slug || s.name.toLowerCase() === String(c.name || "").toLowerCase()
-      );
-      return {
-        id: c.id || `cat_${idx}`,
-        name: c.name || "Category",
-        slug: c.slug || toSlug(c.name || "category"),
-        tagline: c.tagline || matchedSeed?.tagline || "Certified sports nutrition formula",
-        image: typeof c.image === "string" ? c.image : matchedSeed?.image || "",
-        sortOrder: typeof c.sortOrder === "number" ? c.sortOrder : idx,
-        isActive: typeof c.isActive === "boolean" ? c.isActive : true,
-      };
-    })
-    .sort((a, b) => a.sortOrder - b.sortOrder);
-}
 
 export const SEED_BRANDS: AdminBrand[] = [
   { id: "brd_1", name: "Optimum Nutrition", slug: "optimum-nutrition", originCountry: "USA Direct", isActive: true },
@@ -414,68 +399,6 @@ const SEED_ORDERS: AdminOrder[] = [
   },
 ];
 
-// Normalize either Checkout OrderConfirmationData or AdminOrder into AdminOrder
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function normalizeOrderRecord(raw: any): AdminOrder {
-  if (raw.id && raw.itemsSummary && raw.courier) {
-    return raw as AdminOrder;
-  }
-  const orderId = raw.orderId || raw.id || `AF-${Date.now()}`;
-  const itemsArr: AdminOrderItem[] = Array.isArray(raw.items)
-    ? raw.items.map(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (it: any) => ({
-          name: it.product?.name || it.name || "Supplement",
-          quantity: it.quantity || 1,
-          price: it.product?.price || it.price || 0,
-          flavor: it.selectedFlavor || it.flavor,
-        })
-      )
-    : [];
-  const itemsSummary =
-    itemsArr.map((i) => `${i.name} × ${i.quantity}`).join(" + ") ||
-    "Supplement Stack";
-  const paymentMethod: AdminOrder["paymentMethod"] =
-    raw.paymentMethod === "koko" || raw.isKoko || raw.paymentMethod === "KOKO 3x"
-      ? "KOKO 3x"
-      : raw.paymentMethod === "cod" || raw.paymentMethod === "COD"
-      ? "COD"
-      : "Card";
-
-  return {
-    id: orderId,
-    customerName: raw.customerName || "Customer",
-    email: raw.email,
-    phone: raw.phone || "+94 77 000 0000",
-    address: raw.address || "",
-    city: raw.city || "Colombo",
-    district: raw.district || "Colombo",
-    postalCode: raw.postalCode || "00300",
-    notes: raw.notes,
-    date:
-      raw.date ||
-      new Date().toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }),
-    paymentMethod,
-    total: Number(raw.total) || 0,
-    status: raw.status || "Order Placed",
-    courier: raw.courier || "PromptX Courier",
-    waybillNumber: raw.waybillNumber || "",
-    estimatedArrival: raw.estimatedArrival || "Within 24–48 Hours",
-    riderNotes: raw.riderNotes,
-    itemsSummary,
-    items: itemsArr,
-    promoCodeId: raw.promoCodeId,
-    promoCode: raw.promoCode,
-    coachId: raw.coachId,
-    discountAmount: typeof raw.discountAmount === "number" ? raw.discountAmount : undefined,
-    cashbackAmount: typeof raw.cashbackAmount === "number" ? raw.cashbackAmount : undefined,
-  };
-}
-
 const SEED_BATCHES: AdminBatch[] = Object.values(BATCH_REGISTRY).map((b, i) => ({
   batchNumber: b.batchNumber,
   brand: b.product.brand,
@@ -515,7 +438,7 @@ const SEED_MESSAGES: AdminMessage[] = [
 
 export function AdminProvider({ children }: { children: React.ReactNode }) {
   const { showToast } = useToast();
-  const [isHydrated, setIsHydrated] = useState(false);
+  const isHydrated = true;
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [products, setProducts] = useState<AdminProduct[]>(SEED_PRODUCTS);
   const [orders, setOrders] = useState<AdminOrder[]>(SEED_ORDERS);
@@ -528,159 +451,6 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [cashbackPayouts, setCashbackPayouts] = useState<CashbackPayout[]>(
     SEED_CASHBACK_PAYOUTS
   );
-
-  const loadOrdersFromStorage = useCallback(() => {
-    try {
-      const rawOrders = window.localStorage.getItem(ADMIN_KEYS.ORDERS);
-      if (rawOrders) {
-        const parsed = JSON.parse(rawOrders);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const normalized = parsed.map(normalizeOrderRecord);
-          const existingIds = new Set(normalized.map((o) => o.id));
-          return [
-            ...normalized,
-            ...SEED_ORDERS.filter((s) => !existingIds.has(s.id)),
-          ];
-        }
-      }
-    } catch {
-      // ignore
-    }
-    return SEED_ORDERS;
-  }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      try {
-        if (window.localStorage.getItem(ADMIN_KEYS.AUTH) === "true") {
-          setIsAdminAuthenticated(true);
-        }
-        const p = window.localStorage.getItem(ADMIN_KEYS.PRODUCTS);
-        if (p) setProducts(JSON.parse(p));
-
-        setOrders(loadOrdersFromStorage());
-
-        const b = window.localStorage.getItem(ADMIN_KEYS.BATCHES);
-        if (b) setBatches(JSON.parse(b));
-
-        const c = window.localStorage.getItem(ADMIN_KEYS.CATEGORIES);
-        if (c) setCategories(normalizeCategories(JSON.parse(c)));
-
-        const br = window.localStorage.getItem(ADMIN_KEYS.BRANDS);
-        if (br) setBrands(JSON.parse(br));
-
-        const co = window.localStorage.getItem(ADMIN_KEYS.COACHES);
-        if (co) setCoaches(JSON.parse(co));
-
-        const pr = window.localStorage.getItem(ADMIN_KEYS.PROMO_CODES);
-        if (pr) setPromoCodes(JSON.parse(pr));
-
-        const py = window.localStorage.getItem(ADMIN_KEYS.CASHBACK_PAYOUTS);
-        if (py) setCashbackPayouts(JSON.parse(py));
-
-        const m = window.localStorage.getItem(ADMIN_KEYS.MESSAGES);
-        const contactTickets = window.localStorage.getItem(ADMIN_KEYS.CONTACT_TICKETS);
-        let baseMessages: AdminMessage[] = m ? JSON.parse(m) : SEED_MESSAGES;
-        if (contactTickets) {
-          const parsedTickets: AdminMessage[] = JSON.parse(contactTickets);
-          const existingIds = new Set(baseMessages.map((x) => x.ticketId));
-          baseMessages = [
-            ...parsedTickets.filter((t) => !existingIds.has(t.ticketId)),
-            ...baseMessages,
-          ];
-        }
-        setMessages(baseMessages);
-      } catch {
-        // ignore
-      }
-      setIsHydrated(true);
-    }, 0);
-
-    const handleStorage = (e: StorageEvent) => {
-      if (e.key === ADMIN_KEYS.ORDERS) {
-        setOrders(loadOrdersFromStorage());
-      }
-      if (e.key === ADMIN_KEYS.PRODUCTS && e.newValue) {
-        try {
-          setProducts(JSON.parse(e.newValue));
-        } catch {
-          // ignore
-        }
-      }
-      if (e.key === ADMIN_KEYS.CATEGORIES && e.newValue) {
-        try {
-          setCategories(normalizeCategories(JSON.parse(e.newValue)));
-        } catch {
-          // ignore
-        }
-      }
-      if (e.key === ADMIN_KEYS.BRANDS && e.newValue) {
-        try {
-          setBrands(JSON.parse(e.newValue));
-        } catch {
-          // ignore
-        }
-      }
-      if (e.key === ADMIN_KEYS.COACHES && e.newValue) {
-        try {
-          setCoaches(JSON.parse(e.newValue));
-        } catch {
-          // ignore
-        }
-      }
-      if (e.key === ADMIN_KEYS.PROMO_CODES && e.newValue) {
-        try {
-          setPromoCodes(JSON.parse(e.newValue));
-        } catch {
-          // ignore
-        }
-      }
-      if (e.key === ADMIN_KEYS.CASHBACK_PAYOUTS && e.newValue) {
-        try {
-          setCashbackPayouts(JSON.parse(e.newValue));
-        } catch {
-          // ignore
-        }
-      }
-    };
-
-    window.addEventListener("storage", handleStorage);
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener("storage", handleStorage);
-    };
-  }, [loadOrdersFromStorage]);
-
-  useEffect(() => {
-    if (!isHydrated) return;
-    try {
-      localStorage.setItem(ADMIN_KEYS.PRODUCTS, JSON.stringify(products));
-      localStorage.setItem(ADMIN_KEYS.ORDERS, JSON.stringify(orders));
-      localStorage.setItem(ADMIN_KEYS.BATCHES, JSON.stringify(batches));
-      localStorage.setItem(ADMIN_KEYS.MESSAGES, JSON.stringify(messages));
-      localStorage.setItem(ADMIN_KEYS.CATEGORIES, JSON.stringify(categories));
-      localStorage.setItem(ADMIN_KEYS.BRANDS, JSON.stringify(brands));
-      localStorage.setItem(ADMIN_KEYS.COACHES, JSON.stringify(coaches));
-      localStorage.setItem(ADMIN_KEYS.PROMO_CODES, JSON.stringify(promoCodes));
-      localStorage.setItem(
-        ADMIN_KEYS.CASHBACK_PAYOUTS,
-        JSON.stringify(cashbackPayouts)
-      );
-    } catch {
-      // ignore
-    }
-  }, [
-    products,
-    orders,
-    batches,
-    messages,
-    categories,
-    brands,
-    coaches,
-    promoCodes,
-    cashbackPayouts,
-    isHydrated,
-  ]);
 
   const adminLogin = useCallback(
     (email: string, pin: string) => {
@@ -1079,9 +849,41 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     [showToast]
   );
 
-  const recordOrder = useCallback((order: AdminOrder) => {
-    setOrders((prev) => [order, ...prev.filter((o) => o.id !== order.id)]);
-  }, []);
+  const recordOrder = useCallback(
+    (order: AdminOrder) => {
+      const nextOrders = [order, ...orders.filter((o) => o.id !== order.id)];
+      setOrders(nextOrders);
+
+      if (order.coachId && order.status !== "Cancelled") {
+        const promo = promoCodes.find((p) => p.coachId === order.coachId);
+        const cumulativeSales = nextOrders
+          .filter(
+            (o) =>
+              o.status !== "Cancelled" &&
+              (o.coachId === order.coachId ||
+                (promo && o.promoCode?.toUpperCase() === promo.code.toUpperCase()))
+          )
+          .reduce((sum, o) => sum + (o.total || 0), 0);
+
+        setCoaches((prev) =>
+          prev.map((c) => {
+            if (c.id !== order.coachId || !c.isLevelSystemEnabled) return c;
+            const resolved = resolveTierForSales(
+              c,
+              promo?.cashbackValue ?? c.activeCashbackRate,
+              cumulativeSales
+            );
+            return {
+              ...c,
+              currentLevel: resolved.currentLevel,
+              activeCashbackRate: resolved.activeCashbackRate,
+            };
+          })
+        );
+      }
+    },
+    [orders, promoCodes]
+  );
 
   const savePromoAffiliate = useCallback(
     (input: {
@@ -1091,11 +893,14 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       coachName: string;
       contactInfo: string;
       email?: string;
+      gymOrNotes?: string;
       discountType: DiscountValueType;
       discountValue: number;
       cashbackType: DiscountValueType;
       cashbackValue: number;
       isActive: boolean;
+      isLevelSystemEnabled: boolean;
+      commissionTiers: CommissionTier[];
     }): { ok: boolean; error?: string } => {
       const cleanCode = input.code.trim().toUpperCase().replace(/\s+/g, "");
       const cleanCoachName = input.coachName.trim();
@@ -1117,6 +922,46 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
       const nowIso = new Date().toISOString();
       const targetCoachId = input.coachId || `coach_${Date.now()}`;
+      const baseRate = Math.max(0, Number(input.cashbackValue) || 0);
+
+      const normalizedTiers: CommissionTier[] = input.isLevelSystemEnabled
+        ? [...input.commissionTiers]
+            .map((t, idx) => ({
+              level: idx + 1,
+              salesTargetLkr: idx === 0 ? 0 : Math.max(0, Number(t.salesTargetLkr) || 0),
+              cashbackValue:
+                idx === 0 ? baseRate : Math.max(0, Number(t.cashbackValue) || 0),
+            }))
+            .sort((a, b) => a.salesTargetLkr - b.salesTargetLkr)
+            .map((t, idx) => ({ ...t, level: idx + 1 }))
+        : [{ level: 1, salesTargetLkr: 0, cashbackValue: baseRate }];
+
+      const existingSales = orders
+        .filter(
+          (o) =>
+            o.status !== "Cancelled" &&
+            (o.coachId === targetCoachId ||
+              o.promoCode?.toUpperCase() === cleanCode)
+        )
+        .reduce((sum, o) => sum + (o.total || 0), 0);
+
+      const resolvedTier = input.isLevelSystemEnabled
+        ? resolveTierForSales(
+            {
+              id: targetCoachId,
+              name: cleanCoachName,
+              contactInfo: cleanContact || "N/A",
+              isActive: true,
+              isLevelSystemEnabled: true,
+              currentLevel: 1,
+              activeCashbackRate: baseRate,
+              commissionTiers: normalizedTiers,
+              createdAt: nowIso,
+            },
+            baseRate,
+            existingSales
+          )
+        : { currentLevel: 1, activeCashbackRate: baseRate };
 
       setCoaches((prev) => {
         const exists = prev.some((c) => c.id === targetCoachId);
@@ -1127,7 +972,12 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
                   ...c,
                   name: cleanCoachName,
                   contactInfo: cleanContact || c.contactInfo,
-                  email: input.email?.trim() || c.email,
+                  email: input.email?.trim() || undefined,
+                  gymOrNotes: input.gymOrNotes?.trim() || undefined,
+                  isLevelSystemEnabled: input.isLevelSystemEnabled,
+                  currentLevel: resolvedTier.currentLevel,
+                  activeCashbackRate: resolvedTier.activeCashbackRate,
+                  commissionTiers: normalizedTiers,
                 }
               : c
           );
@@ -1138,7 +988,12 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
             name: cleanCoachName,
             contactInfo: cleanContact || "N/A",
             email: input.email?.trim() || undefined,
+            gymOrNotes: input.gymOrNotes?.trim() || undefined,
             isActive: true,
+            isLevelSystemEnabled: input.isLevelSystemEnabled,
+            currentLevel: resolvedTier.currentLevel,
+            activeCashbackRate: resolvedTier.activeCashbackRate,
+            commissionTiers: normalizedTiers,
             createdAt: nowIso,
           },
           ...prev,
@@ -1158,7 +1013,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
                   discountType: input.discountType,
                   discountValue: Math.max(0, Number(input.discountValue) || 0),
                   cashbackType: input.cashbackType,
-                  cashbackValue: Math.max(0, Number(input.cashbackValue) || 0),
+                  cashbackValue: baseRate,
                   isActive: input.isActive,
                 }
               : p
@@ -1172,7 +1027,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
             discountType: input.discountType,
             discountValue: Math.max(0, Number(input.discountValue) || 0),
             cashbackType: input.cashbackType,
-            cashbackValue: Math.max(0, Number(input.cashbackValue) || 0),
+            cashbackValue: baseRate,
             isActive: input.isActive,
             createdAt: nowIso,
           },
@@ -1187,7 +1042,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       });
       return { ok: true };
     },
-    [promoCodes, showToast]
+    [promoCodes, orders, showToast]
   );
 
   const togglePromoStatus = useCallback(

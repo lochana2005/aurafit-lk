@@ -1,11 +1,22 @@
 export type DiscountValueType = "percentage" | "fixed_lkr";
 
+export interface CommissionTier {
+  level: number;
+  salesTargetLkr: number;
+  cashbackValue: number;
+}
+
 export interface CoachAffiliate {
   id: string;
   name: string;
   contactInfo: string;
   email?: string;
+  gymOrNotes?: string;
   isActive: boolean;
+  isLevelSystemEnabled: boolean;
+  currentLevel: number;
+  activeCashbackRate: number;
+  commissionTiers: CommissionTier[];
   createdAt: string;
 }
 
@@ -47,7 +58,12 @@ export const SEED_COACHES: CoachAffiliate[] = [
     name: "AuraFit VIP Club",
     contactInfo: "+94 11 234 5678",
     email: "vip@aurafit.lk",
+    gymOrNotes: "Official AuraFit Flagship Member Code",
     isActive: true,
+    isLevelSystemEnabled: false,
+    currentLevel: 1,
+    activeCashbackRate: 0,
+    commissionTiers: [{ level: 1, salesTargetLkr: 0, cashbackValue: 0 }],
     createdAt: "2026-11-01T08:00:00.000Z",
   },
   {
@@ -55,7 +71,16 @@ export const SEED_COACHES: CoachAffiliate[] = [
     name: "Coach Kasun Wijesinghe",
     contactInfo: "+94 77 512 8840",
     email: "kasun.coach@gmail.com",
+    gymOrNotes: "IronWorks Colombo 03 — Head Strength Coach",
     isActive: true,
+    isLevelSystemEnabled: true,
+    currentLevel: 1,
+    activeCashbackRate: 5,
+    commissionTiers: [
+      { level: 1, salesTargetLkr: 0, cashbackValue: 5 },
+      { level: 2, salesTargetLkr: 100000, cashbackValue: 8 },
+      { level: 3, salesTargetLkr: 250000, cashbackValue: 10 },
+    ],
     createdAt: "2026-11-05T09:30:00.000Z",
   },
   {
@@ -63,7 +88,12 @@ export const SEED_COACHES: CoachAffiliate[] = [
     name: "Rohan Fitness Studio",
     contactInfo: "+94 71 904 3311",
     email: "rohan@fitstudio.lk",
+    gymOrNotes: "Negombo Athlete Performance Hub",
     isActive: true,
+    isLevelSystemEnabled: false,
+    currentLevel: 1,
+    activeCashbackRate: 1000,
+    commissionTiers: [{ level: 1, salesTargetLkr: 0, cashbackValue: 1000 }],
     createdAt: "2026-11-10T11:15:00.000Z",
   },
 ];
@@ -116,6 +146,37 @@ export const SEED_CASHBACK_PAYOUTS: CashbackPayout[] = [
   },
 ];
 
+export function resolveTierForSales(
+  coach: CoachAffiliate,
+  baseRate: number,
+  cumulativeSalesLkr: number
+): { currentLevel: number; activeCashbackRate: number; nextTier?: CommissionTier } {
+  if (!coach.isLevelSystemEnabled || !coach.commissionTiers?.length) {
+    return { currentLevel: 1, activeCashbackRate: baseRate };
+  }
+
+  const sortedTiers = [...coach.commissionTiers].sort(
+    (a, b) => a.salesTargetLkr - b.salesTargetLkr
+  );
+
+  let unlocked = sortedTiers[0];
+  for (const tier of sortedTiers) {
+    if (cumulativeSalesLkr >= tier.salesTargetLkr) {
+      unlocked = tier;
+    }
+  }
+
+  const nextTier = sortedTiers.find(
+    (t) => t.salesTargetLkr > cumulativeSalesLkr && t.level > unlocked.level
+  );
+
+  return {
+    currentLevel: unlocked.level,
+    activeCashbackRate: unlocked.cashbackValue,
+    nextTier,
+  };
+}
+
 export function evaluatePromoCode(
   rawCode: string,
   subtotal: number,
@@ -160,11 +221,16 @@ export function evaluatePromoCode(
       ? Math.round((subtotal * promo.discountValue) / 100)
       : Math.min(subtotal, Math.round(promo.discountValue));
 
+  const effectiveCashbackRate =
+    coach && coach.isLevelSystemEnabled
+      ? coach.activeCashbackRate
+      : promo.cashbackValue;
+
   const netOrderSubtotal = Math.max(0, subtotal - discountAmount);
   const cashbackAmount =
     promo.cashbackType === "percentage"
-      ? Math.round((netOrderSubtotal * promo.cashbackValue) / 100)
-      : Math.round(promo.cashbackValue);
+      ? Math.round((netOrderSubtotal * effectiveCashbackRate) / 100)
+      : Math.round(effectiveCashbackRate);
 
   const discountLabel =
     promo.discountType === "percentage"

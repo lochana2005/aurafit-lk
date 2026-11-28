@@ -192,9 +192,9 @@ function AdminOrdersCockpitContent() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Top Filter & Search Bar */}
-      <div className="bg-[#111115] border border-white/10 rounded-2xl p-4 space-y-4">
+    <div className="-m-4 sm:-m-6 lg:-m-8 px-4 sm:px-6 lg:px-8 pt-4 sm:pt-5 lg:pt-6 xl:h-[calc(100vh-4rem)] flex flex-col xl:overflow-hidden">
+      {/* Top Filter & Search Bar (Fixed Non-Scrolling Header) */}
+      <div className="shrink-0 bg-[#09090B] border-b border-white/[0.08] pb-4 space-y-3">
         <div className="flex flex-wrap items-center gap-2">
           {(
             [
@@ -241,9 +241,12 @@ function AdminOrdersCockpitContent() {
       </div>
 
       {/* Split Master-Detail Cockpit */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+      <div className="flex-1 xl:min-h-0 grid grid-cols-1 xl:grid-cols-12 gap-6 pt-4">
         {/* Left Column (5 cols): Scannable Order Queue */}
-        <div className="xl:col-span-5 space-y-3">
+        <div
+          data-lenis-prevent
+          className="xl:col-span-5 xl:h-full xl:overflow-y-auto xl:pr-1.5 pb-6 space-y-3 scrollbar-thin"
+        >
           {filtered.length === 0 ? (
             <div className="bg-[#111115] border border-white/10 rounded-2xl p-10 text-center text-sm text-zinc-400">
               No orders match your current filter.
@@ -329,7 +332,10 @@ function AdminOrdersCockpitContent() {
         </div>
 
         {/* Right Column (7 cols): Interactive Order Fulfillment & Waybill Cockpit */}
-        <div className="xl:col-span-7">
+        <div
+          data-lenis-prevent
+          className="xl:col-span-7 xl:h-full xl:overflow-y-auto xl:pr-1.5 pb-6 scrollbar-thin"
+        >
           {!activeOrder ? (
             <div className="bg-[#111115] border border-white/10 rounded-2xl p-12 text-center text-zinc-400 text-sm">
               Select an order from the queue to begin fulfillment.
