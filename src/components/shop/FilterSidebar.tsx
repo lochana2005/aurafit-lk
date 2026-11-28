@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { RotateCcw, ShieldCheck, Check, Minus, Plus, X } from "lucide-react";
 import { ProductCategory, FitnessGoal } from "@/data/mockProducts";
+import { useAdmin } from "@/context/AdminContext";
 
 export const MAX_PRICE_LIMIT = 60000;
 export const PRICE_STEP = 500;
@@ -69,6 +70,16 @@ export default function FilterSidebar({
   goalCounts,
   hasActiveFilters,
 }: FilterSidebarProps) {
+  const { categories: adminCategories, brands: adminBrands, isHydrated } = useAdmin();
+
+  const displayedCategories: ProductCategory[] = isHydrated
+    ? adminCategories.filter((c) => c.isActive).map((c) => c.name)
+    : ALL_CATEGORIES;
+
+  const displayedBrands: string[] = isHydrated
+    ? adminBrands.filter((b) => b.isActive).map((b) => b.name)
+    : ALL_BRANDS;
+
   const [openSections, setOpenSections] = useState({
     price: true,
     categories: true,
@@ -263,7 +274,7 @@ export default function FilterSidebar({
 
         {openSections.categories && (
           <div className="mt-2.5 space-y-1.5">
-            {ALL_CATEGORIES.map((cat) => {
+            {displayedCategories.map((cat) => {
               const isChecked = filters.categories.includes(cat);
               const count = categoryCounts[cat] || 0;
               return (
@@ -393,7 +404,7 @@ export default function FilterSidebar({
 
         {openSections.brands && (
           <div className="mt-2.5 space-y-1.5">
-            {ALL_BRANDS.map((brand) => {
+            {displayedBrands.map((brand) => {
               const isChecked = filters.brands.includes(brand);
               const count = brandCounts[brand] || 0;
               return (

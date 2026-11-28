@@ -10,6 +10,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/admin": "Executive Overview",
   "/admin/products": "Products & Inventory",
   "/admin/products/new": "Add New Supplement",
+  "/admin/categories-brands": "Categories & Brands Manager",
   "/admin/inventory": "Inventory & Stock Audit",
   "/admin/orders": "Orders & Delivery Dispatch",
   "/admin/batches": "QR Batch Authenticity Vault",

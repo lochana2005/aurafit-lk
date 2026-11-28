@@ -3,6 +3,7 @@
 import React, { useRef, useEffect } from "react";
 import Link from "next/link";
 import { ShieldCheck, Award } from "lucide-react";
+import { useAdmin } from "@/context/AdminContext";
 
 interface BrandItem {
   id: string;
@@ -219,9 +220,43 @@ const GLOBAL_BRANDS: BrandItem[] = [
 ];
 
 export default function BrandMarquee() {
+  const { brands: adminBrands, isHydrated } = useAdmin();
   const trackRef = useRef<HTMLDivElement>(null);
   const isPausedRef = useRef(false);
   const offsetRef = useRef(0);
+
+  const displayedBrands: BrandItem[] = isHydrated
+    ? adminBrands
+        .filter((b) => b.isActive)
+        .map((b) => {
+          const matched = GLOBAL_BRANDS.find(
+            (gb) => gb.queryParam.toLowerCase() === b.name.toLowerCase()
+          );
+          if (matched) return matched;
+          return {
+            id: b.id,
+            name: b.name.toUpperCase(),
+            queryParam: b.name,
+            logo: (
+              <div className="flex items-center gap-3 group-hover:scale-105 transition-transform duration-300">
+                <div className="w-8 h-8 rounded-lg bg-[#16161C] border border-[#E2C275]/30 flex items-center justify-center text-[#E2C275] font-heading font-extrabold text-sm">
+                  {b.name.slice(0, 2).toUpperCase()}
+                </div>
+                <div className="flex flex-col leading-none">
+                  <span className="font-heading text-xl sm:text-2xl font-extrabold uppercase tracking-wider text-current">
+                    {b.name}
+                  </span>
+                  {b.originCountry && (
+                    <span className="text-[9px] font-mono uppercase tracking-widest text-zinc-500 mt-0.5">
+                      {b.originCountry}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ),
+          };
+        })
+    : GLOBAL_BRANDS;
 
   useEffect(() => {
     let animId: number;
@@ -296,7 +331,7 @@ export default function BrandMarquee() {
         >
           {/* Group 1 */}
           <div className="flex shrink-0 items-center gap-12 sm:gap-16 pr-12 sm:pr-16">
-            {GLOBAL_BRANDS.map((brand) => (
+            {displayedBrands.map((brand) => (
               <Link
                 key={brand.id}
                 href={`/shop?brand=${encodeURIComponent(brand.queryParam)}`}
@@ -309,7 +344,7 @@ export default function BrandMarquee() {
 
           {/* Group 2 (Duplicate for seamless loop) */}
           <div aria-hidden="true" className="flex shrink-0 items-center gap-12 sm:gap-16 pr-12 sm:pr-16">
-            {GLOBAL_BRANDS.map((brand) => (
+            {displayedBrands.map((brand) => (
               <Link
                 key={`${brand.id}-dup`}
                 tabIndex={-1}

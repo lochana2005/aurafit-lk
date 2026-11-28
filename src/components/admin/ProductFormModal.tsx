@@ -11,7 +11,7 @@ import {
   Link as LinkIcon,
   ShieldCheck,
 } from "lucide-react";
-import { AdminProduct } from "@/context/AdminContext";
+import { AdminProduct, useAdmin } from "@/context/AdminContext";
 import { ProductCategory, FitnessGoal } from "@/data/mockProducts";
 import { formatLKR, getKokoTotal, getKokoInstallment } from "@/lib/pricing";
 
@@ -64,7 +64,16 @@ export default function ProductFormModal({
   onClose,
   onSave,
 }: ProductFormModalProps) {
+  const { categories, brands } = useAdmin();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const activeCategoryNames = categories
+    .filter((c) => c.isActive)
+    .map((c) => c.name);
+  const activeBrandNames = brands
+    .filter((b) => b.isActive)
+    .map((b) => b.name);
+  const dynamicBrands = [...activeBrandNames, "Custom Brand"];
 
   const [name, setName] = useState(editingProduct?.name || "");
   const [brandSelect, setBrandSelect] = useState(() => {
@@ -395,7 +404,7 @@ export default function ProductFormModal({
                   onChange={(e) => setBrandSelect(e.target.value)}
                   className="w-full bg-[#09090B] border border-white/15 focus:border-[#E2C275] rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none"
                 >
-                  {BRAND_PRESETS.map((b) => (
+                  {dynamicBrands.map((b) => (
                     <option key={b} value={b}>
                       {b}
                     </option>
@@ -423,7 +432,7 @@ export default function ProductFormModal({
                   }
                   className="w-full bg-[#09090B] border border-white/15 focus:border-[#E2C275] rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none"
                 >
-                  {CATEGORIES.map((c) => (
+                  {(activeCategoryNames.length > 0 ? activeCategoryNames : CATEGORIES).map((c) => (
                     <option key={c} value={c}>
                       {c}
                     </option>

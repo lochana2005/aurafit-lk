@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { useAdmin } from "@/context/AdminContext";
 
 interface CategoryItem {
   id: string;
@@ -125,8 +126,28 @@ function SupplementClusterSVG({ item }: { item: CategoryItem }) {
 }
 
 export default function CategorySection() {
+  const { categories: adminCategories, isHydrated } = useAdmin();
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
+
+  const displayedCategories: CategoryItem[] = isHydrated
+    ? adminCategories
+        .filter((c) => c.isActive)
+        .map((c) => {
+          const matched = CATEGORIES_8.find(
+            (item) => item.name.toLowerCase() === c.name.toLowerCase()
+          );
+          if (matched) return matched;
+          return {
+            id: c.id,
+            name: c.name,
+            href: `/shop?category=${encodeURIComponent(c.name)}`,
+            image: "",
+            color: "#E2C275",
+            subBadge: c.tagline ? c.tagline.split(" ")[0].toUpperCase().slice(0, 10) : "FORMULA",
+          };
+        })
+    : CATEGORIES_8;
 
   return (
     <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 border-t border-white/[0.08]">
@@ -160,7 +181,7 @@ export default function CategorySection() {
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-x-5 gap-y-8"
       >
-        {CATEGORIES_8.map((cat, idx) => (
+        {displayedCategories.map((cat, idx) => (
           <Link
             key={cat.id}
             href={cat.href}
@@ -172,7 +193,7 @@ export default function CategorySection() {
             <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full relative flex items-center justify-center bg-[#16161C] border border-white/[0.06] transition-all duration-300 group-hover:bg-[#E2C275] group-hover:border-[#E2C275] group-hover:shadow-[0_0_28px_rgba(226,194,117,0.35)]">
               {/* 3D Pop-Out Supplement Cluster */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                {failedImages[cat.id] ? (
+                {!cat.image || failedImages[cat.id] ? (
                   <SupplementClusterSVG item={cat} />
                 ) : (
                   /* eslint-disable-next-line @next/next/no-img-element */
@@ -198,7 +219,7 @@ export default function CategorySection() {
 
       {/* Minimal Pagination Dots Below */}
       <div className="mt-8 flex items-center justify-center gap-2">
-        {CATEGORIES_8.map((cat, idx) => {
+        {displayedCategories.map((cat, idx) => {
           const isActive = hoveredIdx === idx || (hoveredIdx === null && idx === 0);
           return (
             <button

@@ -6,10 +6,9 @@ import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import ProductCard from "@/components/ProductCard";
 import { MOCK_PRODUCTS } from "@/data/mockProducts";
+import { useAdmin } from "@/context/AdminContext";
 
-type CategoryFilter = "ALL" | "WHEY PROTEIN" | "CREATINE" | "PRE WORKOUT" | "MASS GAINER";
-
-const FILTER_TABS: CategoryFilter[] = [
+const BASE_FILTER_TABS: string[] = [
   "ALL",
   "WHEY PROTEIN",
   "CREATINE",
@@ -18,12 +17,25 @@ const FILTER_TABS: CategoryFilter[] = [
 ];
 
 export default function TopPicksSection() {
-  const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>("ALL");
+  const { categories, products, isHydrated } = useAdmin();
+  const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
+
+  const filterTabs = isHydrated
+    ? [
+        ...BASE_FILTER_TABS,
+        ...categories
+          .filter((c) => c.isActive)
+          .map((c) => c.name.toUpperCase())
+          .filter((name) => !BASE_FILTER_TABS.includes(name)),
+      ]
+    : BASE_FILTER_TABS;
+
+  const activeProducts = isHydrated ? products : MOCK_PRODUCTS;
 
   const filteredProducts =
     selectedCategory === "ALL"
-      ? MOCK_PRODUCTS
-      : MOCK_PRODUCTS.filter(
+      ? activeProducts
+      : activeProducts.filter(
           (p) => p.category.toUpperCase() === selectedCategory.toUpperCase()
         );
 
@@ -49,7 +61,7 @@ export default function TopPicksSection() {
 
         {/* Interactive Category Filter Pill Tabs */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-none">
-          {FILTER_TABS.map((tab) => {
+          {filterTabs.map((tab) => {
             const isActive = selectedCategory === tab;
             return (
               <button

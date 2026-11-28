@@ -92,6 +92,22 @@ export interface AdminMessage {
   resolved: boolean;
 }
 
+export interface AdminCategory {
+  id: string;
+  name: string;
+  slug: string;
+  tagline: string;
+  isActive: boolean;
+}
+
+export interface AdminBrand {
+  id: string;
+  name: string;
+  slug: string;
+  originCountry: string;
+  isActive: boolean;
+}
+
 interface AdminContextType {
   isHydrated: boolean;
   isAdminAuthenticated: boolean;
@@ -125,6 +141,16 @@ interface AdminContextType {
   toggleBatchStatus: (batchNumber: string) => void;
   messages: AdminMessage[];
   toggleMessageResolved: (id: string) => void;
+  categories: AdminCategory[];
+  addCategory: (name: string, tagline?: string) => void;
+  updateCategory: (id: string, updates: Partial<AdminCategory>) => void;
+  deleteCategory: (id: string) => void;
+  toggleCategoryStatus: (id: string) => void;
+  brands: AdminBrand[];
+  addBrand: (name: string, originCountry?: string) => void;
+  updateBrand: (id: string, updates: Partial<AdminBrand>) => void;
+  deleteBrand: (id: string) => void;
+  toggleBrandStatus: (id: string) => void;
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -136,7 +162,38 @@ export const ADMIN_KEYS = {
   BATCHES: "aurafit_admin_batches",
   MESSAGES: "aurafit_admin_messages",
   CONTACT_TICKETS: "aurafit_contact_tickets",
+  CATEGORIES: "aurafit_admin_categories",
+  BRANDS: "aurafit_admin_brands",
 };
+
+const toSlug = (val: string) =>
+  val
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
+export const SEED_CATEGORIES: AdminCategory[] = [
+  { id: "cat_1", name: "Whey Protein", slug: "whey-protein", tagline: "Ultra-pure isolates & blends", isActive: true },
+  { id: "cat_2", name: "Mass Gainer", slug: "mass-gainer", tagline: "Clean caloric surplus formulas", isActive: true },
+  { id: "cat_3", name: "Creatine", slug: "creatine", tagline: "Micronized ATP strength fuel", isActive: true },
+  { id: "cat_4", name: "Pre Workout", slug: "pre-workout", tagline: "Explosive focus & nitric pump", isActive: true },
+  { id: "cat_5", name: "BCAA", slug: "bcaa", tagline: "Intra-workout amino recovery", isActive: true },
+  { id: "cat_6", name: "Amino", slug: "amino", tagline: "Essential EAA & hydration support", isActive: true },
+  { id: "cat_7", name: "Fat Burner", slug: "fat-burner", tagline: "Thermogenic shred & metabolism", isActive: true },
+  { id: "cat_8", name: "Multivitamins", slug: "multivitamins", tagline: "Daily athlete micronutrient packs", isActive: true },
+];
+
+export const SEED_BRANDS: AdminBrand[] = [
+  { id: "brd_1", name: "Optimum Nutrition", slug: "optimum-nutrition", originCountry: "USA Direct", isActive: true },
+  { id: "brd_2", name: "Dymatize", slug: "dymatize", originCountry: "USA Direct", isActive: true },
+  { id: "brd_3", name: "MuscleTech", slug: "muscletech", originCountry: "USA Direct", isActive: true },
+  { id: "brd_4", name: "Applied Nutrition", slug: "applied-nutrition", originCountry: "UK Direct", isActive: true },
+  { id: "brd_5", name: "Ronnie Coleman", slug: "ronnie-coleman", originCountry: "USA Direct", isActive: true },
+  { id: "brd_6", name: "Cellucor", slug: "cellucor", originCountry: "USA Direct", isActive: true },
+  { id: "brd_7", name: "Universal Nutrition", slug: "universal-nutrition", originCountry: "USA Direct", isActive: true },
+  { id: "brd_8", name: "BSN", slug: "bsn", originCountry: "USA Direct", isActive: true },
+];
 
 const SEED_PRODUCTS: AdminProduct[] = MOCK_PRODUCTS.map((p, idx) => ({
   ...p,
@@ -371,6 +428,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [orders, setOrders] = useState<AdminOrder[]>(SEED_ORDERS);
   const [batches, setBatches] = useState<AdminBatch[]>(SEED_BATCHES);
   const [messages, setMessages] = useState<AdminMessage[]>(SEED_MESSAGES);
+  const [categories, setCategories] = useState<AdminCategory[]>(SEED_CATEGORIES);
+  const [brands, setBrands] = useState<AdminBrand[]>(SEED_BRANDS);
 
   const loadOrdersFromStorage = useCallback(() => {
     try {
@@ -406,6 +465,12 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         const b = window.localStorage.getItem(ADMIN_KEYS.BATCHES);
         if (b) setBatches(JSON.parse(b));
 
+        const c = window.localStorage.getItem(ADMIN_KEYS.CATEGORIES);
+        if (c) setCategories(JSON.parse(c));
+
+        const br = window.localStorage.getItem(ADMIN_KEYS.BRANDS);
+        if (br) setBrands(JSON.parse(br));
+
         const m = window.localStorage.getItem(ADMIN_KEYS.MESSAGES);
         const contactTickets = window.localStorage.getItem(ADMIN_KEYS.CONTACT_TICKETS);
         let baseMessages: AdminMessage[] = m ? JSON.parse(m) : SEED_MESSAGES;
@@ -435,6 +500,20 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           // ignore
         }
       }
+      if (e.key === ADMIN_KEYS.CATEGORIES && e.newValue) {
+        try {
+          setCategories(JSON.parse(e.newValue));
+        } catch {
+          // ignore
+        }
+      }
+      if (e.key === ADMIN_KEYS.BRANDS && e.newValue) {
+        try {
+          setBrands(JSON.parse(e.newValue));
+        } catch {
+          // ignore
+        }
+      }
     };
 
     window.addEventListener("storage", handleStorage);
@@ -451,10 +530,12 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem(ADMIN_KEYS.ORDERS, JSON.stringify(orders));
       localStorage.setItem(ADMIN_KEYS.BATCHES, JSON.stringify(batches));
       localStorage.setItem(ADMIN_KEYS.MESSAGES, JSON.stringify(messages));
+      localStorage.setItem(ADMIN_KEYS.CATEGORIES, JSON.stringify(categories));
+      localStorage.setItem(ADMIN_KEYS.BRANDS, JSON.stringify(brands));
     } catch {
       // ignore
     }
-  }, [products, orders, batches, messages, isHydrated]);
+  }, [products, orders, batches, messages, categories, brands, isHydrated]);
 
   const adminLogin = useCallback(
     (email: string, pin: string) => {
@@ -673,6 +754,144 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     [showToast]
   );
 
+  const addCategory = useCallback(
+    (name: string, tagline = "") => {
+      const cleanName = name.trim();
+      if (!cleanName) return;
+      const newCat: AdminCategory = {
+        id: `cat_${Date.now()}`,
+        name: cleanName,
+        slug: toSlug(cleanName),
+        tagline: tagline.trim() || "Certified sports nutrition formula",
+        isActive: true,
+      };
+      setCategories((prev) => [...prev, newCat]);
+      showToast({
+        type: "gold",
+        title: "Category Added",
+        subtitle: `${cleanName} is now live across Storefront & Admin.`,
+      });
+    },
+    [showToast]
+  );
+
+  const updateCategory = useCallback(
+    (id: string, updates: Partial<AdminCategory>) => {
+      setCategories((prev) =>
+        prev.map((c) =>
+          c.id === id
+            ? {
+                ...c,
+                ...updates,
+                slug: updates.name ? toSlug(updates.name) : c.slug,
+              }
+            : c
+        )
+      );
+      showToast({
+        type: "gold",
+        title: "Category Updated",
+        subtitle: "Changes synced to Storefront & Catalog.",
+      });
+    },
+    [showToast]
+  );
+
+  const toggleCategoryStatus = useCallback(
+    (id: string) => {
+      setCategories((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, isActive: !c.isActive } : c))
+      );
+      showToast({
+        type: "gold",
+        title: "Category Visibility Updated",
+        subtitle: "Storefront category display refreshed.",
+      });
+    },
+    [showToast]
+  );
+
+  const deleteCategory = useCallback(
+    (id: string) => {
+      setCategories((prev) => prev.filter((c) => c.id !== id));
+      showToast({
+        type: "gold",
+        title: "Category Deleted",
+        subtitle: "Category removed from catalog.",
+      });
+    },
+    [showToast]
+  );
+
+  const addBrand = useCallback(
+    (name: string, originCountry = "USA Direct") => {
+      const cleanName = name.trim();
+      if (!cleanName) return;
+      const newBrand: AdminBrand = {
+        id: `brd_${Date.now()}`,
+        name: cleanName,
+        slug: toSlug(cleanName),
+        originCountry: originCountry.trim() || "USA Direct",
+        isActive: true,
+      };
+      setBrands((prev) => [...prev, newBrand]);
+      showToast({
+        type: "gold",
+        title: "Brand Added",
+        subtitle: `${cleanName} added to Official Brands & Marquee.`,
+      });
+    },
+    [showToast]
+  );
+
+  const updateBrand = useCallback(
+    (id: string, updates: Partial<AdminBrand>) => {
+      setBrands((prev) =>
+        prev.map((b) =>
+          b.id === id
+            ? {
+                ...b,
+                ...updates,
+                slug: updates.name ? toSlug(updates.name) : b.slug,
+              }
+            : b
+        )
+      );
+      showToast({
+        type: "gold",
+        title: "Brand Updated",
+        subtitle: "Official brand details synced.",
+      });
+    },
+    [showToast]
+  );
+
+  const toggleBrandStatus = useCallback(
+    (id: string) => {
+      setBrands((prev) =>
+        prev.map((b) => (b.id === id ? { ...b, isActive: !b.isActive } : b))
+      );
+      showToast({
+        type: "gold",
+        title: "Brand Visibility Updated",
+        subtitle: "Storefront marquee & filters refreshed.",
+      });
+    },
+    [showToast]
+  );
+
+  const deleteBrand = useCallback(
+    (id: string) => {
+      setBrands((prev) => prev.filter((b) => b.id !== id));
+      showToast({
+        type: "gold",
+        title: "Brand Deleted",
+        subtitle: "Brand removed from official roster.",
+      });
+    },
+    [showToast]
+  );
+
   return (
     <AdminContext.Provider
       value={{
@@ -693,6 +912,16 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         toggleBatchStatus,
         messages,
         toggleMessageResolved,
+        categories,
+        addCategory,
+        updateCategory,
+        deleteCategory,
+        toggleCategoryStatus,
+        brands,
+        addBrand,
+        updateBrand,
+        deleteBrand,
+        toggleBrandStatus,
       }}
     >
       {children}

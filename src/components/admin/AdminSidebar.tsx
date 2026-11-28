@@ -13,6 +13,7 @@ import {
   LogOut,
   X,
   Boxes,
+  Tags,
 } from "lucide-react";
 import { useAdmin } from "@/context/AdminContext";
 
@@ -24,6 +25,7 @@ interface AdminSidebarProps {
 const ADMIN_NAV = [
   { name: "Overview", href: "/admin", icon: LayoutDashboard },
   { name: "Products & Stock", href: "/admin/products", icon: Package },
+  { name: "Categories & Brands", href: "/admin/categories-brands", icon: Tags },
   { name: "Inventory & Stock", href: "/admin/inventory", icon: Boxes },
   { name: "Orders & Dispatch", href: "/admin/orders", icon: Truck },
   { name: "QR Batch Vault", href: "/admin/batches", icon: QrCode },

@@ -6,7 +6,8 @@ export type ProductCategory =
   | "BCAA"
   | "Amino"
   | "Fat Burner"
-  | "Multivitamins";
+  | "Multivitamins"
+  | (string & {});
 
 export type FitnessGoal =
   | "Muscle Gain"
