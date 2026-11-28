@@ -13,7 +13,13 @@ import {
 } from "lucide-react";
 import { AdminProduct, useAdmin } from "@/context/AdminContext";
 import { ProductCategory, FitnessGoal } from "@/data/mockProducts";
-import { formatLKR, getKokoTotal, getKokoInstallment } from "@/lib/pricing";
+import {
+  ProductDiscountType,
+  calculateProductPricing,
+  formatLKR,
+  getKokoInstallment,
+} from "@/lib/pricing";
+import ProductProfitSection from "@/components/admin/ProductProfitSection";
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -101,9 +107,19 @@ export default function ProductFormModal({
     editingProduct?.flavors || ["Double Rich Chocolate", "Vanilla Ice Cream"]
   );
   const [flavorInput, setFlavorInput] = useState("");
-  const [price, setPrice] = useState<number>(editingProduct?.price || 32500);
-  const [originalPrice, setOriginalPrice] = useState<string>(
-    editingProduct?.originalPrice ? String(editingProduct.originalPrice) : ""
+  const [costPrice, setCostPrice] = useState<number>(
+    editingProduct?.costPrice ?? 23400
+  );
+  const [regularPrice, setRegularPrice] = useState<number>(
+    editingProduct?.originalPrice && editingProduct.originalPrice > (editingProduct?.price || 0)
+      ? editingProduct.originalPrice
+      : editingProduct?.price || 32500
+  );
+  const [discountType, setDiscountType] = useState<ProductDiscountType>(
+    editingProduct?.discountType || "none"
+  );
+  const [discountValue, setDiscountValue] = useState<number>(
+    editingProduct?.discountValue ?? 0
   );
   const [stockCount, setStockCount] = useState<number>(
     editingProduct?.stockCount ?? 20
@@ -205,7 +221,12 @@ export default function ProductFormModal({
 
     const primaryImage =
       images[0] || "/images/products/gold-standard-isolate.png";
-    const parsedOrig = originalPrice.trim() ? Number(originalPrice) : undefined;
+    const pricing = calculateProductPricing(
+      regularPrice,
+      costPrice,
+      discountType,
+      discountValue
+    );
 
     const payload: AdminProduct = {
       id: editingProduct?.id || `prod_${Date.now()}`,
@@ -214,8 +235,14 @@ export default function ProductFormModal({
       brand: resolvedBrand,
       category,
       goal,
-      price: Number(price) || 0,
-      originalPrice: parsedOrig && parsedOrig > price ? parsedOrig : undefined,
+      price: pricing.finalSellingPrice,
+      originalPrice:
+        discountType !== "none" && pricing.regularPrice > pricing.finalSellingPrice
+          ? pricing.regularPrice
+          : undefined,
+      costPrice: pricing.costPrice,
+      discountType,
+      discountValue,
       weight: weight.trim() || "5.0 lbs",
       weightOrServings: `${weight.trim()}${servingsCount.trim() ? ` · ${servingsCount.trim()}` : ""}`,
       servingsCount: servingsCount.trim(),
@@ -538,51 +565,17 @@ export default function ProductFormModal({
             </div>
           </div>
 
-          {/* 4. Pricing & Auto-KOKO Calculator */}
-          <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-zinc-300">
-                  Cash / Card Price (LKR)
-                </label>
-                <input
-                  type="number"
-                  required
-                  min={100}
-                  value={price}
-                  onChange={(e) => setPrice(Number(e.target.value))}
-                  className="w-full bg-[#09090B] border border-white/15 focus:border-[#E2C275] rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-zinc-300">
-                  Original Price (Optional Strike-Through)
-                </label>
-                <input
-                  type="number"
-                  value={originalPrice}
-                  onChange={(e) => setOriginalPrice(e.target.value)}
-                  placeholder="e.g. 36500"
-                  className="w-full bg-[#09090B] border border-white/15 focus:border-[#E2C275] rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="p-3.5 rounded-xl bg-[#16161C] border border-[#8B5CF6]/35 flex items-center justify-between text-xs">
-              <div>
-                <span className="text-[#A78BFA] font-bold block">
-                  AUTO KOKO 3× (+9%) CALCULATOR
-                </span>
-                <span className="text-zinc-400">
-                  Total: {formatLKR(getKokoTotal(price || 0), false)}
-                </span>
-              </div>
-              <span className="text-sm font-mono font-bold text-white">
-                3 × {formatLKR(getKokoInstallment(price || 0), false)}
-              </span>
-            </div>
-          </div>
+          {/* 4. Pricing, Discount & Live Profit Calculator */}
+          <ProductProfitSection
+            costPrice={costPrice}
+            regularPrice={regularPrice}
+            discountType={discountType}
+            discountValue={discountValue}
+            onCostPriceChange={setCostPrice}
+            onRegularPriceChange={setRegularPrice}
+            onDiscountTypeChange={setDiscountType}
+            onDiscountValueChange={setDiscountValue}
+          />
 
           {/* 5. Inventory & Authenticity */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -692,9 +685,28 @@ export default function ProductFormModal({
                 {name || "New Supplement Preview"}
               </div>
               <div className="text-xs font-extrabold text-white mt-0.5">
-                {formatLKR(price || 0, false)}{" "}
+                {formatLKR(
+                  calculateProductPricing(
+                    regularPrice,
+                    costPrice,
+                    discountType,
+                    discountValue
+                  ).finalSellingPrice,
+                  false
+                )}{" "}
                 <span className="text-zinc-400 font-normal">
-                  · 3 × {formatLKR(getKokoInstallment(price || 0), false)}
+                  · 3 ×{" "}
+                  {formatLKR(
+                    getKokoInstallment(
+                      calculateProductPricing(
+                        regularPrice,
+                        costPrice,
+                        discountType,
+                        discountValue
+                      ).finalSellingPrice
+                    ),
+                    false
+                  )}
                 </span>
               </div>
             </div>

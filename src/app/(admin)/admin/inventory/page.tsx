@@ -29,6 +29,7 @@ export default function AdminInventoryPage() {
 
   const [restockTarget, setRestockTarget] = useState<AdminProduct | null>(null);
   const [customQty, setCustomQty] = useState(20);
+  const [batchUnitCost, setBatchUnitCost] = useState(0);
   const [customNote, setCustomNote] = useState(
     "New Colombo Air-Freight Shipment"
   );
@@ -37,6 +38,11 @@ export default function AdminInventoryPage() {
     (sum, p) => sum + p.price * p.stockCount,
     0
   );
+  const totalInventoryCost = products.reduce(
+    (sum, p) => sum + (p.costPrice || 0) * p.stockCount,
+    0
+  );
+  const estimatedStockProfit = totalRetailValue - totalInventoryCost;
   const totalUnits = products.reduce((sum, p) => sum + p.stockCount, 0);
   const healthyStockCount = products.filter(
     (p) => p.stockCount > (p.lowStockThreshold ?? 5)
@@ -76,11 +82,9 @@ export default function AdminInventoryPage() {
   const handleCustomRestock = (e: React.FormEvent) => {
     e.preventDefault();
     if (!restockTarget || customQty <= 0) return;
-    adjustStock(
-      restockTarget.id,
-      customQty,
-      customNote.trim() || "Manual restock"
-    );
+    const totalBatchCost = customQty * (batchUnitCost || 0);
+    const noteWithCost = `${customNote.trim() || "Manual restock"} (Batch Cost: ${formatLKR(totalBatchCost, false)})`;
+    adjustStock(restockTarget.id, customQty, noteWithCost, batchUnitCost);
     setRestockTarget(null);
   };
 
@@ -90,7 +94,7 @@ export default function AdminInventoryPage() {
       <div className="shrink-0 rounded-xl border border-white/[0.08] bg-[#0e0e12] overflow-hidden">
         {/* Top Row — Compact 4-Column KPI Strip */}
         <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-white/[0.08]">
-          {/* 1. Total Retail Stock Value */}
+          {/* 1. Total Retail Stock Value + Cost & Est. Profit */}
           <div className="px-5 py-3.5 relative border-t-2 border-t-[#d4af37]/80 lg:border-t-0 lg:border-l-2 lg:border-l-[#d4af37]/80">
             <div className="flex items-center justify-between gap-2">
               <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
@@ -100,6 +104,14 @@ export default function AdminInventoryPage() {
             </div>
             <div className="text-xl sm:text-2xl font-black text-white font-heading mt-1">
               {formatLKR(totalRetailValue, false)}
+            </div>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1 text-[10px] font-mono">
+              <span className="text-zinc-400">
+                Cost: {formatLKR(totalInventoryCost, false)}
+              </span>
+              <span className="text-emerald-400 font-bold">
+                Est. Profit: +{formatLKR(estimatedStockProfit, false)}
+              </span>
             </div>
           </div>
 
@@ -208,12 +220,14 @@ export default function AdminInventoryPage() {
       {/* Framed Scrollable Inventory Table */}
       <div className="flex-1 min-h-0 flex flex-col rounded-xl border border-white/[0.08] bg-[#0e0e12] overflow-hidden">
         <div className="flex-1 min-h-0 flex flex-col overflow-x-auto">
-          <div className="min-w-[820px] flex-1 min-h-0 flex flex-col">
+          <div className="min-w-[980px] flex-1 min-h-0 flex flex-col">
             {/* Pinned Table Column Header Row */}
-            <div className="shrink-0 bg-[#131318] border-b border-white/[0.08] grid grid-cols-[minmax(240px,2fr)_minmax(120px,1fr)_minmax(110px,0.9fr)_minmax(120px,0.9fr)_minmax(240px,1.5fr)] items-center px-5 py-3 text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+            <div className="shrink-0 bg-[#131318] border-b border-white/[0.08] grid grid-cols-[minmax(220px,1.8fr)_minmax(115px,0.9fr)_minmax(100px,0.8fr)_minmax(115px,0.9fr)_minmax(105px,0.8fr)_minmax(105px,0.8fr)_minmax(230px,1.4fr)] items-center px-5 py-3 text-[11px] font-bold uppercase tracking-wider text-zinc-400">
               <div>Supplement</div>
               <div>Batch Code</div>
-              <div>Unit Price</div>
+              <div>Cost Price</div>
+              <div>Selling Price</div>
+              <div>Unit Profit</div>
               <div>Current Stock</div>
               <div className="text-right">Quick Inline Stock Controls</div>
             </div>
@@ -237,10 +251,13 @@ export default function AdminInventoryPage() {
                       ? "bg-amber-500/15 text-amber-300 border-amber-400/30"
                       : "bg-emerald-500/15 text-emerald-300 border-emerald-400/30";
 
+                  const unitProfit = p.price - (p.costPrice || 0);
+                  const isProfitPos = unitProfit >= 0;
+
                   return (
                     <div
                       key={p.id}
-                      className="grid grid-cols-[minmax(240px,2fr)_minmax(120px,1fr)_minmax(110px,0.9fr)_minmax(120px,0.9fr)_minmax(240px,1.5fr)] items-center px-5 py-3 text-xs sm:text-sm hover:bg-white/[0.02] transition-colors"
+                      className="grid grid-cols-[minmax(220px,1.8fr)_minmax(115px,0.9fr)_minmax(100px,0.8fr)_minmax(115px,0.9fr)_minmax(105px,0.8fr)_minmax(105px,0.8fr)_minmax(230px,1.4fr)] items-center px-5 py-3 text-xs sm:text-sm hover:bg-white/[0.02] transition-colors"
                     >
                       <div className="flex items-center gap-3 pr-4 min-w-0">
                         <div className="relative w-10 h-10 rounded-lg bg-[#09090B] border border-white/10 p-1 shrink-0 overflow-hidden">
@@ -267,8 +284,32 @@ export default function AdminInventoryPage() {
                         {p.batchCode || "—"}
                       </div>
 
-                      <div className="font-semibold text-white whitespace-nowrap pr-4">
-                        {formatLKR(p.price, false)}
+                      <div className="font-mono text-xs text-zinc-400 whitespace-nowrap pr-4">
+                        {formatLKR(p.costPrice || 0, false)}
+                      </div>
+
+                      <div className="whitespace-nowrap pr-4">
+                        <div className="font-semibold text-white font-mono">
+                          {formatLKR(p.price, false)}
+                        </div>
+                        {p.originalPrice && p.originalPrice > p.price && (
+                          <div className="text-[10px] font-mono text-zinc-500 line-through">
+                            {formatLKR(p.originalPrice, false)}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="whitespace-nowrap pr-4">
+                        <span
+                          className={`px-2 py-0.5 rounded-lg font-mono text-xs font-bold border ${
+                            isProfitPos
+                              ? "bg-emerald-500/15 border-emerald-500/35 text-emerald-300"
+                              : "bg-red-500/15 border-red-500/35 text-red-300"
+                          }`}
+                        >
+                          {isProfitPos ? "+" : "-"}
+                          {formatLKR(Math.abs(unitProfit), false)}
+                        </span>
                       </div>
 
                       <div className="whitespace-nowrap pr-4">
@@ -328,6 +369,7 @@ export default function AdminInventoryPage() {
                             onClick={() => {
                               setRestockTarget(p);
                               setCustomQty(20);
+                              setBatchUnitCost(p.costPrice || 0);
                             }}
                             className="px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-wider btn-aurafit-gold cursor-pointer"
                           >
@@ -372,18 +414,41 @@ export default function AdminInventoryPage() {
             </div>
 
             <form onSubmit={handleCustomRestock} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-zinc-300">
-                  Quantity to Add (Current: {restockTarget.stockCount})
-                </label>
-                <input
-                  type="number"
-                  min={1}
-                  required
-                  value={customQty}
-                  onChange={(e) => setCustomQty(Number(e.target.value))}
-                  className="w-full bg-[#09090B] border border-white/15 focus:border-[#E2C275] rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none"
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-zinc-300">
+                    Quantity to Add
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    required
+                    value={customQty}
+                    onChange={(e) => setCustomQty(Number(e.target.value))}
+                    className="w-full bg-[#09090B] border border-white/15 focus:border-[#E2C275] rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-zinc-300">
+                    Purchase Cost / Unit (LKR)
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    required
+                    value={batchUnitCost}
+                    onChange={(e) => setBatchUnitCost(Number(e.target.value))}
+                    className="w-full bg-[#09090B] border border-white/15 focus:border-[#E2C275] rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-[#09090B] border border-[#E2C275]/25 flex items-center justify-between text-xs">
+                <span className="text-zinc-400">Total Batch Purchase Cost</span>
+                <span className="font-mono font-black text-[#E2C275]">
+                  {formatLKR(Math.max(0, customQty) * Math.max(0, batchUnitCost), false)}
+                </span>
               </div>
 
               <div className="space-y-1">

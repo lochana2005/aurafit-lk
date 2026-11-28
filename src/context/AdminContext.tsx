@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 import { MOCK_PRODUCTS, Product } from "@/data/mockProducts";
 import { BATCH_REGISTRY } from "@/data/batchRegistry";
+import { ProductDiscountType } from "@/lib/pricing";
 import {
   CoachAffiliate,
   PromoCode,
@@ -16,6 +17,7 @@ import {
   evaluatePromoCode,
   resolveTierForSales,
 } from "@/data/affiliateSchema";
+import { TimedOffer, SEED_OFFERS } from "@/data/offersSchema";
 import { useToast } from "./ToastContext";
 
 export interface StockHistoryEntry {
@@ -26,6 +28,9 @@ export interface StockHistoryEntry {
 }
 
 export interface AdminProduct extends Product {
+  costPrice: number;
+  discountType?: ProductDiscountType;
+  discountValue?: number;
   stockCount: number;
   lowStockThreshold: number;
   active: boolean;
@@ -84,6 +89,10 @@ export interface AdminOrder {
   coachId?: string;
   discountAmount?: number;
   cashbackAmount?: number;
+  paymentChannel?: "Card" | "KOKO 3x" | "Bank Transfer" | "COD";
+  paymentStatus?: "PAID" | "COD PENDING" | "PARTIAL/REFUNDED";
+  transactionRef?: string;
+  costOfGoods?: number;
 }
 
 export interface AdminBatch {
@@ -137,7 +146,12 @@ interface AdminContextType {
   products: AdminProduct[];
   saveProduct: (product: AdminProduct, isNew: boolean) => void;
   toggleProductActive: (id: string) => void;
-  adjustStock: (id: string, delta: number, note?: string) => void;
+  adjustStock: (
+    id: string,
+    delta: number,
+    note?: string,
+    batchUnitCost?: number
+  ) => void;
   deleteProduct: (id: string) => void;
   orders: AdminOrder[];
   recordOrder: (order: AdminOrder) => void;
@@ -206,6 +220,10 @@ interface AdminContextType {
     referenceNote: string;
   }) => void;
   validatePromoCode: (code: string, subtotal: number) => PromoValidationResult;
+  offers: TimedOffer[];
+  saveOffer: (offer: TimedOffer, isNew: boolean) => void;
+  toggleOfferStatus: (id: string) => void;
+  deleteOffer: (id: string) => void;
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
@@ -253,25 +271,32 @@ export const SEED_BRANDS: AdminBrand[] = [
   { id: "brd_8", name: "BSN", slug: "bsn", originCountry: "USA Direct", isActive: true },
 ];
 
-const SEED_PRODUCTS: AdminProduct[] = MOCK_PRODUCTS.map((p, idx) => ({
-  ...p,
-  stockCount: idx === 2 ? 3 : idx === 5 ? 4 : idx === 9 ? 0 : 18 + (idx % 5) * 6,
-  lowStockThreshold: 5,
-  active: idx !== 9 && p.inStock,
-  inStock: idx !== 9 && p.inStock,
-  galleryImages: [p.image],
-  batchCode: `AF-${p.brand.slice(0, 2).toUpperCase()}-2026-${880 + idx}`,
-  servingsCount: p.weightOrServings.includes("Servings")
-    ? p.weightOrServings
-    : "60 Servings",
-  highlights: [
-    "100% Direct USA/UK Manufacturer Import",
-    "Tamper-Evident Holographic QR Batch Seal",
-    "Climate-Controlled Colombo 03 Vault Storage",
-  ],
-  description: `Authentic ${p.brand} ${p.name} formulated for ${p.goal}. Laboratory assayed and verified for Sri Lankan athletes.`,
-  restockHistory: [],
-}));
+const SEED_PRODUCTS: AdminProduct[] = MOCK_PRODUCTS.map((p, idx) => {
+  const hasDiscount = Boolean(p.originalPrice && p.originalPrice > p.price);
+  return {
+    ...p,
+    costPrice: Math.round((p.price * 0.72) / 100) * 100,
+    discountType: hasDiscount ? "fixed_lkr" : "none",
+    discountValue:
+      hasDiscount && p.originalPrice ? p.originalPrice - p.price : 0,
+    stockCount: idx === 2 ? 3 : idx === 5 ? 4 : idx === 9 ? 0 : 18 + (idx % 5) * 6,
+    lowStockThreshold: 5,
+    active: idx !== 9 && p.inStock,
+    inStock: idx !== 9 && p.inStock,
+    galleryImages: [p.image],
+    batchCode: `AF-${p.brand.slice(0, 2).toUpperCase()}-2026-${880 + idx}`,
+    servingsCount: p.weightOrServings.includes("Servings")
+      ? p.weightOrServings
+      : "60 Servings",
+    highlights: [
+      "100% Direct USA/UK Manufacturer Import",
+      "Tamper-Evident Holographic QR Batch Seal",
+      "Climate-Controlled Colombo 03 Vault Storage",
+    ],
+    description: `Authentic ${p.brand} ${p.name} formulated for ${p.goal}. Laboratory assayed and verified for Sri Lankan athletes.`,
+    restockHistory: [],
+  };
+});
 
 const SEED_ORDERS: AdminOrder[] = [
   {
@@ -305,6 +330,10 @@ const SEED_ORDERS: AdminOrder[] = [
     coachId: "coach_kasun_01",
     discountAmount: 3250,
     cashbackAmount: 1463,
+    paymentChannel: "KOKO 3x",
+    paymentStatus: "PAID",
+    transactionRef: "KOKO-992841-LK",
+    costOfGoods: 23400,
   },
   {
     id: "AF-2026-7105",
@@ -335,6 +364,10 @@ const SEED_ORDERS: AdminOrder[] = [
     coachId: "coach_kasun_01",
     discountAmount: 2100,
     cashbackAmount: 945,
+    paymentChannel: "Card",
+    paymentStatus: "PAID",
+    transactionRef: "PAYHERE-441029",
+    costOfGoods: 13600,
   },
   {
     id: "AF-2026-7055",
@@ -371,6 +404,44 @@ const SEED_ORDERS: AdminOrder[] = [
     coachId: "coach_rohan_02",
     discountAmount: 1500,
     cashbackAmount: 1000,
+    paymentChannel: "COD",
+    paymentStatus: "COD PENDING",
+    transactionRef: "COD-KMB-193820",
+    costOfGoods: 29500,
+  },
+  {
+    id: "AF-2026-6988",
+    customerName: "Malith Wickramasinghe",
+    email: "malith.w@gmail.com",
+    phone: "+94 77 231 5590",
+    address: "No. 88, High Level Road",
+    city: "Maharagama",
+    district: "Colombo",
+    date: "Nov 26, 2026",
+    paymentMethod: "Card",
+    total: 24900,
+    status: "Delivered",
+    courier: "Colombo Flagship Rider",
+    waybillNumber: "CFR-110294-LK",
+    estimatedArrival: "Delivered Nov 26, 2026",
+    itemsSummary: "Nitro-Tech Whey Gold (5.5 lbs) × 1",
+    items: [
+      {
+        name: "Nitro-Tech 100% Whey Gold (5.5 lbs)",
+        quantity: 1,
+        price: 24900,
+        flavor: "Double Rich Chocolate",
+      },
+    ],
+    promoCodeId: "promo_aura10",
+    promoCode: "AURA10",
+    coachId: "coach_aurafit_vip",
+    discountAmount: 2490,
+    cashbackAmount: 0,
+    paymentChannel: "Bank Transfer",
+    paymentStatus: "PAID",
+    transactionRef: "HNB-SLIPS-77412",
+    costOfGoods: 17900,
   },
   {
     id: "AF-2026-6910",
@@ -396,6 +467,10 @@ const SEED_ORDERS: AdminOrder[] = [
         flavor: "Gourmet Chocolate",
       },
     ],
+    paymentChannel: "KOKO 3x",
+    paymentStatus: "PAID",
+    transactionRef: "KOKO-884019-LK",
+    costOfGoods: 28000,
   },
 ];
 
@@ -451,6 +526,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [cashbackPayouts, setCashbackPayouts] = useState<CashbackPayout[]>(
     SEED_CASHBACK_PAYOUTS
   );
+  const [offers, setOffers] = useState<TimedOffer[]>(SEED_OFFERS);
 
   const adminLogin = useCallback(
     (email: string, pin: string) => {
@@ -539,7 +615,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   );
 
   const adjustStock = useCallback(
-    (id: string, delta: number, note?: string) => {
+    (id: string, delta: number, note?: string, batchUnitCost?: number) => {
       const timestamp = new Date().toLocaleString("en-US", {
         month: "short",
         day: "numeric",
@@ -558,6 +634,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           };
           return {
             ...p,
+            costPrice:
+              typeof batchUnitCost === "number" && batchUnitCost > 0
+                ? batchUnitCost
+                : p.costPrice,
             stockCount: nextStock,
             inStock: nextStock > 0,
             active: nextStock > 0,
@@ -1109,6 +1189,47 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     [promoCodes, coaches]
   );
 
+  const saveOffer = useCallback(
+    (offer: TimedOffer, isNew: boolean) => {
+      setOffers((prev) => {
+        if (isNew) return [offer, ...prev];
+        return prev.map((o) => (o.id === offer.id ? offer : o));
+      });
+      showToast({
+        type: "gold",
+        title: isNew ? "Timed Offer Created" : "Timed Offer Updated",
+        subtitle: `${offer.headline} synced to Storefront.`,
+      });
+    },
+    [showToast]
+  );
+
+  const toggleOfferStatus = useCallback(
+    (id: string) => {
+      setOffers((prev) =>
+        prev.map((o) => (o.id === id ? { ...o, isActive: !o.isActive } : o))
+      );
+      showToast({
+        type: "gold",
+        title: "Offer Status Updated",
+        subtitle: "Storefront Flash Deals display refreshed.",
+      });
+    },
+    [showToast]
+  );
+
+  const deleteOffer = useCallback(
+    (id: string) => {
+      setOffers((prev) => prev.filter((o) => o.id !== id));
+      showToast({
+        type: "gold",
+        title: "Offer Deleted",
+        subtitle: "Timed offer removed from schedule.",
+      });
+    },
+    [showToast]
+  );
+
   return (
     <AdminContext.Provider
       value={{
@@ -1149,6 +1270,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         deletePromoCode,
         recordCashbackPayout,
         validatePromoCode,
+        offers,
+        saveOffer,
+        toggleOfferStatus,
+        deleteOffer,
       }}
     >
       {children}

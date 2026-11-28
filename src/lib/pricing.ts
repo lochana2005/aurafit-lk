@@ -39,3 +39,53 @@ export function formatLKRNoDecimals(amount: number): string {
   return formatLKR(amount, false);
 }
 
+export type ProductDiscountType = "none" | "percentage" | "fixed_lkr";
+
+export interface ProductProfitMetrics {
+  regularPrice: number;
+  costPrice: number;
+  finalSellingPrice: number;
+  unitProfit: number;
+  marginPercent: number;
+}
+
+/**
+ * Calculates final selling price, unit profit, and profit margin %
+ * given regular selling price, landed cost price, and optional product discount.
+ */
+export function calculateProductPricing(
+  regularPrice: number,
+  costPrice: number,
+  discountType: ProductDiscountType = "none",
+  discountValue = 0
+): ProductProfitMetrics {
+  const safeRegular = Math.max(0, Math.round(Number(regularPrice) || 0));
+  const safeCost = Math.max(0, Math.round(Number(costPrice) || 0));
+  const safeDisc = Math.max(0, Number(discountValue) || 0);
+
+  let finalSellingPrice = safeRegular;
+  if (discountType === "percentage") {
+    finalSellingPrice = Math.max(
+      0,
+      Math.round(safeRegular * (1 - Math.min(100, safeDisc) / 100))
+    );
+  } else if (discountType === "fixed_lkr") {
+    finalSellingPrice = Math.max(0, Math.round(safeRegular - safeDisc));
+  }
+
+  const unitProfit = finalSellingPrice - safeCost;
+  const marginPercent =
+    finalSellingPrice > 0
+      ? Math.round((unitProfit / finalSellingPrice) * 1000) / 10
+      : 0;
+
+  return {
+    regularPrice: safeRegular,
+    costPrice: safeCost,
+    finalSellingPrice,
+    unitProfit,
+    marginPercent,
+  };
+}
+
+

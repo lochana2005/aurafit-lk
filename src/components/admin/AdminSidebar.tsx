@@ -17,6 +17,8 @@ import {
   Layers,
   TicketPercent,
   Users,
+  CircleDollarSign,
+  Flame,
 } from "lucide-react";
 import { useAdmin } from "@/context/AdminContext";
 
@@ -32,7 +34,9 @@ const ADMIN_NAV = [
   { name: "Categories & Brands", href: "/admin/categories-brands", icon: Tags },
   { name: "Inventory & Stock", href: "/admin/inventory", icon: Boxes },
   { name: "Orders & Dispatch", href: "/admin/orders", icon: Truck },
+  { name: "Payments & Profit", href: "/admin/payments-profit", icon: CircleDollarSign },
   { name: "Promo & Affiliates", href: "/admin/promo-affiliates", icon: TicketPercent },
+  { name: "Offers & Deals", href: "/admin/offers", icon: Flame },
   { name: "QR Batch Vault", href: "/admin/batches", icon: QrCode },
   { name: "Customers", href: "/admin/customers", icon: Users },
   { name: "Customer Inquiries", href: "/admin/messages", icon: MessageSquare },

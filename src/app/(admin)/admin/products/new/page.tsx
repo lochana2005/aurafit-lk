@@ -17,7 +17,16 @@ import {
 } from "lucide-react";
 import { useAdmin, AdminProduct } from "@/context/AdminContext";
 import { ProductCategory, FitnessGoal } from "@/data/mockProducts";
-import { formatLKR, getKokoTotal, getKokoInstallment } from "@/lib/pricing";
+import {
+  formatLKR,
+  getKokoTotal,
+  getKokoInstallment,
+  ProductDiscountType,
+  calculateProductPricing,
+} from "@/lib/pricing";
+import ProductProfitSection from "@/components/admin/ProductProfitSection";
+
+const createProductId = () => `prod_${Date.now()}`;
 
 const CATEGORIES: ProductCategory[] = [
   "Whey Protein",
@@ -70,8 +79,11 @@ export default function AdminNewProductPage() {
     "Vanilla Ice Cream",
   ]);
   const [flavorInput, setFlavorInput] = useState("");
-  const [price, setPrice] = useState<number>(32500);
-  const [originalPrice, setOriginalPrice] = useState<string>("36500");
+  const [costPrice, setCostPrice] = useState<number>(23400);
+  const [regularPrice, setRegularPrice] = useState<number>(36500);
+  const [discountType, setDiscountType] =
+    useState<ProductDiscountType>("fixed_lkr");
+  const [discountValue, setDiscountValue] = useState<number>(4000);
   const [stockCount, setStockCount] = useState<number>(20);
   const [lowStockThreshold, setLowStockThreshold] = useState<number>(5);
   const [batchCode, setBatchCode] = useState("AF-ON-2026-910");
@@ -148,8 +160,17 @@ export default function AdminNewProductPage() {
     servingsCount.trim() ? ` · ${servingsCount.trim()}` : ""
   }`;
 
-  const parsedOrig = originalPrice.trim() ? Number(originalPrice) : undefined;
-  const validOrig = parsedOrig && parsedOrig > price ? parsedOrig : undefined;
+  const pricing = calculateProductPricing(
+    regularPrice,
+    costPrice,
+    discountType,
+    discountValue
+  );
+  const price = pricing.finalSellingPrice;
+  const validOrig =
+    discountType !== "none" && pricing.regularPrice > pricing.finalSellingPrice
+      ? pricing.regularPrice
+      : undefined;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -161,14 +182,17 @@ export default function AdminNewProductPage() {
       .replace(/(^-|-$)/g, "");
 
     const payload: AdminProduct = {
-      id: `prod_${Date.now()}`,
+      id: createProductId(),
       slug,
       name: name.trim(),
       brand: resolvedBrand,
       category,
       goal,
-      price: Number(price) || 0,
+      price,
       originalPrice: validOrig,
+      costPrice: pricing.costPrice,
+      discountType,
+      discountValue,
       weight: weight.trim() || "5.0 lbs",
       weightOrServings: weightLabel,
       servingsCount: servingsCount.trim(),
@@ -490,53 +514,22 @@ export default function AdminNewProductPage() {
             </div>
           </div>
 
-          {/* Card 3: Pricing, Inventory & Copy */}
+          {/* Card 3: Pricing, Discount & Profit Calculator */}
           <div className="bg-[#111115] border border-white/10 rounded-2xl p-6 space-y-5">
             <h2 className="text-base font-bold uppercase tracking-wider text-white font-heading">
-              3. Pricing, Stock &amp; Authenticity
+              3. Pricing, Discount &amp; Profit Calculator
             </h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-zinc-300">
-                  Cash / Card Price (LKR)
-                </label>
-                <input
-                  type="number"
-                  required
-                  min={100}
-                  value={price}
-                  onChange={(e) => setPrice(Number(e.target.value))}
-                  className="w-full bg-[#09090B] border border-white/15 focus:border-[#E2C275] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-zinc-300">
-                  Original Strike-Through Price (LKR)
-                </label>
-                <input
-                  type="number"
-                  value={originalPrice}
-                  onChange={(e) => setOriginalPrice(e.target.value)}
-                  className="w-full bg-[#09090B] border border-white/15 focus:border-[#E2C275] rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="p-4 rounded-xl bg-[#16161C] border border-[#8B5CF6]/35 flex items-center justify-between text-xs">
-              <div>
-                <span className="text-[#A78BFA] font-bold block">
-                  AUTO KOKO 3× (+9%) CALCULATOR
-                </span>
-                <span className="text-zinc-400">
-                  Total KOKO Amount: {formatLKR(getKokoTotal(price || 0), false)}
-                </span>
-              </div>
-              <span className="text-base font-mono font-bold text-white">
-                3 × {formatLKR(getKokoInstallment(price || 0), false)}
-              </span>
-            </div>
+            <ProductProfitSection
+              costPrice={costPrice}
+              regularPrice={regularPrice}
+              discountType={discountType}
+              discountValue={discountValue}
+              onCostPriceChange={setCostPrice}
+              onRegularPriceChange={setRegularPrice}
+              onDiscountTypeChange={setDiscountType}
+              onDiscountValueChange={setDiscountValue}
+            />
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="space-y-1.5">

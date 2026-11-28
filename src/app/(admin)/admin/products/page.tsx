@@ -97,7 +97,9 @@ function AdminProductsContent() {
             <tr className="border-b border-white/10 text-zinc-400 uppercase text-[11px] tracking-wider">
               <th className="pb-3 pr-4">Supplement</th>
               <th className="pb-3 pr-4">Category</th>
-              <th className="pb-3 pr-4">Cash Price</th>
+              <th className="pb-3 pr-4">Cost Price</th>
+              <th className="pb-3 pr-4">Selling Price</th>
+              <th className="pb-3 pr-4">Unit Profit</th>
               <th className="pb-3 pr-4">KOKO 3x (+9%)</th>
               <th className="pb-3 pr-4">Stock</th>
               <th className="pb-3 pr-4">Status</th>
@@ -105,7 +107,10 @@ function AdminProductsContent() {
             </tr>
           </thead>
           <tbody className="divide-y divide-white/[0.06]">
-            {filtered.map((p) => (
+            {filtered.map((p) => {
+              const unitProfit = p.price - (p.costPrice || 0);
+              const isPos = unitProfit >= 0;
+              return (
               <tr key={p.id} className="hover:bg-white/[0.02]">
                 <td className="py-3.5 pr-4">
                   <div className="flex items-center gap-3">
@@ -137,8 +142,30 @@ function AdminProductsContent() {
                 <td className="py-3.5 pr-4 text-zinc-300 whitespace-nowrap">
                   {p.category}
                 </td>
-                <td className="py-3.5 pr-4 font-bold text-white whitespace-nowrap">
-                  {formatLKR(p.price, false)}
+                <td className="py-3.5 pr-4 font-mono text-zinc-400 whitespace-nowrap">
+                  {formatLKR(p.costPrice || 0, false)}
+                </td>
+                <td className="py-3.5 pr-4 whitespace-nowrap">
+                  <div className="font-bold text-white font-mono">
+                    {formatLKR(p.price, false)}
+                  </div>
+                  {p.originalPrice && p.originalPrice > p.price && (
+                    <div className="text-[11px] font-mono text-zinc-500 line-through">
+                      {formatLKR(p.originalPrice, false)}
+                    </div>
+                  )}
+                </td>
+                <td className="py-3.5 pr-4 whitespace-nowrap">
+                  <span
+                    className={`px-2.5 py-1 rounded-lg font-mono text-xs font-bold border ${
+                      isPos
+                        ? "bg-emerald-500/15 border-emerald-500/35 text-emerald-300"
+                        : "bg-red-500/15 border-red-500/35 text-red-300"
+                    }`}
+                  >
+                    {isPos ? "+" : "-"}
+                    {formatLKR(Math.abs(unitProfit), false)}
+                  </span>
                 </td>
                 <td className="py-3.5 pr-4 text-zinc-300 whitespace-nowrap">
                   <div className="font-semibold text-[#A78BFA]">
@@ -196,7 +223,8 @@ function AdminProductsContent() {
                   </div>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

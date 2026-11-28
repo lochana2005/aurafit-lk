@@ -11,6 +11,8 @@ import {
   Package,
   BellRing,
   CheckCircle2,
+  TrendingUp,
+  CreditCard,
 } from "lucide-react";
 import { useAdmin, AdminOrderStatus } from "@/context/AdminContext";
 import { formatLKR } from "@/lib/pricing";
@@ -29,9 +31,47 @@ export default function AdminOverviewPage() {
 
   const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
   const kokoRevenue = orders
-    .filter((o) => o.paymentMethod === "KOKO 3x")
+    .filter((o) => (o.paymentChannel || o.paymentMethod) === "KOKO 3x")
     .reduce((sum, o) => sum + o.total, 0);
-  const cashCardRevenue = totalRevenue - kokoRevenue;
+  const cardRevenue = orders
+    .filter((o) => (o.paymentChannel || o.paymentMethod) === "Card")
+    .reduce((sum, o) => sum + o.total, 0);
+  const bankRevenue = orders
+    .filter((o) => o.paymentChannel === "Bank Transfer")
+    .reduce((sum, o) => sum + o.total, 0);
+  const codCollected = orders
+    .filter(
+      (o) =>
+        (o.paymentChannel || o.paymentMethod) === "COD" &&
+        (o.paymentStatus === "PAID" || o.status === "Delivered")
+    )
+    .reduce((sum, o) => sum + o.total, 0);
+  const codPending = orders
+    .filter(
+      (o) =>
+        (o.paymentChannel || o.paymentMethod) === "COD" &&
+        o.paymentStatus !== "PAID" &&
+        o.status !== "Delivered"
+    )
+    .reduce((sum, o) => sum + o.total, 0);
+
+  const totalCogs = orders.reduce((sum, o) => {
+    if (typeof o.costOfGoods === "number") return sum + o.costOfGoods;
+    return (
+      sum +
+      o.items.reduce(
+        (s, it) => s + Math.round((it.price * 0.72) / 100) * 100 * it.quantity,
+        0
+      )
+    );
+  }, 0);
+  const totalDeductions = orders.reduce(
+    (sum, o) => sum + (o.discountAmount || 0) + (o.cashbackAmount || 0),
+    0
+  );
+  const netProfit = totalRevenue - totalCogs - totalDeductions;
+  const netMarginPercent =
+    totalRevenue > 0 ? Math.round((netProfit / totalRevenue) * 1000) / 10 : 0;
 
   const newIncomingOrders = orders.filter((o) => o.status === "Order Placed");
   const activeOrdersCount = orders.filter((o) => o.status !== "Delivered").length;
@@ -117,8 +157,8 @@ export default function AdminOverviewPage() {
         </div>
       )}
 
-      {/* 4 Executive KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      {/* 5 Executive KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
         <div className="bg-[#111115] border border-white/10 rounded-2xl p-5 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
@@ -128,14 +168,37 @@ export default function AdminOverviewPage() {
               <DollarSign className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-white font-heading">
+          <div className="text-2xl font-black text-white font-heading">
             {formatLKR(totalRevenue, false)}
           </div>
-          <div className="text-xs text-zinc-400 flex items-center justify-between pt-1 border-t border-white/[0.06]">
-            <span>Cash/Card: {formatLKR(cashCardRevenue, false)}</span>
+          <div className="text-[11px] text-zinc-400 flex items-center justify-between pt-1 border-t border-white/[0.06]">
+            <span>Card/Bank: {formatLKR(cardRevenue + bankRevenue, false)}</span>
             <span className="text-[#A78BFA] font-semibold">
               KOKO: {formatLKR(kokoRevenue, false)}
             </span>
+          </div>
+        </div>
+
+        <div className="bg-[#111115] border border-emerald-500/30 rounded-2xl p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-300">
+              NET PROFIT (LKR)
+            </span>
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/35 flex items-center justify-center text-emerald-400">
+              <TrendingUp className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-2xl font-black text-emerald-400 font-heading">
+            +{formatLKR(netProfit, false)}
+          </div>
+          <div className="text-[11px] text-zinc-400 flex items-center justify-between pt-1 border-t border-white/[0.06]">
+            <span>Margin: {netMarginPercent}%</span>
+            <Link
+              href="/admin/payments-profit"
+              className="text-[#E2C275] hover:underline"
+            >
+              Ledger →
+            </Link>
           </div>
         </div>
 
@@ -189,6 +252,63 @@ export default function AdminOverviewPage() {
           </div>
           <div className="text-xs text-zinc-400 pt-1 border-t border-white/[0.06]">
             Across {batches.length} registered import batches
+          </div>
+        </div>
+      </div>
+
+      {/* Compact Payment Methods Summary Strip */}
+      <div className="bg-[#111115] border border-white/10 rounded-2xl p-5 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <CreditCard className="w-4 h-4 text-[#E2C275]" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-white font-heading">
+              PAYMENT METHODS SUMMARY
+            </h3>
+          </div>
+          <Link
+            href="/admin/payments-profit"
+            className="text-xs font-bold text-[#E2C275] hover:underline flex items-center gap-1"
+          >
+            <span>Open Payments &amp; Profit Ledger</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+          <div className="p-3.5 rounded-xl bg-[#16161C] border border-white/8">
+            <span className="text-[10px] font-bold uppercase text-zinc-400 block">
+              Card (PayHere / Stripe)
+            </span>
+            <span className="text-base font-black font-mono text-white mt-1 block">
+              {formatLKR(cardRevenue, false)}
+            </span>
+          </div>
+          <div className="p-3.5 rounded-xl bg-[#16161C] border border-white/8">
+            <span className="text-[10px] font-bold uppercase text-[#A78BFA] block">
+              KOKO 3x Installments
+            </span>
+            <span className="text-base font-black font-mono text-white mt-1 block">
+              {formatLKR(kokoRevenue, false)}
+            </span>
+          </div>
+          <div className="p-3.5 rounded-xl bg-[#16161C] border border-white/8">
+            <span className="text-[10px] font-bold uppercase text-[#38BDF8] block">
+              Bank Transfer (SLIPS)
+            </span>
+            <span className="text-base font-black font-mono text-white mt-1 block">
+              {formatLKR(bankRevenue, false)}
+            </span>
+          </div>
+          <div className="p-3.5 rounded-xl bg-[#16161C] border border-amber-500/25">
+            <span className="text-[10px] font-bold uppercase text-amber-300 block">
+              COD (Collected / Pending)
+            </span>
+            <span className="text-sm font-black font-mono text-white mt-1 block">
+              {formatLKR(codCollected, false)} /{" "}
+              <span className="text-amber-300">
+                {formatLKR(codPending, false)}
+              </span>
+            </span>
           </div>
         </div>
       </div>
